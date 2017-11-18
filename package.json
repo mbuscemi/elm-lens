@@ -1,0 +1,14 @@
+{
+    "name": "elm-lens",
+    "main": "./lib/elm-lens",
+    "version": "0.0.0",
+    "description": "A short description of your package",
+    "keywords": [],
+    "activationCommands": {},
+    "repository": "https://github.com/atom/temp",
+    "license": "MIT",
+    "engines": {
+        "atom": ">=1.0.0 <2.0.0"
+    },
+    "dependencies": {}
+}
