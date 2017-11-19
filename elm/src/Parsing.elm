@@ -26,6 +26,11 @@ isAlphaOrDot char =
     isAlpha char || isDot char
 
 
+singleLowerCaseLetter : Parser String
+singleLowerCaseLetter =
+    keep (Exactly 1) Char.isLower
+
+
 isAlpha : Char -> Bool
 isAlpha char =
     Char.isUpper char || Char.isLower char
@@ -34,8 +39,3 @@ isAlpha char =
 isDot : Char -> Bool
 isDot char =
     char == '.'
-
-
-singleLowerCaseLetter : Parser String
-singleLowerCaseLetter =
-    keep (Exactly 1) Char.isLower
