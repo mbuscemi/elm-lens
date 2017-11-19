@@ -1,7 +1,7 @@
 module Model.ExposedFunctions exposing (record)
 
-import Char
 import Parser exposing ((|.), (|=), Parser, andThen, delayedCommit, ignore, keep, keyword, oneOf, oneOrMore, run, succeed, symbol, zeroOrMore)
+import Parsing exposing (isAlphaOrDot, singleString, spaces)
 
 
 type alias WithExposedFunctions model =
@@ -26,7 +26,7 @@ exposedFunctions =
         |. spaces
         |. moduleName
         |. spaces
-        |. exposingDeclaration
+        |. keyword "exposing"
         |. spaces
         |. symbol "("
         |. spaces
@@ -46,11 +46,6 @@ moduleDeclaration =
 moduleName : Parser ()
 moduleName =
     ignore oneOrMore isAlphaOrDot
-
-
-exposingDeclaration : Parser ()
-exposingDeclaration =
-    keyword "exposing"
 
 
 exposedFunctionList : Parser (List String)
@@ -74,28 +69,3 @@ nextString =
             |. symbol ","
             |. spaces
             |= singleString
-
-
-singleString : Parser String
-singleString =
-    keep oneOrMore isAlpha
-
-
-isAlphaOrDot : Char -> Bool
-isAlphaOrDot char =
-    isAlpha char || isDot char
-
-
-isAlpha : Char -> Bool
-isAlpha char =
-    Char.isUpper char || Char.isLower char
-
-
-isDot : Char -> Bool
-isDot char =
-    char == '.'
-
-
-spaces : Parser String
-spaces =
-    keep zeroOrMore (\c -> c == ' ')

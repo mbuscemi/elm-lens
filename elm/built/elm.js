@@ -5757,6 +5757,137 @@ var _elm_lang$core$Tuple$first = function (_p6) {
 	return _p7._0;
 };
 
+var _elm_lang$core$Set$foldr = F3(
+	function (f, b, _p0) {
+		var _p1 = _p0;
+		return A3(
+			_elm_lang$core$Dict$foldr,
+			F3(
+				function (k, _p2, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p1._0);
+	});
+var _elm_lang$core$Set$foldl = F3(
+	function (f, b, _p3) {
+		var _p4 = _p3;
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			F3(
+				function (k, _p5, b) {
+					return A2(f, k, b);
+				}),
+			b,
+			_p4._0);
+	});
+var _elm_lang$core$Set$toList = function (_p6) {
+	var _p7 = _p6;
+	return _elm_lang$core$Dict$keys(_p7._0);
+};
+var _elm_lang$core$Set$size = function (_p8) {
+	var _p9 = _p8;
+	return _elm_lang$core$Dict$size(_p9._0);
+};
+var _elm_lang$core$Set$member = F2(
+	function (k, _p10) {
+		var _p11 = _p10;
+		return A2(_elm_lang$core$Dict$member, k, _p11._0);
+	});
+var _elm_lang$core$Set$isEmpty = function (_p12) {
+	var _p13 = _p12;
+	return _elm_lang$core$Dict$isEmpty(_p13._0);
+};
+var _elm_lang$core$Set$Set_elm_builtin = function (a) {
+	return {ctor: 'Set_elm_builtin', _0: a};
+};
+var _elm_lang$core$Set$empty = _elm_lang$core$Set$Set_elm_builtin(_elm_lang$core$Dict$empty);
+var _elm_lang$core$Set$singleton = function (k) {
+	return _elm_lang$core$Set$Set_elm_builtin(
+		A2(
+			_elm_lang$core$Dict$singleton,
+			k,
+			{ctor: '_Tuple0'}));
+};
+var _elm_lang$core$Set$insert = F2(
+	function (k, _p14) {
+		var _p15 = _p14;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A3(
+				_elm_lang$core$Dict$insert,
+				k,
+				{ctor: '_Tuple0'},
+				_p15._0));
+	});
+var _elm_lang$core$Set$fromList = function (xs) {
+	return A3(_elm_lang$core$List$foldl, _elm_lang$core$Set$insert, _elm_lang$core$Set$empty, xs);
+};
+var _elm_lang$core$Set$map = F2(
+	function (f, s) {
+		return _elm_lang$core$Set$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				f,
+				_elm_lang$core$Set$toList(s)));
+	});
+var _elm_lang$core$Set$remove = F2(
+	function (k, _p16) {
+		var _p17 = _p16;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$remove, k, _p17._0));
+	});
+var _elm_lang$core$Set$union = F2(
+	function (_p19, _p18) {
+		var _p20 = _p19;
+		var _p21 = _p18;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$union, _p20._0, _p21._0));
+	});
+var _elm_lang$core$Set$intersect = F2(
+	function (_p23, _p22) {
+		var _p24 = _p23;
+		var _p25 = _p22;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$intersect, _p24._0, _p25._0));
+	});
+var _elm_lang$core$Set$diff = F2(
+	function (_p27, _p26) {
+		var _p28 = _p27;
+		var _p29 = _p26;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(_elm_lang$core$Dict$diff, _p28._0, _p29._0));
+	});
+var _elm_lang$core$Set$filter = F2(
+	function (p, _p30) {
+		var _p31 = _p30;
+		return _elm_lang$core$Set$Set_elm_builtin(
+			A2(
+				_elm_lang$core$Dict$filter,
+				F2(
+					function (k, _p32) {
+						return p(k);
+					}),
+				_p31._0));
+	});
+var _elm_lang$core$Set$partition = F2(
+	function (p, _p33) {
+		var _p34 = _p33;
+		var _p35 = A2(
+			_elm_lang$core$Dict$partition,
+			F2(
+				function (k, _p36) {
+					return p(k);
+				}),
+			_p34._0);
+		var p1 = _p35._0;
+		var p2 = _p35._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _elm_lang$core$Set$Set_elm_builtin(p1),
+			_1: _elm_lang$core$Set$Set_elm_builtin(p2)
+		};
+	});
+
 var _elm_tools$parser_primitives$Native_ParserPrimitives = function() {
 
 
@@ -6663,7 +6794,11 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
-var _user$project$Model_ExposedFunctions$spaces = A2(
+var _user$project$Parsing$singleLowerCaseLetter = A2(
+	_elm_tools$parser$Parser$keep,
+	_elm_tools$parser$Parser$Exactly(1),
+	_elm_lang$core$Char$isLower);
+var _user$project$Parsing$spaces = A2(
 	_elm_tools$parser$Parser$keep,
 	_elm_tools$parser$Parser$zeroOrMore,
 	function (c) {
@@ -6671,21 +6806,99 @@ var _user$project$Model_ExposedFunctions$spaces = A2(
 			c,
 			_elm_lang$core$Native_Utils.chr(' '));
 	});
-var _user$project$Model_ExposedFunctions$isDot = function ($char) {
+var _user$project$Parsing$isDot = function ($char) {
 	return _elm_lang$core$Native_Utils.eq(
 		$char,
 		_elm_lang$core$Native_Utils.chr('.'));
 };
-var _user$project$Model_ExposedFunctions$isAlpha = function ($char) {
+var _user$project$Parsing$isAlpha = function ($char) {
 	return _elm_lang$core$Char$isUpper($char) || _elm_lang$core$Char$isLower($char);
 };
-var _user$project$Model_ExposedFunctions$isAlphaOrDot = function ($char) {
-	return _user$project$Model_ExposedFunctions$isAlpha($char) || _user$project$Model_ExposedFunctions$isDot($char);
+var _user$project$Parsing$isAlphaOrDot = function ($char) {
+	return _user$project$Parsing$isAlpha($char) || _user$project$Parsing$isDot($char);
 };
-var _user$project$Model_ExposedFunctions$singleString = A2(_elm_tools$parser$Parser$keep, _elm_tools$parser$Parser$oneOrMore, _user$project$Model_ExposedFunctions$isAlpha);
+var _user$project$Parsing$singleString = A2(_elm_tools$parser$Parser$keep, _elm_tools$parser$Parser$oneOrMore, _user$project$Parsing$isAlpha);
+var _user$project$Parsing$lowerInitialSingleString = A2(
+	_elm_tools$parser$Parser_ops['|='],
+	A2(
+		_elm_tools$parser$Parser_ops['|='],
+		_elm_tools$parser$Parser$succeed(
+			F2(
+				function (x, y) {
+					return A2(_elm_lang$core$Basics_ops['++'], x, y);
+				})),
+		_user$project$Parsing$singleLowerCaseLetter),
+	_user$project$Parsing$singleString);
+
+var _user$project$Model_AllFunctions$FunctionName = function (a) {
+	return {ctor: 'FunctionName', _0: a};
+};
+var _user$project$Model_AllFunctions$ElmKeyword = {ctor: 'ElmKeyword'};
+var _user$project$Model_AllFunctions$wordInIntialPosition = _elm_tools$parser$Parser$oneOf(
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_tools$parser$Parser_ops['|.'],
+			_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
+			_elm_tools$parser$Parser$keyword('port')),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_tools$parser$Parser_ops['|.'],
+				_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
+				_elm_tools$parser$Parser$keyword('module')),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_tools$parser$Parser_ops['|.'],
+					_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
+					_elm_tools$parser$Parser$keyword('import')),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_tools$parser$Parser_ops['|.'],
+						_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
+						_elm_tools$parser$Parser$keyword('type')),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_tools$parser$Parser_ops['|='],
+							_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$FunctionName),
+							_user$project$Parsing$lowerInitialSingleString),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		}
+	});
+var _user$project$Model_AllFunctions$functionCollector = F2(
+	function (line, functions) {
+		var _p0 = A2(_elm_tools$parser$Parser$run, _user$project$Model_AllFunctions$wordInIntialPosition, line);
+		if ((_p0.ctor === 'Ok') && (_p0._0.ctor === 'FunctionName')) {
+			return A2(_elm_lang$core$Set$insert, _p0._0._0, functions);
+		} else {
+			return functions;
+		}
+	});
+var _user$project$Model_AllFunctions$parseAllFunctions = function (allLines) {
+	return A3(
+		_elm_lang$core$List$foldl,
+		_user$project$Model_AllFunctions$functionCollector,
+		_elm_lang$core$Set$empty,
+		A2(_elm_lang$core$String$split, '\n', allLines));
+};
+var _user$project$Model_AllFunctions$record = F2(
+	function (allLines, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				allFunctions: _user$project$Model_AllFunctions$parseAllFunctions(allLines)
+			});
+	});
+
 var _user$project$Model_ExposedFunctions$nextString = A2(
 	_elm_tools$parser$Parser$delayedCommit,
-	_user$project$Model_ExposedFunctions$spaces,
+	_user$project$Parsing$spaces,
 	A2(
 		_elm_tools$parser$Parser_ops['|='],
 		A2(
@@ -6694,8 +6907,8 @@ var _user$project$Model_ExposedFunctions$nextString = A2(
 				_elm_tools$parser$Parser_ops['|.'],
 				_elm_tools$parser$Parser$succeed(_elm_lang$core$Basics$identity),
 				_elm_tools$parser$Parser$symbol(',')),
-			_user$project$Model_ExposedFunctions$spaces),
-		_user$project$Model_ExposedFunctions$singleString));
+			_user$project$Parsing$spaces),
+		_user$project$Parsing$singleString));
 var _user$project$Model_ExposedFunctions$listBuilder = function (strings) {
 	return _elm_tools$parser$Parser$oneOf(
 		{
@@ -6725,9 +6938,8 @@ var _user$project$Model_ExposedFunctions$exposedFunctionList = A2(
 				_1: {ctor: '[]'}
 			});
 	},
-	_user$project$Model_ExposedFunctions$singleString);
-var _user$project$Model_ExposedFunctions$exposingDeclaration = _elm_tools$parser$Parser$keyword('exposing');
-var _user$project$Model_ExposedFunctions$moduleName = A2(_elm_tools$parser$Parser$ignore, _elm_tools$parser$Parser$oneOrMore, _user$project$Model_ExposedFunctions$isAlphaOrDot);
+	_user$project$Parsing$singleString);
+var _user$project$Model_ExposedFunctions$moduleName = A2(_elm_tools$parser$Parser$ignore, _elm_tools$parser$Parser$oneOrMore, _user$project$Parsing$isAlphaOrDot);
 var _user$project$Model_ExposedFunctions$moduleDeclaration = _elm_tools$parser$Parser$oneOf(
 	{
 		ctor: '::',
@@ -6762,15 +6974,15 @@ var _user$project$Model_ExposedFunctions$exposedFunctions = A2(
 											_elm_tools$parser$Parser_ops['|.'],
 											_elm_tools$parser$Parser$succeed(_elm_lang$core$Basics$identity),
 											_user$project$Model_ExposedFunctions$moduleDeclaration),
-										_user$project$Model_ExposedFunctions$spaces),
+										_user$project$Parsing$spaces),
 									_user$project$Model_ExposedFunctions$moduleName),
-								_user$project$Model_ExposedFunctions$spaces),
-							_user$project$Model_ExposedFunctions$exposingDeclaration),
-						_user$project$Model_ExposedFunctions$spaces),
+								_user$project$Parsing$spaces),
+							_elm_tools$parser$Parser$keyword('exposing')),
+						_user$project$Parsing$spaces),
 					_elm_tools$parser$Parser$symbol('(')),
-				_user$project$Model_ExposedFunctions$spaces),
+				_user$project$Parsing$spaces),
 			_user$project$Model_ExposedFunctions$exposedFunctionList),
-		_user$project$Model_ExposedFunctions$spaces),
+		_user$project$Parsing$spaces),
 	_elm_tools$parser$Parser$symbol(')'));
 var _user$project$Model_ExposedFunctions$parseExposedFunctions = function (firstLine) {
 	return A2(
@@ -6790,16 +7002,27 @@ var _user$project$Model_ExposedFunctions$record = F2(
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		return _user$project$And$noCommand(
-			A2(_user$project$Model_ExposedFunctions$record, _p0._0, model));
+		if (_p0.ctor === 'ProcessFirstLine') {
+			return _user$project$And$noCommand(
+				A2(_user$project$Model_ExposedFunctions$record, _p0._0, model));
+		} else {
+			return _user$project$And$noCommand(
+				A2(_user$project$Model_AllFunctions$record, _p0._0, model));
+		}
 	});
 var _user$project$Main$init = _user$project$And$noCommand(
 	{
-		exposedFunctions: {ctor: '[]'}
+		exposedFunctions: {ctor: '[]'},
+		allFunctions: _elm_lang$core$Set$empty
 	});
 var _user$project$Main$processFirstLine = _elm_lang$core$Native_Platform.incomingPort('processFirstLine', _elm_lang$core$Json_Decode$string);
-var _user$project$Main$Model = function (a) {
-	return {exposedFunctions: a};
+var _user$project$Main$processAllLines = _elm_lang$core$Native_Platform.incomingPort('processAllLines', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$Model = F2(
+	function (a, b) {
+		return {exposedFunctions: a, allFunctions: b};
+	});
+var _user$project$Main$ProcessAllLines = function (a) {
+	return {ctor: 'ProcessAllLines', _0: a};
 };
 var _user$project$Main$ProcessFirstLine = function (a) {
 	return {ctor: 'ProcessFirstLine', _0: a};
@@ -6809,7 +7032,11 @@ var _user$project$Main$subscriptions = function (model) {
 		{
 			ctor: '::',
 			_0: _user$project$Main$processFirstLine(_user$project$Main$ProcessFirstLine),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: _user$project$Main$processAllLines(_user$project$Main$ProcessAllLines),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$Main$main = _elm_lang$core$Platform$program(
