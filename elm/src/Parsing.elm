@@ -16,6 +16,11 @@ lowerInitialSingleString =
         |= singleString
 
 
+spaces : Parser String
+spaces =
+    keep zeroOrMore (\c -> c == ' ')
+
+
 isAlphaOrDot : Char -> Bool
 isAlphaOrDot char =
     isAlpha char || isDot char
@@ -29,11 +34,6 @@ isAlpha char =
 isDot : Char -> Bool
 isDot char =
     char == '.'
-
-
-spaces : Parser String
-spaces =
-    keep zeroOrMore (\c -> c == ' ')
 
 
 singleLowerCaseLetter : Parser String

@@ -6798,14 +6798,6 @@ var _user$project$Parsing$singleLowerCaseLetter = A2(
 	_elm_tools$parser$Parser$keep,
 	_elm_tools$parser$Parser$Exactly(1),
 	_elm_lang$core$Char$isLower);
-var _user$project$Parsing$spaces = A2(
-	_elm_tools$parser$Parser$keep,
-	_elm_tools$parser$Parser$zeroOrMore,
-	function (c) {
-		return _elm_lang$core$Native_Utils.eq(
-			c,
-			_elm_lang$core$Native_Utils.chr(' '));
-	});
 var _user$project$Parsing$isDot = function ($char) {
 	return _elm_lang$core$Native_Utils.eq(
 		$char,
@@ -6817,6 +6809,14 @@ var _user$project$Parsing$isAlpha = function ($char) {
 var _user$project$Parsing$isAlphaOrDot = function ($char) {
 	return _user$project$Parsing$isAlpha($char) || _user$project$Parsing$isDot($char);
 };
+var _user$project$Parsing$spaces = A2(
+	_elm_tools$parser$Parser$keep,
+	_elm_tools$parser$Parser$zeroOrMore,
+	function (c) {
+		return _elm_lang$core$Native_Utils.eq(
+			c,
+			_elm_lang$core$Native_Utils.chr(' '));
+	});
 var _user$project$Parsing$singleString = A2(_elm_tools$parser$Parser$keep, _elm_tools$parser$Parser$oneOrMore, _user$project$Parsing$isAlpha);
 var _user$project$Parsing$lowerInitialSingleString = A2(
 	_elm_tools$parser$Parser_ops['|='],
@@ -6840,25 +6840,25 @@ var _user$project$Model_AllFunctions$wordInIntialPosition = _elm_tools$parser$Pa
 		_0: A2(
 			_elm_tools$parser$Parser_ops['|.'],
 			_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
-			_elm_tools$parser$Parser$keyword('port')),
+			_elm_tools$parser$Parser$keyword('port ')),
 		_1: {
 			ctor: '::',
 			_0: A2(
 				_elm_tools$parser$Parser_ops['|.'],
 				_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
-				_elm_tools$parser$Parser$keyword('module')),
+				_elm_tools$parser$Parser$keyword('module ')),
 			_1: {
 				ctor: '::',
 				_0: A2(
 					_elm_tools$parser$Parser_ops['|.'],
 					_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
-					_elm_tools$parser$Parser$keyword('import')),
+					_elm_tools$parser$Parser$keyword('import ')),
 				_1: {
 					ctor: '::',
 					_0: A2(
 						_elm_tools$parser$Parser_ops['|.'],
 						_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$ElmKeyword),
-						_elm_tools$parser$Parser$keyword('type')),
+						_elm_tools$parser$Parser$keyword('type ')),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -6916,7 +6916,7 @@ var _user$project$Model_AllFunctions$parseFunctionLines = F3(
 				A3(
 					_elm_lang$core$List$foldl,
 					_user$project$Model_AllFunctions$functionLineCollector,
-					{ctor: '_Tuple2', _0: _elm_lang$core$Dict$empty, _1: 0},
+					{ctor: '_Tuple2', _0: _elm_lang$core$Dict$empty, _1: -1},
 					A2(_elm_lang$core$String$split, '\n', allLines))));
 	});
 var _user$project$Model_AllFunctions$record = F3(
@@ -6924,14 +6924,8 @@ var _user$project$Model_AllFunctions$record = F3(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				allFunctions: A2(
-					_elm_lang$core$Debug$log,
-					'all functions',
-					A3(_user$project$Model_AllFunctions$parseAllFunctions, fileName, allLines, model.allFunctions)),
-				allFunctionLines: A2(
-					_elm_lang$core$Debug$log,
-					'all function lines',
-					A3(_user$project$Model_AllFunctions$parseFunctionLines, fileName, allLines, model.allFunctionLines))
+				allFunctions: A3(_user$project$Model_AllFunctions$parseAllFunctions, fileName, allLines, model.allFunctions),
+				allFunctionLines: A3(_user$project$Model_AllFunctions$parseFunctionLines, fileName, allLines, model.allFunctionLines)
 			});
 	});
 
@@ -7033,50 +7027,117 @@ var _user$project$Model_ExposedFunctions$record = F3(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				exposedFunctions: A2(
-					_elm_lang$core$Debug$log,
-					'exposed functions',
-					A3(_user$project$Model_ExposedFunctions$parseExposedFunctions, fileName, firstLine, model.exposedFunctions))
+				exposedFunctions: A3(_user$project$Model_ExposedFunctions$parseExposedFunctions, fileName, firstLine, model.exposedFunctions)
 			});
 	});
 
+var _user$project$Model_Report$isExposed = F3(
+	function (fileName, functionName, model) {
+		return A2(
+			_elm_lang$core$Set$member,
+			functionName,
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				_elm_lang$core$Set$empty,
+				A2(_elm_lang$core$Dict$get, fileName, model.exposedFunctions)));
+	});
+var _user$project$Model_Report$lineForFunctionName = F3(
+	function (fileName, functionName, model) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			-1,
+			A2(
+				_elm_lang$core$Dict$get,
+				functionName,
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$core$Dict$empty,
+					A2(_elm_lang$core$Dict$get, fileName, model.allFunctionLines))));
+	});
+var _user$project$Model_Report$allFunctionsList = F2(
+	function (fileName, model) {
+		return _elm_lang$core$Set$toList(
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				_elm_lang$core$Set$empty,
+				A2(_elm_lang$core$Dict$get, fileName, model.allFunctions)));
+	});
+var _user$project$Model_Report$functionExposingsList = F2(
+	function (fileName, model) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (functionName) {
+				return {
+					ctor: '_Tuple3',
+					_0: functionName,
+					_1: A3(_user$project$Model_Report$lineForFunctionName, fileName, functionName, model),
+					_2: A3(_user$project$Model_Report$isExposed, fileName, functionName, model)
+				};
+			},
+			A2(_user$project$Model_Report$allFunctionsList, fileName, model));
+	});
+var _user$project$Model_Report$make = F2(
+	function (fileName, model) {
+		return {
+			ctor: '_Tuple2',
+			_0: fileName,
+			_1: A2(_user$project$Model_Report$functionExposingsList, fileName, model)
+		};
+	});
+var _user$project$Model_Report$Model = F3(
+	function (a, b, c) {
+		return {exposedFunctions: a, allFunctions: b, allFunctionLines: c};
+	});
+
+var _user$project$Main$init = _user$project$And$noCommand(
+	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctions: _elm_lang$core$Dict$empty, allFunctionLines: _elm_lang$core$Dict$empty});
+var _user$project$Main$report = _elm_lang$core$Native_Platform.outgoingPort(
+	'report',
+	function (v) {
+		return [
+			v._0,
+			_elm_lang$core$Native_List.toArray(v._1).map(
+			function (v) {
+				return [v._0, v._1, v._2];
+			})
+		];
+	});
+var _user$project$Main$andSendReport = F2(
+	function (fileName, model) {
+		return A2(
+			_user$project$And$execute,
+			_user$project$Main$report(
+				A2(_user$project$Model_Report$make, fileName, model)),
+			model);
+	});
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		if (_p0.ctor === 'ProcessFirstLine') {
-			return _user$project$And$noCommand(
-				A3(_user$project$Model_ExposedFunctions$record, _p0._0._0, _p0._0._1, model));
-		} else {
-			return _user$project$And$noCommand(
-				A3(_user$project$Model_AllFunctions$record, _p0._0._0, _p0._0._1, model));
-		}
+		var _p1 = _p0._0._0;
+		return A2(
+			_user$project$Main$andSendReport,
+			_p1,
+			A3(
+				_user$project$Model_AllFunctions$record,
+				_p1,
+				_p0._0._2,
+				A3(_user$project$Model_ExposedFunctions$record, _p1, _p0._0._1, model)));
 	});
-var _user$project$Main$init = _user$project$And$noCommand(
-	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctions: _elm_lang$core$Dict$empty, allFunctionLines: _elm_lang$core$Dict$empty});
-var _user$project$Main$processFirstLine = _elm_lang$core$Native_Platform.incomingPort(
-	'processFirstLine',
+var _user$project$Main$process = _elm_lang$core$Native_Platform.incomingPort(
+	'process',
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (x0) {
 			return A2(
 				_elm_lang$core$Json_Decode$andThen,
 				function (x1) {
-					return _elm_lang$core$Json_Decode$succeed(
-						{ctor: '_Tuple2', _0: x0, _1: x1});
-				},
-				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
-		},
-		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Main$processAllLines = _elm_lang$core$Native_Platform.incomingPort(
-	'processAllLines',
-	A2(
-		_elm_lang$core$Json_Decode$andThen,
-		function (x0) {
-			return A2(
-				_elm_lang$core$Json_Decode$andThen,
-				function (x1) {
-					return _elm_lang$core$Json_Decode$succeed(
-						{ctor: '_Tuple2', _0: x0, _1: x1});
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (x2) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{ctor: '_Tuple3', _0: x0, _1: x1, _2: x2});
+						},
+						A2(_elm_lang$core$Json_Decode$index, 2, _elm_lang$core$Json_Decode$string));
 				},
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
@@ -7085,22 +7146,15 @@ var _user$project$Main$Model = F3(
 	function (a, b, c) {
 		return {exposedFunctions: a, allFunctions: b, allFunctionLines: c};
 	});
-var _user$project$Main$ProcessAllLines = function (a) {
-	return {ctor: 'ProcessAllLines', _0: a};
-};
-var _user$project$Main$ProcessFirstLine = function (a) {
-	return {ctor: 'ProcessFirstLine', _0: a};
+var _user$project$Main$ProcessLines = function (a) {
+	return {ctor: 'ProcessLines', _0: a};
 };
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: _user$project$Main$processFirstLine(_user$project$Main$ProcessFirstLine),
-			_1: {
-				ctor: '::',
-				_0: _user$project$Main$processAllLines(_user$project$Main$ProcessAllLines),
-				_1: {ctor: '[]'}
-			}
+			_0: _user$project$Main$process(_user$project$Main$ProcessLines),
+			_1: {ctor: '[]'}
 		});
 };
 var _user$project$Main$main = _elm_lang$core$Platform$program(

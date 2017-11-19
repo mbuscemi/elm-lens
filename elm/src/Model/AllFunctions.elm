@@ -24,8 +24,8 @@ type alias WithAllFunctions model =
 record : String -> String -> WithAllFunctions model -> WithAllFunctions model
 record fileName allLines model =
     { model
-        | allFunctions = Debug.log "all functions" <| parseAllFunctions fileName allLines model.allFunctions
-        , allFunctionLines = Debug.log "all function lines" <| parseFunctionLines fileName allLines model.allFunctionLines
+        | allFunctions = parseAllFunctions fileName allLines model.allFunctions
+        , allFunctionLines = parseFunctionLines fileName allLines model.allFunctionLines
     }
 
 
@@ -47,7 +47,7 @@ functionCollector line functions =
 
 parseFunctionLines : String -> String -> FileFunctionLinesMap -> FileFunctionLinesMap
 parseFunctionLines fileName allLines allFunctionLines =
-    List.foldl functionLineCollector ( Dict.empty, 0 ) (String.split "\n" allLines)
+    List.foldl functionLineCollector ( Dict.empty, -1 ) (String.split "\n" allLines)
         |> Tuple.first
         |> (\functionLines -> Dict.insert fileName functionLines allFunctionLines)
 
@@ -71,13 +71,13 @@ wordInIntialPosition : Parser InitialWord
 wordInIntialPosition =
     oneOf
         [ succeed ElmKeyword
-            |. keyword "port"
+            |. keyword "port "
         , succeed ElmKeyword
-            |. keyword "module"
+            |. keyword "module "
         , succeed ElmKeyword
-            |. keyword "import"
+            |. keyword "import "
         , succeed ElmKeyword
-            |. keyword "type"
+            |. keyword "type "
         , succeed FunctionName
             |= lowerInitialSingleString
         ]

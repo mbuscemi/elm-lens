@@ -16,7 +16,7 @@ type alias WithExposedFunctions model =
 
 record : String -> String -> WithExposedFunctions model -> WithExposedFunctions model
 record fileName firstLine model =
-    { model | exposedFunctions = Debug.log "exposed functions" <| parseExposedFunctions fileName firstLine model.exposedFunctions }
+    { model | exposedFunctions = parseExposedFunctions fileName firstLine model.exposedFunctions }
 
 
 parseExposedFunctions : String -> String -> FileFunctionsMap -> FileFunctionsMap

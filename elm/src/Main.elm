@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Json.Decode
 import Model.AllFunctions
 import Model.ExposedFunctions
+import Model.Report
 import Set exposing (Set)
 
 
@@ -16,8 +17,7 @@ type alias Model =
 
 
 type Message
-    = ProcessFirstLine ( String, String )
-    | ProcessAllLines ( String, String )
+    = ProcessLines ( String, String, String )
 
 
 main : Program Never Model Message
@@ -41,24 +41,25 @@ init =
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        ProcessFirstLine ( fileName, firstLine ) ->
+        ProcessLines ( fileName, firstLine, allLines ) ->
             Model.ExposedFunctions.record fileName firstLine model
-                |> And.noCommand
+                |> Model.AllFunctions.record fileName allLines
+                |> andSendReport fileName
 
-        ProcessAllLines ( fileName, allLines ) ->
-            Model.AllFunctions.record fileName allLines model
-                |> And.noCommand
+
+andSendReport : String -> Model -> ( Model, Cmd Message )
+andSendReport fileName model =
+    And.execute (report <| Model.Report.make fileName model) model
 
 
 subscriptions : Model -> Sub Message
 subscriptions model =
     Sub.batch
-        [ processFirstLine ProcessFirstLine
-        , processAllLines ProcessAllLines
+        [ process ProcessLines
         ]
 
 
-port processFirstLine : (( String, String ) -> message) -> Sub message
+port report : ( String, List ( String, Int, Bool ) ) -> Cmd message
 
 
-port processAllLines : (( String, String ) -> message) -> Sub message
+port process : (( String, String, String ) -> message) -> Sub message
