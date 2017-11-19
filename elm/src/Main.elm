@@ -11,6 +11,7 @@ import Set exposing (Set)
 type alias Model =
     { exposedFunctions : Dict String (Set String)
     , allFunctions : Dict String (Set String)
+    , allFunctionLines : Dict String (Dict String Int)
     }
 
 
@@ -32,6 +33,7 @@ init : ( Model, Cmd Message )
 init =
     { exposedFunctions = Dict.empty
     , allFunctions = Dict.empty
+    , allFunctionLines = Dict.empty
     }
         |> And.noCommand
 

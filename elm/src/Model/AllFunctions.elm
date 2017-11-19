@@ -6,19 +6,33 @@ import Parsing exposing (lowerInitialSingleString)
 import Set exposing (Set)
 
 
+type alias FileFunctionsMap =
+    Dict String (Set String)
+
+
+type alias FileFunctionLinesMap =
+    Dict String (Dict String Int)
+
+
 type alias WithAllFunctions model =
-    { model | allFunctions : Dict String (Set String) }
+    { model
+        | allFunctions : FileFunctionsMap
+        , allFunctionLines : FileFunctionLinesMap
+    }
 
 
 record : String -> String -> WithAllFunctions model -> WithAllFunctions model
 record fileName allLines model =
-    { model | allFunctions = Debug.log "all functions" <| parseAllFunctions fileName allLines }
+    { model
+        | allFunctions = Debug.log "all functions" <| parseAllFunctions fileName allLines model.allFunctions
+        , allFunctionLines = Debug.log "all function lines" <| parseFunctionLines fileName allLines model.allFunctionLines
+    }
 
 
-parseAllFunctions : String -> String -> Dict String (Set String)
-parseAllFunctions fileName allLines =
+parseAllFunctions : String -> String -> FileFunctionsMap -> FileFunctionsMap
+parseAllFunctions fileName allLines allFunctions =
     List.foldl functionCollector Set.empty (String.split "\n" allLines)
-        |> (\functions -> Dict.insert fileName functions Dict.empty)
+        |> (\functions -> Dict.insert fileName functions allFunctions)
 
 
 functionCollector : String -> Set String -> Set String
@@ -29,6 +43,23 @@ functionCollector line functions =
 
         _ ->
             functions
+
+
+parseFunctionLines : String -> String -> FileFunctionLinesMap -> FileFunctionLinesMap
+parseFunctionLines fileName allLines allFunctionLines =
+    List.foldl functionLineCollector ( Dict.empty, 0 ) (String.split "\n" allLines)
+        |> Tuple.first
+        |> (\functionLines -> Dict.insert fileName functionLines allFunctionLines)
+
+
+functionLineCollector : String -> ( Dict String Int, Int ) -> ( Dict String Int, Int )
+functionLineCollector line ( lineNumberMap, lineNumber ) =
+    case run wordInIntialPosition line of
+        Ok (FunctionName function) ->
+            ( Dict.insert function lineNumber lineNumberMap, lineNumber + 1 )
+
+        _ ->
+            ( lineNumberMap, lineNumber + 1 )
 
 
 type InitialWord

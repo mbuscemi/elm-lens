@@ -6,20 +6,24 @@ import Parsing exposing (isAlphaOrDot, singleString, spaces)
 import Set exposing (Set)
 
 
+type alias FileFunctionsMap =
+    Dict String (Set String)
+
+
 type alias WithExposedFunctions model =
-    { model | exposedFunctions : Dict String (Set String) }
+    { model | exposedFunctions : FileFunctionsMap }
 
 
 record : String -> String -> WithExposedFunctions model -> WithExposedFunctions model
 record fileName firstLine model =
-    { model | exposedFunctions = Debug.log "exposed functions" <| parseExposedFunctions fileName firstLine }
+    { model | exposedFunctions = Debug.log "exposed functions" <| parseExposedFunctions fileName firstLine model.exposedFunctions }
 
 
-parseExposedFunctions : String -> String -> Dict String (Set String)
-parseExposedFunctions fileName firstLine =
+parseExposedFunctions : String -> String -> FileFunctionsMap -> FileFunctionsMap
+parseExposedFunctions fileName firstLine exposedFuntions =
     run exposedFunctions firstLine
         |> Result.withDefault Set.empty
-        |> (\functions -> Dict.insert fileName functions Dict.empty)
+        |> (\functions -> Dict.insert fileName functions exposedFuntions)
 
 
 exposedFunctions : Parser (Set String)

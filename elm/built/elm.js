@@ -6880,16 +6880,44 @@ var _user$project$Model_AllFunctions$functionCollector = F2(
 			return functions;
 		}
 	});
-var _user$project$Model_AllFunctions$parseAllFunctions = F2(
-	function (fileName, allLines) {
+var _user$project$Model_AllFunctions$parseAllFunctions = F3(
+	function (fileName, allLines, allFunctions) {
 		return function (functions) {
-			return A3(_elm_lang$core$Dict$insert, fileName, functions, _elm_lang$core$Dict$empty);
+			return A3(_elm_lang$core$Dict$insert, fileName, functions, allFunctions);
 		}(
 			A3(
 				_elm_lang$core$List$foldl,
 				_user$project$Model_AllFunctions$functionCollector,
 				_elm_lang$core$Set$empty,
 				A2(_elm_lang$core$String$split, '\n', allLines)));
+	});
+var _user$project$Model_AllFunctions$functionLineCollector = F2(
+	function (line, _p1) {
+		var _p2 = _p1;
+		var _p5 = _p2._0;
+		var _p4 = _p2._1;
+		var _p3 = A2(_elm_tools$parser$Parser$run, _user$project$Model_AllFunctions$wordInIntialPosition, line);
+		if ((_p3.ctor === 'Ok') && (_p3._0.ctor === 'FunctionName')) {
+			return {
+				ctor: '_Tuple2',
+				_0: A3(_elm_lang$core$Dict$insert, _p3._0._0, _p4, _p5),
+				_1: _p4 + 1
+			};
+		} else {
+			return {ctor: '_Tuple2', _0: _p5, _1: _p4 + 1};
+		}
+	});
+var _user$project$Model_AllFunctions$parseFunctionLines = F3(
+	function (fileName, allLines, allFunctionLines) {
+		return function (functionLines) {
+			return A3(_elm_lang$core$Dict$insert, fileName, functionLines, allFunctionLines);
+		}(
+			_elm_lang$core$Tuple$first(
+				A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_AllFunctions$functionLineCollector,
+					{ctor: '_Tuple2', _0: _elm_lang$core$Dict$empty, _1: 0},
+					A2(_elm_lang$core$String$split, '\n', allLines))));
 	});
 var _user$project$Model_AllFunctions$record = F3(
 	function (fileName, allLines, model) {
@@ -6899,7 +6927,11 @@ var _user$project$Model_AllFunctions$record = F3(
 				allFunctions: A2(
 					_elm_lang$core$Debug$log,
 					'all functions',
-					A2(_user$project$Model_AllFunctions$parseAllFunctions, fileName, allLines))
+					A3(_user$project$Model_AllFunctions$parseAllFunctions, fileName, allLines, model.allFunctions)),
+				allFunctionLines: A2(
+					_elm_lang$core$Debug$log,
+					'all function lines',
+					A3(_user$project$Model_AllFunctions$parseFunctionLines, fileName, allLines, model.allFunctionLines))
 			});
 	});
 
@@ -6986,10 +7018,10 @@ var _user$project$Model_ExposedFunctions$exposedFunctions = A2(
 			_user$project$Model_ExposedFunctions$exposedFunctionList),
 		_user$project$Parsing$spaces),
 	_elm_tools$parser$Parser$symbol(')'));
-var _user$project$Model_ExposedFunctions$parseExposedFunctions = F2(
-	function (fileName, firstLine) {
+var _user$project$Model_ExposedFunctions$parseExposedFunctions = F3(
+	function (fileName, firstLine, exposedFuntions) {
 		return function (functions) {
-			return A3(_elm_lang$core$Dict$insert, fileName, functions, _elm_lang$core$Dict$empty);
+			return A3(_elm_lang$core$Dict$insert, fileName, functions, exposedFuntions);
 		}(
 			A2(
 				_elm_lang$core$Result$withDefault,
@@ -7004,7 +7036,7 @@ var _user$project$Model_ExposedFunctions$record = F3(
 				exposedFunctions: A2(
 					_elm_lang$core$Debug$log,
 					'exposed functions',
-					A2(_user$project$Model_ExposedFunctions$parseExposedFunctions, fileName, firstLine))
+					A3(_user$project$Model_ExposedFunctions$parseExposedFunctions, fileName, firstLine, model.exposedFunctions))
 			});
 	});
 
@@ -7020,7 +7052,7 @@ var _user$project$Main$update = F2(
 		}
 	});
 var _user$project$Main$init = _user$project$And$noCommand(
-	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctions: _elm_lang$core$Dict$empty});
+	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctions: _elm_lang$core$Dict$empty, allFunctionLines: _elm_lang$core$Dict$empty});
 var _user$project$Main$processFirstLine = _elm_lang$core$Native_Platform.incomingPort(
 	'processFirstLine',
 	A2(
@@ -7049,9 +7081,9 @@ var _user$project$Main$processAllLines = _elm_lang$core$Native_Platform.incoming
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Main$Model = F2(
-	function (a, b) {
-		return {exposedFunctions: a, allFunctions: b};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {exposedFunctions: a, allFunctions: b, allFunctionLines: c};
 	});
 var _user$project$Main$ProcessAllLines = function (a) {
 	return {ctor: 'ProcessAllLines', _0: a};
