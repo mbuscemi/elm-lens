@@ -6794,10 +6794,6 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
-var _user$project$Parsing$singleLowerCaseLetter = A2(
-	_elm_tools$parser$Parser$keep,
-	_elm_tools$parser$Parser$Exactly(1),
-	_elm_lang$core$Char$isLower);
 var _user$project$Parsing$isDot = function ($char) {
 	return _elm_lang$core$Native_Utils.eq(
 		$char,
@@ -6806,6 +6802,10 @@ var _user$project$Parsing$isDot = function ($char) {
 var _user$project$Parsing$isAlpha = function ($char) {
 	return _elm_lang$core$Char$isUpper($char) || _elm_lang$core$Char$isLower($char);
 };
+var _user$project$Parsing$singleLowerCaseLetter = A2(
+	_elm_tools$parser$Parser$keep,
+	_elm_tools$parser$Parser$Exactly(1),
+	_elm_lang$core$Char$isLower);
 var _user$project$Parsing$isAlphaOrDot = function ($char) {
 	return _user$project$Parsing$isAlpha($char) || _user$project$Parsing$isDot($char);
 };
@@ -6871,40 +6871,20 @@ var _user$project$Model_AllFunctions$wordInIntialPosition = _elm_tools$parser$Pa
 			}
 		}
 	});
-var _user$project$Model_AllFunctions$functionCollector = F2(
-	function (line, functions) {
-		var _p0 = A2(_elm_tools$parser$Parser$run, _user$project$Model_AllFunctions$wordInIntialPosition, line);
-		if ((_p0.ctor === 'Ok') && (_p0._0.ctor === 'FunctionName')) {
-			return A2(_elm_lang$core$Set$insert, _p0._0._0, functions);
-		} else {
-			return functions;
-		}
-	});
-var _user$project$Model_AllFunctions$parseAllFunctions = F3(
-	function (fileName, allLines, allFunctions) {
-		return function (functions) {
-			return A3(_elm_lang$core$Dict$insert, fileName, functions, allFunctions);
-		}(
-			A3(
-				_elm_lang$core$List$foldl,
-				_user$project$Model_AllFunctions$functionCollector,
-				_elm_lang$core$Set$empty,
-				A2(_elm_lang$core$String$split, '\n', allLines)));
-	});
 var _user$project$Model_AllFunctions$functionLineCollector = F2(
-	function (line, _p1) {
-		var _p2 = _p1;
-		var _p5 = _p2._0;
-		var _p4 = _p2._1;
-		var _p3 = A2(_elm_tools$parser$Parser$run, _user$project$Model_AllFunctions$wordInIntialPosition, line);
-		if ((_p3.ctor === 'Ok') && (_p3._0.ctor === 'FunctionName')) {
+	function (line, _p0) {
+		var _p1 = _p0;
+		var _p4 = _p1._0;
+		var _p3 = _p1._1;
+		var _p2 = A2(_elm_tools$parser$Parser$run, _user$project$Model_AllFunctions$wordInIntialPosition, line);
+		if ((_p2.ctor === 'Ok') && (_p2._0.ctor === 'FunctionName')) {
 			return {
 				ctor: '_Tuple2',
-				_0: A3(_elm_lang$core$Dict$insert, _p3._0._0, _p4, _p5),
-				_1: _p4 + 1
+				_0: A3(_elm_lang$core$Dict$insert, _p2._0._0, _p3, _p4),
+				_1: _p3 + 1
 			};
 		} else {
-			return {ctor: '_Tuple2', _0: _p5, _1: _p4 + 1};
+			return {ctor: '_Tuple2', _0: _p4, _1: _p3 + 1};
 		}
 	});
 var _user$project$Model_AllFunctions$parseFunctionLines = F3(
@@ -6924,7 +6904,6 @@ var _user$project$Model_AllFunctions$record = F3(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				allFunctions: A3(_user$project$Model_AllFunctions$parseAllFunctions, fileName, allLines, model.allFunctions),
 				allFunctionLines: A3(_user$project$Model_AllFunctions$parseFunctionLines, fileName, allLines, model.allFunctionLines)
 			});
 	});
@@ -7056,11 +7035,14 @@ var _user$project$Model_Report$lineForFunctionName = F3(
 	});
 var _user$project$Model_Report$allFunctionsList = F2(
 	function (fileName, model) {
-		return _elm_lang$core$Set$toList(
-			A2(
-				_elm_lang$core$Maybe$withDefault,
-				_elm_lang$core$Set$empty,
-				A2(_elm_lang$core$Dict$get, fileName, model.allFunctions)));
+		return A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$first,
+			_elm_lang$core$Dict$toList(
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$core$Dict$empty,
+					A2(_elm_lang$core$Dict$get, fileName, model.allFunctionLines))));
 	});
 var _user$project$Model_Report$functionExposingsList = F2(
 	function (fileName, model) {
@@ -7084,13 +7066,9 @@ var _user$project$Model_Report$make = F2(
 			_1: A2(_user$project$Model_Report$functionExposingsList, fileName, model)
 		};
 	});
-var _user$project$Model_Report$Model = F3(
-	function (a, b, c) {
-		return {exposedFunctions: a, allFunctions: b, allFunctionLines: c};
-	});
 
 var _user$project$Main$init = _user$project$And$noCommand(
-	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctions: _elm_lang$core$Dict$empty, allFunctionLines: _elm_lang$core$Dict$empty});
+	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctionLines: _elm_lang$core$Dict$empty});
 var _user$project$Main$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -7142,9 +7120,9 @@ var _user$project$Main$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {exposedFunctions: a, allFunctions: b, allFunctionLines: c};
+var _user$project$Main$Model = F2(
+	function (a, b) {
+		return {exposedFunctions: a, allFunctionLines: b};
 	});
 var _user$project$Main$ProcessLines = function (a) {
 	return {ctor: 'ProcessLines', _0: a};

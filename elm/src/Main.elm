@@ -11,7 +11,6 @@ import Set exposing (Set)
 
 type alias Model =
     { exposedFunctions : Dict String (Set String)
-    , allFunctions : Dict String (Set String)
     , allFunctionLines : Dict String (Dict String Int)
     }
 
@@ -32,7 +31,6 @@ main =
 init : ( Model, Cmd Message )
 init =
     { exposedFunctions = Dict.empty
-    , allFunctions = Dict.empty
     , allFunctionLines = Dict.empty
     }
         |> And.noCommand
@@ -42,7 +40,8 @@ update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         ProcessLines ( fileName, firstLine, allLines ) ->
-            Model.ExposedFunctions.record fileName firstLine model
+            model
+                |> Model.ExposedFunctions.record fileName firstLine
                 |> Model.AllFunctions.record fileName allLines
                 |> andSendReport fileName
 

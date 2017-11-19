@@ -3,11 +3,6 @@ module Model.AllFunctions exposing (record)
 import Dict exposing (Dict)
 import Parser exposing ((|.), (|=), Parser, fail, ignore, keyword, oneOf, oneOrMore, run, succeed, symbol)
 import Parsing exposing (lowerInitialSingleString)
-import Set exposing (Set)
-
-
-type alias FileFunctionsMap =
-    Dict String (Set String)
 
 
 type alias FileFunctionLinesMap =
@@ -16,33 +11,15 @@ type alias FileFunctionLinesMap =
 
 type alias WithAllFunctions model =
     { model
-        | allFunctions : FileFunctionsMap
-        , allFunctionLines : FileFunctionLinesMap
+        | allFunctionLines : FileFunctionLinesMap
     }
 
 
 record : String -> String -> WithAllFunctions model -> WithAllFunctions model
 record fileName allLines model =
     { model
-        | allFunctions = parseAllFunctions fileName allLines model.allFunctions
-        , allFunctionLines = parseFunctionLines fileName allLines model.allFunctionLines
+        | allFunctionLines = parseFunctionLines fileName allLines model.allFunctionLines
     }
-
-
-parseAllFunctions : String -> String -> FileFunctionsMap -> FileFunctionsMap
-parseAllFunctions fileName allLines allFunctions =
-    List.foldl functionCollector Set.empty (String.split "\n" allLines)
-        |> (\functions -> Dict.insert fileName functions allFunctions)
-
-
-functionCollector : String -> Set String -> Set String
-functionCollector line functions =
-    case run wordInIntialPosition line of
-        Ok (FunctionName function) ->
-            Set.insert function functions
-
-        _ ->
-            functions
 
 
 parseFunctionLines : String -> String -> FileFunctionLinesMap -> FileFunctionLinesMap
