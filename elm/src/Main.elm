@@ -7,6 +7,7 @@ import Model.AllFunctions
 import Model.ExposedFunctions
 import Model.Report
 import Set exposing (Set)
+import Text
 
 
 type alias Model =
@@ -40,9 +41,13 @@ update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         ProcessLines ( fileName, text ) ->
+            let
+                lines =
+                    Text.preprocess text
+            in
             model
-                |> Model.ExposedFunctions.record fileName text
-                |> Model.AllFunctions.record fileName text
+                |> Model.ExposedFunctions.record fileName lines
+                |> Model.AllFunctions.record fileName lines
                 |> andSendReport fileName
 
 
