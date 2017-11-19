@@ -1,25 +1,28 @@
 module Model.ExposedFunctions exposing (record)
 
+import Dict exposing (Dict)
 import Parser exposing ((|.), (|=), Parser, andThen, delayedCommit, ignore, keep, keyword, oneOf, oneOrMore, run, succeed, symbol, zeroOrMore)
 import Parsing exposing (isAlphaOrDot, singleString, spaces)
+import Set exposing (Set)
 
 
 type alias WithExposedFunctions model =
-    { model | exposedFunctions : List String }
+    { model | exposedFunctions : Dict String (Set String) }
 
 
-record : String -> WithExposedFunctions model -> WithExposedFunctions model
-record firstLine model =
-    { model | exposedFunctions = parseExposedFunctions firstLine }
+record : String -> String -> WithExposedFunctions model -> WithExposedFunctions model
+record fileName firstLine model =
+    { model | exposedFunctions = Debug.log "exposed functions" <| parseExposedFunctions fileName firstLine }
 
 
-parseExposedFunctions : String -> List String
-parseExposedFunctions firstLine =
+parseExposedFunctions : String -> String -> Dict String (Set String)
+parseExposedFunctions fileName firstLine =
     run exposedFunctions firstLine
-        |> Result.withDefault []
+        |> Result.withDefault Set.empty
+        |> (\functions -> Dict.insert fileName functions Dict.empty)
 
 
-exposedFunctions : Parser (List String)
+exposedFunctions : Parser (Set String)
 exposedFunctions =
     succeed identity
         |. moduleDeclaration
@@ -48,17 +51,17 @@ moduleName =
     ignore oneOrMore isAlphaOrDot
 
 
-exposedFunctionList : Parser (List String)
+exposedFunctionList : Parser (Set String)
 exposedFunctionList =
-    andThen (\string -> listBuilder [ string ]) <| singleString
+    andThen (\string -> setBuilder (Set.insert string Set.empty)) <| singleString
 
 
-listBuilder : List String -> Parser (List String)
-listBuilder strings =
+setBuilder : Set String -> Parser (Set String)
+setBuilder strings =
     oneOf
         [ nextString
-            |> andThen (\string -> listBuilder (string :: strings))
-        , succeed (List.reverse strings)
+            |> andThen (\string -> setBuilder (Set.insert string strings))
+        , succeed strings
         ]
 
 

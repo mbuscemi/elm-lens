@@ -1,25 +1,24 @@
 module Model.AllFunctions exposing (record)
 
+import Dict exposing (Dict)
 import Parser exposing ((|.), (|=), Parser, fail, ignore, keyword, oneOf, oneOrMore, run, succeed, symbol)
 import Parsing exposing (lowerInitialSingleString)
 import Set exposing (Set)
 
 
 type alias WithAllFunctions model =
-    { model | allFunctions : Set String }
+    { model | allFunctions : Dict String (Set String) }
 
 
-record : String -> WithAllFunctions model -> WithAllFunctions model
-record allLines model =
-    { model | allFunctions = parseAllFunctions allLines }
+record : String -> String -> WithAllFunctions model -> WithAllFunctions model
+record fileName allLines model =
+    { model | allFunctions = Debug.log "all functions" <| parseAllFunctions fileName allLines }
 
 
-parseAllFunctions : String -> Set String
-parseAllFunctions allLines =
-    List.foldl
-        functionCollector
-        Set.empty
-        (String.split "\n" allLines)
+parseAllFunctions : String -> String -> Dict String (Set String)
+parseAllFunctions fileName allLines =
+    List.foldl functionCollector Set.empty (String.split "\n" allLines)
+        |> (\functions -> Dict.insert fileName functions Dict.empty)
 
 
 functionCollector : String -> Set String -> Set String

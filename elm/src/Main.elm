@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import And
+import Dict exposing (Dict)
 import Json.Decode
 import Model.AllFunctions
 import Model.ExposedFunctions
@@ -8,14 +9,14 @@ import Set exposing (Set)
 
 
 type alias Model =
-    { exposedFunctions : List String
-    , allFunctions : Set String
+    { exposedFunctions : Dict String (Set String)
+    , allFunctions : Dict String (Set String)
     }
 
 
 type Message
-    = ProcessFirstLine String
-    | ProcessAllLines String
+    = ProcessFirstLine ( String, String )
+    | ProcessAllLines ( String, String )
 
 
 main : Program Never Model Message
@@ -29,8 +30,8 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { exposedFunctions = []
-    , allFunctions = Set.empty
+    { exposedFunctions = Dict.empty
+    , allFunctions = Dict.empty
     }
         |> And.noCommand
 
@@ -38,12 +39,12 @@ init =
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        ProcessFirstLine firstLine ->
-            Model.ExposedFunctions.record firstLine model
+        ProcessFirstLine ( fileName, firstLine ) ->
+            Model.ExposedFunctions.record fileName firstLine model
                 |> And.noCommand
 
-        ProcessAllLines allLines ->
-            Model.AllFunctions.record allLines model
+        ProcessAllLines ( fileName, allLines ) ->
+            Model.AllFunctions.record fileName allLines model
                 |> And.noCommand
 
 
@@ -55,7 +56,7 @@ subscriptions model =
         ]
 
 
-port processFirstLine : (String -> message) -> Sub message
+port processFirstLine : (( String, String ) -> message) -> Sub message
 
 
-port processAllLines : (String -> message) -> Sub message
+port processAllLines : (( String, String ) -> message) -> Sub message
