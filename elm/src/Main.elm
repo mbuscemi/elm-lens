@@ -16,7 +16,7 @@ type alias Model =
 
 
 type Message
-    = ProcessLines ( String, String, String )
+    = ProcessLines ( String, String )
 
 
 main : Program Never Model Message
@@ -39,10 +39,10 @@ init =
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        ProcessLines ( fileName, firstLine, allLines ) ->
+        ProcessLines ( fileName, text ) ->
             model
-                |> Model.ExposedFunctions.record fileName firstLine
-                |> Model.AllFunctions.record fileName allLines
+                |> Model.ExposedFunctions.record fileName text
+                |> Model.AllFunctions.record fileName text
                 |> andSendReport fileName
 
 
@@ -61,4 +61,4 @@ subscriptions model =
 port report : ( String, List ( String, Int, Bool ) ) -> Cmd message
 
 
-port process : (( String, String, String ) -> message) -> Sub message
+port process : (( String, String ) -> message) -> Sub message

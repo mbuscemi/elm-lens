@@ -18,7 +18,7 @@ lowerInitialSingleString =
 
 spaces : Parser String
 spaces =
-    keep zeroOrMore (\c -> c == ' ')
+    keep zeroOrMore isSpace
 
 
 isAlphaOrDot : Char -> Bool
@@ -39,3 +39,8 @@ isAlpha char =
 isDot : Char -> Bool
 isDot char =
     char == '.'
+
+
+isSpace : Char -> Bool
+isSpace char =
+    char == ' '

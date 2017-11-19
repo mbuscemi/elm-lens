@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Parser exposing ((|.), (|=), Parser, andThen, delayedCommit, ignore, keep, keyword, oneOf, oneOrMore, run, succeed, symbol, zeroOrMore)
 import Parsing exposing (isAlphaOrDot, singleString, spaces)
 import Set exposing (Set)
+import String.Extra as String
 
 
 type alias FileFunctionsMap =
@@ -20,8 +21,9 @@ record fileName firstLine model =
 
 
 parseExposedFunctions : String -> String -> FileFunctionsMap -> FileFunctionsMap
-parseExposedFunctions fileName firstLine exposedFuntions =
-    run exposedFunctions firstLine
+parseExposedFunctions fileName text exposedFuntions =
+    String.replace "\n" "" text
+        |> run exposedFunctions
         |> Result.withDefault Set.empty
         |> (\functions -> Dict.insert fileName functions exposedFuntions)
 

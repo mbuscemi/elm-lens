@@ -16,15 +16,15 @@ type alias WithAllFunctions model =
 
 
 record : String -> String -> WithAllFunctions model -> WithAllFunctions model
-record fileName allLines model =
+record fileName text model =
     { model
-        | allFunctionLines = parseFunctionLines fileName allLines model.allFunctionLines
+        | allFunctionLines = parseFunctionLines fileName text model.allFunctionLines
     }
 
 
 parseFunctionLines : String -> String -> FileFunctionLinesMap -> FileFunctionLinesMap
-parseFunctionLines fileName allLines allFunctionLines =
-    List.foldl functionLineCollector ( Dict.empty, -1 ) (String.split "\n" allLines)
+parseFunctionLines fileName text allFunctionLines =
+    List.foldl functionLineCollector ( Dict.empty, -1 ) (String.split "\n" text)
         |> Tuple.first
         |> (\functionLines -> Dict.insert fileName functionLines allFunctionLines)
 
