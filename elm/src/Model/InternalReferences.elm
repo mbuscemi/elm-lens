@@ -93,10 +93,10 @@ findInExpression expression functions =
             findInExpression expression1 [] ++ findInExpression expression2 [] ++ findInExpression expression3 [] ++ functions
 
         Ast.Expression.Let list expression ->
-            findInExpression expression functions ++ List.foldl (\( exp1, exp2 ) funcs -> concatExpressions2 exp1 exp2 funcs) [] list
+            findInExpression expression functions ++ List.foldl concatExpression2Tuple [] list
 
         Ast.Expression.Case expression list ->
-            findInExpression expression functions ++ List.foldl (\( exp1, exp2 ) funcs -> concatExpressions2 exp1 exp2 funcs) [] list
+            findInExpression expression functions ++ List.foldl concatExpression2Tuple [] list
 
         Ast.Expression.Lambda list expression ->
             findInExpression expression functions ++ List.foldl (\exp funcs -> findInExpression exp funcs) [] list
@@ -109,6 +109,11 @@ findInExpression expression functions =
 
         _ ->
             functions
+
+
+concatExpression2Tuple : ( Expression, Expression ) -> List String -> List String
+concatExpression2Tuple ( exp1, exp2 ) functions =
+    concatExpressions2 exp1 exp2 functions
 
 
 concatExpressions2 : Expression -> Expression -> List String -> List String

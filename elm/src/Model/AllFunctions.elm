@@ -3,7 +3,7 @@ module Model.AllFunctions exposing (record)
 import Dict exposing (Dict)
 import FunctionMetaData exposing (FunctionMetaData)
 import Parser exposing ((|.), (|=), Parser, fail, ignore, keyword, oneOf, oneOrMore, run, succeed, symbol)
-import Parsing exposing (takeLowerInitialSingleString)
+import Parsing exposing (lowerCaseVariable)
 
 
 type alias MetaMap =
@@ -68,5 +68,5 @@ wordInIntialPosition =
         , succeed ElmKeyword
             |. keyword "type "
         , succeed FunctionName
-            |= takeLowerInitialSingleString
+            |= lowerCaseVariable
         ]

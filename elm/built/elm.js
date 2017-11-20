@@ -12023,7 +12023,7 @@ var _user$project$Model_AllFunctions$wordInIntialPosition = _elm_tools$parser$Pa
 						_0: A2(
 							_elm_tools$parser$Parser_ops['|='],
 							_elm_tools$parser$Parser$succeed(_user$project$Model_AllFunctions$FunctionName),
-							_user$project$Parsing$takeLowerInitialSingleString),
+							_user$project$Parsing$lowerCaseVariable),
 						_1: {ctor: '[]'}
 					}
 				}
@@ -12267,11 +12267,7 @@ var _user$project$Model_InternalReferences$findInExpression = F2(
 					A2(_user$project$Model_InternalReferences$findInExpression, _p0._1, functions),
 					A3(
 						_elm_lang$core$List$foldl,
-						F2(
-							function (_p5, funcs) {
-								var _p6 = _p5;
-								return A3(_user$project$Model_InternalReferences$concatExpressions2, _p6._0, _p6._1, funcs);
-							}),
+						_user$project$Model_InternalReferences$concatExpression2Tuple,
 						{ctor: '[]'},
 						_p0._0));
 			case 'Case':
@@ -12280,11 +12276,7 @@ var _user$project$Model_InternalReferences$findInExpression = F2(
 					A2(_user$project$Model_InternalReferences$findInExpression, _p0._0, functions),
 					A3(
 						_elm_lang$core$List$foldl,
-						F2(
-							function (_p7, funcs) {
-								var _p8 = _p7;
-								return A3(_user$project$Model_InternalReferences$concatExpressions2, _p8._0, _p8._1, funcs);
-							}),
+						_user$project$Model_InternalReferences$concatExpression2Tuple,
 						{ctor: '[]'},
 						_p0._1));
 			case 'Lambda':
@@ -12306,6 +12298,11 @@ var _user$project$Model_InternalReferences$findInExpression = F2(
 			default:
 				return functions;
 		}
+	});
+var _user$project$Model_InternalReferences$concatExpression2Tuple = F2(
+	function (_p5, functions) {
+		var _p6 = _p5;
+		return A3(_user$project$Model_InternalReferences$concatExpressions2, _p6._0, _p6._1, functions);
 	});
 var _user$project$Model_InternalReferences$concatExpressions2 = F3(
 	function (exp1, exp2, functions) {
@@ -12347,9 +12344,9 @@ var _user$project$Model_InternalReferences$concatExpressions3 = F4(
 	});
 var _user$project$Model_InternalReferences$searchDeclarations = F2(
 	function (statement, functions) {
-		var _p9 = statement;
-		if (_p9.ctor === 'FunctionDeclaration') {
-			return A2(_user$project$Model_InternalReferences$findInExpression, _p9._2, functions);
+		var _p7 = statement;
+		if (_p7.ctor === 'FunctionDeclaration') {
+			return A2(_user$project$Model_InternalReferences$findInExpression, _p7._2, functions);
 		} else {
 			return functions;
 		}
