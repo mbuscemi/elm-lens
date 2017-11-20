@@ -12207,9 +12207,196 @@ var _user$project$ReferenceMetaData$addInstance = F3(
 				}));
 	});
 
+var _user$project$Model_InternalReferences$findInExpression = F2(
+	function (expression, functions) {
+		var _p0 = expression;
+		switch (_p0.ctor) {
+			case 'Variable':
+				return A2(_elm_lang$core$Basics_ops['++'], functions, _p0._0);
+			case 'List':
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_InternalReferences$findInExpression, functions, _p0._0);
+			case 'Tuple':
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_InternalReferences$findInExpression, functions, _p0._0);
+			case 'Record':
+				return A3(
+					_elm_lang$core$List$foldl,
+					F2(
+						function (_p1, funcs) {
+							var _p2 = _p1;
+							return A2(_user$project$Model_InternalReferences$findInExpression, _p2._1, funcs);
+						}),
+					functions,
+					_p0._0);
+			case 'RecordUpdate':
+				return A3(
+					_elm_lang$core$List$foldl,
+					F2(
+						function (_p3, funcs) {
+							var _p4 = _p3;
+							return A2(_user$project$Model_InternalReferences$findInExpression, _p4._1, funcs);
+						}),
+					functions,
+					_p0._1);
+			case 'If':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(
+						_user$project$Model_InternalReferences$findInExpression,
+						_p0._0,
+						{ctor: '[]'}),
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						A2(
+							_user$project$Model_InternalReferences$findInExpression,
+							_p0._1,
+							{ctor: '[]'}),
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							A2(
+								_user$project$Model_InternalReferences$findInExpression,
+								_p0._2,
+								{ctor: '[]'}),
+							functions)));
+			case 'Let':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(_user$project$Model_InternalReferences$findInExpression, _p0._1, functions),
+					A3(
+						_elm_lang$core$List$foldl,
+						F2(
+							function (_p5, funcs) {
+								var _p6 = _p5;
+								return A3(_user$project$Model_InternalReferences$concatExpressions2, _p6._0, _p6._1, funcs);
+							}),
+						{ctor: '[]'},
+						_p0._0));
+			case 'Case':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(_user$project$Model_InternalReferences$findInExpression, _p0._0, functions),
+					A3(
+						_elm_lang$core$List$foldl,
+						F2(
+							function (_p7, funcs) {
+								var _p8 = _p7;
+								return A3(_user$project$Model_InternalReferences$concatExpressions2, _p8._0, _p8._1, funcs);
+							}),
+						{ctor: '[]'},
+						_p0._1));
+			case 'Lambda':
+				return A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(_user$project$Model_InternalReferences$findInExpression, _p0._1, functions),
+					A3(
+						_elm_lang$core$List$foldl,
+						F2(
+							function (exp, funcs) {
+								return A2(_user$project$Model_InternalReferences$findInExpression, exp, funcs);
+							}),
+						{ctor: '[]'},
+						_p0._0));
+			case 'Application':
+				return A3(_user$project$Model_InternalReferences$concatExpressions2, _p0._0, _p0._1, functions);
+			case 'BinOp':
+				return A4(_user$project$Model_InternalReferences$concatExpressions3, _p0._0, _p0._1, _p0._2, functions);
+			default:
+				return functions;
+		}
+	});
+var _user$project$Model_InternalReferences$concatExpressions2 = F3(
+	function (exp1, exp2, functions) {
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			A2(
+				_user$project$Model_InternalReferences$findInExpression,
+				exp1,
+				{ctor: '[]'}),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				A2(
+					_user$project$Model_InternalReferences$findInExpression,
+					exp2,
+					{ctor: '[]'}),
+				functions));
+	});
+var _user$project$Model_InternalReferences$concatExpressions3 = F4(
+	function (exp1, exp2, exp3, functions) {
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			A2(
+				_user$project$Model_InternalReferences$findInExpression,
+				exp1,
+				{ctor: '[]'}),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				A2(
+					_user$project$Model_InternalReferences$findInExpression,
+					exp2,
+					{ctor: '[]'}),
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(
+						_user$project$Model_InternalReferences$findInExpression,
+						exp3,
+						{ctor: '[]'}),
+					functions)));
+	});
+var _user$project$Model_InternalReferences$searchDeclarations = F2(
+	function (statement, functions) {
+		var _p9 = statement;
+		if (_p9.ctor === 'FunctionDeclaration') {
+			return A2(_user$project$Model_InternalReferences$findInExpression, _p9._2, functions);
+		} else {
+			return functions;
+		}
+	});
+var _user$project$Model_InternalReferences$functionReferences = function (statements) {
+	return A3(
+		_elm_lang$core$List$foldl,
+		_user$project$Model_InternalReferences$searchDeclarations,
+		{ctor: '[]'},
+		statements);
+};
+var _user$project$Model_InternalReferences$getAstFor = F2(
+	function (fileName, fileSyntaxMap) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			{ctor: '[]'},
+			A2(_elm_lang$core$Dict$get, fileName, fileSyntaxMap));
+	});
+var _user$project$Model_InternalReferences$newReferences = F2(
+	function (fileName, fileSyntaxMap) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (funcRef, dict) {
+					return function (newData) {
+						return A3(_elm_lang$core$Dict$insert, funcRef, newData, dict);
+					}(
+						A3(
+							_user$project$ReferenceMetaData$addInstance,
+							0,
+							'',
+							A2(
+								_elm_lang$core$Maybe$withDefault,
+								_user$project$ReferenceMetaData$empty,
+								A2(_elm_lang$core$Dict$get, funcRef, dict))));
+				}),
+			_elm_lang$core$Dict$empty,
+			_user$project$Model_InternalReferences$functionReferences(
+				A2(_user$project$Model_InternalReferences$getAstFor, fileName, fileSyntaxMap)));
+	});
 var _user$project$Model_InternalReferences$record = F3(
 	function (fileName, fileText, model) {
-		return model;
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				lowerCaseRefsByFile: A3(
+					_elm_lang$core$Dict$insert,
+					fileName,
+					A2(_user$project$Model_InternalReferences$newReferences, fileName, model.fileASTs),
+					model.lowerCaseRefsByFile)
+			});
 	});
 
 var _user$project$Report$Report = F2(
