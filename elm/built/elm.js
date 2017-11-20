@@ -6794,6 +6794,27 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
+var _user$project$FunctionMetaData$getLineNumber = function (_p0) {
+	var _p1 = _p0;
+	return _p1._0.lineNumber;
+};
+var _user$project$FunctionMetaData$Data = function (a) {
+	return {lineNumber: a};
+};
+var _user$project$FunctionMetaData$FunctionMetaData = function (a) {
+	return {ctor: 'FunctionMetaData', _0: a};
+};
+var _user$project$FunctionMetaData$default = _user$project$FunctionMetaData$FunctionMetaData(
+	{lineNumber: 0});
+var _user$project$FunctionMetaData$setLineNumber = F2(
+	function (lineNumber, _p2) {
+		var _p3 = _p2;
+		return _user$project$FunctionMetaData$FunctionMetaData(
+			_elm_lang$core$Native_Utils.update(
+				_p3._0,
+				{lineNumber: lineNumber}));
+	});
+
 var _user$project$Parsing$isSpace = function ($char) {
 	return _elm_lang$core$Native_Utils.eq(
 		$char,
@@ -6828,6 +6849,18 @@ var _user$project$Parsing$lowerInitialSingleString = A2(
 		_user$project$Parsing$singleLowerCaseLetter),
 	_user$project$Parsing$singleString);
 
+var _user$project$Model_AllFunctions$setLineNumberAndIncrement = F4(
+	function ($function, lineNumber, metaMap, functionMetaData) {
+		return {
+			ctor: '_Tuple2',
+			_0: A3(
+				_elm_lang$core$Dict$insert,
+				$function,
+				A2(_user$project$FunctionMetaData$setLineNumber, lineNumber, functionMetaData),
+				metaMap),
+			_1: lineNumber + 1
+		};
+	});
 var _user$project$Model_AllFunctions$FunctionName = function (a) {
 	return {ctor: 'FunctionName', _0: a};
 };
@@ -6872,17 +6905,22 @@ var _user$project$Model_AllFunctions$wordInIntialPosition = _elm_tools$parser$Pa
 var _user$project$Model_AllFunctions$functionLineCollector = F2(
 	function (line, _p0) {
 		var _p1 = _p0;
-		var _p4 = _p1._0;
-		var _p3 = _p1._1;
+		var _p5 = _p1._0;
+		var _p4 = _p1._1;
 		var _p2 = A2(_elm_tools$parser$Parser$run, _user$project$Model_AllFunctions$wordInIntialPosition, line);
 		if ((_p2.ctor === 'Ok') && (_p2._0.ctor === 'FunctionName')) {
-			return {
-				ctor: '_Tuple2',
-				_0: A3(_elm_lang$core$Dict$insert, _p2._0._0, _p3, _p4),
-				_1: _p3 + 1
-			};
+			var _p3 = _p2._0._0;
+			return A4(
+				_user$project$Model_AllFunctions$setLineNumberAndIncrement,
+				_p3,
+				_p4,
+				_p5,
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					_user$project$FunctionMetaData$default,
+					A2(_elm_lang$core$Dict$get, _p3, _p5)));
 		} else {
-			return {ctor: '_Tuple2', _0: _p4, _1: _p3 + 1};
+			return {ctor: '_Tuple2', _0: _p5, _1: _p4 + 1};
 		}
 	});
 var _user$project$Model_AllFunctions$parseFunctionLines = F3(
@@ -6902,7 +6940,7 @@ var _user$project$Model_AllFunctions$record = F3(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				allFunctionLines: A3(_user$project$Model_AllFunctions$parseFunctionLines, fileName, lines, model.allFunctionLines)
+				allFunctionMetaData: A3(_user$project$Model_AllFunctions$parseFunctionLines, fileName, lines, model.allFunctionMetaData)
 			});
 	});
 
@@ -7027,12 +7065,15 @@ var _user$project$Model_Report$lineForFunctionName = F3(
 			_elm_lang$core$Maybe$withDefault,
 			-1,
 			A2(
-				_elm_lang$core$Dict$get,
-				functionName,
+				_elm_lang$core$Maybe$map,
+				_user$project$FunctionMetaData$getLineNumber,
 				A2(
-					_elm_lang$core$Maybe$withDefault,
-					_elm_lang$core$Dict$empty,
-					A2(_elm_lang$core$Dict$get, fileName, model.allFunctionLines))));
+					_elm_lang$core$Dict$get,
+					functionName,
+					A2(
+						_elm_lang$core$Maybe$withDefault,
+						_elm_lang$core$Dict$empty,
+						A2(_elm_lang$core$Dict$get, fileName, model.allFunctionMetaData)))));
 	});
 var _user$project$Model_Report$allFunctionsList = F2(
 	function (fileName, model) {
@@ -7043,7 +7084,7 @@ var _user$project$Model_Report$allFunctionsList = F2(
 				A2(
 					_elm_lang$core$Maybe$withDefault,
 					_elm_lang$core$Dict$empty,
-					A2(_elm_lang$core$Dict$get, fileName, model.allFunctionLines))));
+					A2(_elm_lang$core$Dict$get, fileName, model.allFunctionMetaData))));
 	});
 var _user$project$Model_Report$functionExposingsList = F2(
 	function (fileName, model) {
@@ -7107,7 +7148,7 @@ var _user$project$Text$preprocess = function (text) {
 };
 
 var _user$project$Main$init = _user$project$And$noCommand(
-	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctionLines: _elm_lang$core$Dict$empty});
+	{exposedFunctions: _elm_lang$core$Dict$empty, allFunctionMetaData: _elm_lang$core$Dict$empty});
 var _user$project$Main$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -7157,7 +7198,7 @@ var _user$project$Main$process = _elm_lang$core$Native_Platform.incomingPort(
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
 var _user$project$Main$Model = F2(
 	function (a, b) {
-		return {exposedFunctions: a, allFunctionLines: b};
+		return {exposedFunctions: a, allFunctionMetaData: b};
 	});
 var _user$project$Main$ProcessLines = function (a) {
 	return {ctor: 'ProcessLines', _0: a};

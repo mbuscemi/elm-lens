@@ -1,42 +1,54 @@
 module Model.AllFunctions exposing (record)
 
 import Dict exposing (Dict)
+import FunctionMetaData exposing (FunctionMetaData)
 import Parser exposing ((|.), (|=), Parser, fail, ignore, keyword, oneOf, oneOrMore, run, succeed, symbol)
 import Parsing exposing (lowerInitialSingleString)
 
 
-type alias FileFunctionLinesMap =
-    Dict String (Dict String Int)
+type alias MetaMap =
+    Dict String FunctionMetaData
+
+
+type alias FileFunctionMetaMap =
+    Dict String MetaMap
 
 
 type alias WithAllFunctions model =
     { model
-        | allFunctionLines : FileFunctionLinesMap
+        | allFunctionMetaData : FileFunctionMetaMap
     }
 
 
 record : String -> List String -> WithAllFunctions model -> WithAllFunctions model
 record fileName lines model =
     { model
-        | allFunctionLines = parseFunctionLines fileName lines model.allFunctionLines
+        | allFunctionMetaData = parseFunctionLines fileName lines model.allFunctionMetaData
     }
 
 
-parseFunctionLines : String -> List String -> FileFunctionLinesMap -> FileFunctionLinesMap
+parseFunctionLines : String -> List String -> FileFunctionMetaMap -> FileFunctionMetaMap
 parseFunctionLines fileName lines allFunctionLines =
     List.foldl functionLineCollector ( Dict.empty, -1 ) lines
         |> Tuple.first
         |> (\functionLines -> Dict.insert fileName functionLines allFunctionLines)
 
 
-functionLineCollector : String -> ( Dict String Int, Int ) -> ( Dict String Int, Int )
-functionLineCollector line ( lineNumberMap, lineNumber ) =
+functionLineCollector : String -> ( MetaMap, Int ) -> ( MetaMap, Int )
+functionLineCollector line ( metaMap, lineNumber ) =
     case run wordInIntialPosition line of
         Ok (FunctionName function) ->
-            ( Dict.insert function lineNumber lineNumberMap, lineNumber + 1 )
+            Dict.get function metaMap
+                |> Maybe.withDefault FunctionMetaData.default
+                |> setLineNumberAndIncrement function lineNumber metaMap
 
         _ ->
-            ( lineNumberMap, lineNumber + 1 )
+            ( metaMap, lineNumber + 1 )
+
+
+setLineNumberAndIncrement : String -> Int -> MetaMap -> FunctionMetaData -> ( MetaMap, Int )
+setLineNumberAndIncrement function lineNumber metaMap functionMetaData =
+    ( Dict.insert function (FunctionMetaData.setLineNumber lineNumber functionMetaData) metaMap, lineNumber + 1 )
 
 
 type InitialWord

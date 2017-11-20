@@ -2,6 +2,7 @@ port module Main exposing (main)
 
 import And
 import Dict exposing (Dict)
+import FunctionMetaData exposing (FunctionMetaData)
 import Json.Decode
 import Model.AllFunctions
 import Model.ExposedFunctions
@@ -12,7 +13,7 @@ import Text
 
 type alias Model =
     { exposedFunctions : Dict String (Set String)
-    , allFunctionLines : Dict String (Dict String Int)
+    , allFunctionMetaData : Dict String (Dict String FunctionMetaData)
     }
 
 
@@ -32,7 +33,7 @@ main =
 init : ( Model, Cmd Message )
 init =
     { exposedFunctions = Dict.empty
-    , allFunctionLines = Dict.empty
+    , allFunctionMetaData = Dict.empty
     }
         |> And.noCommand
 

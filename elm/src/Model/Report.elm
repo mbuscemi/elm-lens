@@ -1,6 +1,7 @@
 module Model.Report exposing (make)
 
 import Dict exposing (Dict)
+import FunctionMetaData exposing (FunctionMetaData)
 import Set exposing (Set)
 
 
@@ -8,8 +9,8 @@ type alias FileFunctionsMap =
     Dict String (Set String)
 
 
-type alias FileFunctionLinesMap =
-    Dict String (Dict String Int)
+type alias FileFunctionMetaMap =
+    Dict String (Dict String FunctionMetaData)
 
 
 type alias FileReport =
@@ -19,7 +20,7 @@ type alias FileReport =
 type alias Model model =
     { model
         | exposedFunctions : FileFunctionsMap
-        , allFunctionLines : FileFunctionLinesMap
+        , allFunctionMetaData : FileFunctionMetaMap
     }
 
 
@@ -42,7 +43,7 @@ functionExposingsList fileName model =
 
 allFunctionsList : String -> Model model -> List String
 allFunctionsList fileName model =
-    Dict.get fileName model.allFunctionLines
+    Dict.get fileName model.allFunctionMetaData
         |> Maybe.withDefault Dict.empty
         |> Dict.toList
         |> List.map Tuple.first
@@ -50,9 +51,10 @@ allFunctionsList fileName model =
 
 lineForFunctionName : String -> String -> Model model -> Int
 lineForFunctionName fileName functionName model =
-    Dict.get fileName model.allFunctionLines
+    Dict.get fileName model.allFunctionMetaData
         |> Maybe.withDefault Dict.empty
         |> Dict.get functionName
+        |> Maybe.map FunctionMetaData.getLineNumber
         |> Maybe.withDefault -1
 
 
