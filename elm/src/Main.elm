@@ -1,19 +1,25 @@
 port module Main exposing (main)
 
 import And
+import Ast.Statement exposing (Statement)
 import Dict exposing (Dict)
 import FunctionMetaData exposing (FunctionMetaData)
 import Json.Decode
+import Model.AST
 import Model.AllFunctions
 import Model.ExposedFunctions
+import Model.InternalReferences
 import Model.Report
+import ReferenceMetaData exposing (ReferenceMetaData)
 import Set exposing (Set)
 import Text
 
 
 type alias Model =
-    { exposedFunctions : Dict String (Set String)
+    { fileASTs : Dict String (List Statement)
+    , exposedFunctions : Dict String (Set String)
     , allFunctionMetaData : Dict String (Dict String FunctionMetaData)
+    , lowerCaseRefsByFile : Dict String (Dict String ReferenceMetaData)
     }
 
 
@@ -32,8 +38,10 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { exposedFunctions = Dict.empty
+    { fileASTs = Dict.empty
+    , exposedFunctions = Dict.empty
     , allFunctionMetaData = Dict.empty
+    , lowerCaseRefsByFile = Dict.empty
     }
         |> And.noCommand
 
@@ -47,8 +55,10 @@ update message model =
                     Text.preprocess text
             in
             model
+                |> Model.AST.parseFile fileName text
                 |> Model.ExposedFunctions.record fileName lines
                 |> Model.AllFunctions.record fileName lines
+                |> Model.InternalReferences.record fileName text
                 |> andSendReport fileName
 
 
