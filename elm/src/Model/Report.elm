@@ -2,6 +2,7 @@ module Model.Report exposing (make)
 
 import Dict exposing (Dict)
 import FunctionMetaData exposing (FunctionMetaData)
+import Report exposing (Report)
 import Set exposing (Set)
 
 
@@ -13,10 +14,6 @@ type alias FileFunctionMetaMap =
     Dict String (Dict String FunctionMetaData)
 
 
-type alias FileReport =
-    ( String, List ( String, Int, Bool ) )
-
-
 type alias Model model =
     { model
         | exposedFunctions : FileFunctionsMap
@@ -24,19 +21,19 @@ type alias Model model =
     }
 
 
-make : String -> Model model -> FileReport
+make : String -> Model model -> Report
 make fileName model =
-    ( fileName, functionExposingsList fileName model )
+    Report fileName (functionExposingsList fileName model)
 
 
-functionExposingsList : String -> Model model -> List ( String, Int, Bool )
+functionExposingsList : String -> Model model -> List Report.FunctionData
 functionExposingsList fileName model =
     List.map
         (\functionName ->
-            ( functionName
-            , lineForFunctionName fileName functionName model
-            , isExposed fileName functionName model
-            )
+            Report.FunctionData
+                functionName
+                (lineForFunctionName fileName functionName model)
+                (isExposed fileName functionName model)
         )
         (allFunctionsList fileName model)
 

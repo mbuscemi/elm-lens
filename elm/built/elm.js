@@ -12212,6 +12212,15 @@ var _user$project$Model_InternalReferences$record = F3(
 		return model;
 	});
 
+var _user$project$Report$Report = F2(
+	function (a, b) {
+		return {fileName: a, functions: b};
+	});
+var _user$project$Report$FunctionData = F3(
+	function (a, b, c) {
+		return {name: a, lineNumber: b, isExposed: c};
+	});
+
 var _user$project$Model_Report$isExposed = F3(
 	function (fileName, functionName, model) {
 		return A2(
@@ -12254,22 +12263,20 @@ var _user$project$Model_Report$functionExposingsList = F2(
 		return A2(
 			_elm_lang$core$List$map,
 			function (functionName) {
-				return {
-					ctor: '_Tuple3',
-					_0: functionName,
-					_1: A3(_user$project$Model_Report$lineForFunctionName, fileName, functionName, model),
-					_2: A3(_user$project$Model_Report$isExposed, fileName, functionName, model)
-				};
+				return A3(
+					_user$project$Report$FunctionData,
+					functionName,
+					A3(_user$project$Model_Report$lineForFunctionName, fileName, functionName, model),
+					A3(_user$project$Model_Report$isExposed, fileName, functionName, model));
 			},
 			A2(_user$project$Model_Report$allFunctionsList, fileName, model));
 	});
 var _user$project$Model_Report$make = F2(
 	function (fileName, model) {
-		return {
-			ctor: '_Tuple2',
-			_0: fileName,
-			_1: A2(_user$project$Model_Report$functionExposingsList, fileName, model)
-		};
+		return A2(
+			_user$project$Report$Report,
+			fileName,
+			A2(_user$project$Model_Report$functionExposingsList, fileName, model));
 	});
 
 var _user$project$Text$spacesThenComment = _elm_tools$parser$Parser$oneOf(
@@ -12315,13 +12322,13 @@ var _user$project$Main$init = _user$project$And$noCommand(
 var _user$project$Main$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
-		return [
-			v._0,
-			_elm_lang$core$Native_List.toArray(v._1).map(
-			function (v) {
-				return [v._0, v._1, v._2];
-			})
-		];
+		return {
+			fileName: v.fileName,
+			functions: _elm_lang$core$Native_List.toArray(v.functions).map(
+				function (v) {
+					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed};
+				})
+		};
 	});
 var _user$project$Main$andSendReport = F2(
 	function (fileName, model) {

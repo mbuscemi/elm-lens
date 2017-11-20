@@ -11,6 +11,7 @@ import Model.ExposedFunctions
 import Model.InternalReferences
 import Model.Report
 import ReferenceMetaData exposing (ReferenceMetaData)
+import Report exposing (Report)
 import Set exposing (Set)
 import Text
 
@@ -74,7 +75,7 @@ subscriptions model =
         ]
 
 
-port report : ( String, List ( String, Int, Bool ) ) -> Cmd message
+port report : Report -> Cmd message
 
 
 port process : (( String, String ) -> message) -> Sub message
