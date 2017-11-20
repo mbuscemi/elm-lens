@@ -2,6 +2,7 @@ module Model.Report exposing (make)
 
 import Dict exposing (Dict)
 import FunctionMetaData exposing (FunctionMetaData)
+import ReferenceMetaData exposing (ReferenceMetaData)
 import Report exposing (Report)
 import Set exposing (Set)
 
@@ -14,10 +15,15 @@ type alias FileFunctionMetaMap =
     Dict String (Dict String FunctionMetaData)
 
 
+type alias FileReferenceMap =
+    Dict String (Dict String ReferenceMetaData)
+
+
 type alias Model model =
     { model
         | exposedFunctions : FileFunctionsMap
         , allFunctionMetaData : FileFunctionMetaMap
+        , internalRefsByFile : FileReferenceMap
     }
 
 
@@ -34,6 +40,7 @@ functionExposingsList fileName model =
                 functionName
                 (lineForFunctionName fileName functionName model)
                 (isExposed fileName functionName model)
+                (countInternalReferences fileName functionName model)
         )
         (allFunctionsList fileName model)
 
@@ -60,3 +67,12 @@ isExposed fileName functionName model =
     Dict.get fileName model.exposedFunctions
         |> Maybe.withDefault Set.empty
         |> Set.member functionName
+
+
+countInternalReferences : String -> String -> Model model -> Int
+countInternalReferences fileName functionName model =
+    Dict.get fileName model.internalRefsByFile
+        |> Maybe.withDefault Dict.empty
+        |> Dict.get functionName
+        |> Maybe.map ReferenceMetaData.numInstances
+        |> Maybe.withDefault 0

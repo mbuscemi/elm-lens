@@ -21,18 +21,18 @@ type alias FileReferenceMap =
 type alias WithLowerCaseRefsByFile model =
     { model
         | fileASTs : FileSyntaxMap
-        , lowerCaseRefsByFile : FileReferenceMap
+        , internalRefsByFile : FileReferenceMap
     }
 
 
 record : String -> String -> WithLowerCaseRefsByFile model -> WithLowerCaseRefsByFile model
 record fileName fileText model =
     { model
-        | lowerCaseRefsByFile =
+        | internalRefsByFile =
             Dict.insert
                 fileName
                 (newReferences fileName model.fileASTs)
-                model.lowerCaseRefsByFile
+                model.internalRefsByFile
     }
 
 

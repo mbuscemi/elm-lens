@@ -12177,6 +12177,10 @@ var _user$project$Model_ExposedFunctions$record = F3(
 			});
 	});
 
+var _user$project$ReferenceMetaData$numInstances = function (_p0) {
+	var _p1 = _p0;
+	return _elm_lang$core$List$length(_p1._0.instances);
+};
 var _user$project$ReferenceMetaData$Instance = F2(
 	function (a, b) {
 		return {lineNumber: a, line: b};
@@ -12192,17 +12196,17 @@ var _user$project$ReferenceMetaData$empty = _user$project$ReferenceMetaData$Refe
 		instances: {ctor: '[]'}
 	});
 var _user$project$ReferenceMetaData$addInstance = F3(
-	function (lineNumber, line, _p0) {
-		var _p1 = _p0;
-		var _p2 = _p1._0;
+	function (lineNumber, line, _p2) {
+		var _p3 = _p2;
+		var _p4 = _p3._0;
 		return _user$project$ReferenceMetaData$ReferenceMetaData(
 			_elm_lang$core$Native_Utils.update(
-				_p2,
+				_p4,
 				{
 					instances: {
 						ctor: '::',
 						_0: A2(_user$project$ReferenceMetaData$Instance, lineNumber, line),
-						_1: _p2.instances
+						_1: _p4.instances
 					}
 				}));
 	});
@@ -12391,11 +12395,11 @@ var _user$project$Model_InternalReferences$record = F3(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				lowerCaseRefsByFile: A3(
+				internalRefsByFile: A3(
 					_elm_lang$core$Dict$insert,
 					fileName,
 					A2(_user$project$Model_InternalReferences$newReferences, fileName, model.fileASTs),
-					model.lowerCaseRefsByFile)
+					model.internalRefsByFile)
 			});
 	});
 
@@ -12403,11 +12407,27 @@ var _user$project$Report$Report = F2(
 	function (a, b) {
 		return {fileName: a, functions: b};
 	});
-var _user$project$Report$FunctionData = F3(
-	function (a, b, c) {
-		return {name: a, lineNumber: b, isExposed: c};
+var _user$project$Report$FunctionData = F4(
+	function (a, b, c, d) {
+		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d};
 	});
 
+var _user$project$Model_Report$countInternalReferences = F3(
+	function (fileName, functionName, model) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			0,
+			A2(
+				_elm_lang$core$Maybe$map,
+				_user$project$ReferenceMetaData$numInstances,
+				A2(
+					_elm_lang$core$Dict$get,
+					functionName,
+					A2(
+						_elm_lang$core$Maybe$withDefault,
+						_elm_lang$core$Dict$empty,
+						A2(_elm_lang$core$Dict$get, fileName, model.internalRefsByFile)))));
+	});
 var _user$project$Model_Report$isExposed = F3(
 	function (fileName, functionName, model) {
 		return A2(
@@ -12450,11 +12470,12 @@ var _user$project$Model_Report$functionExposingsList = F2(
 		return A2(
 			_elm_lang$core$List$map,
 			function (functionName) {
-				return A3(
+				return A4(
 					_user$project$Report$FunctionData,
 					functionName,
 					A3(_user$project$Model_Report$lineForFunctionName, fileName, functionName, model),
-					A3(_user$project$Model_Report$isExposed, fileName, functionName, model));
+					A3(_user$project$Model_Report$isExposed, fileName, functionName, model),
+					A3(_user$project$Model_Report$countInternalReferences, fileName, functionName, model));
 			},
 			A2(_user$project$Model_Report$allFunctionsList, fileName, model));
 	});
@@ -12505,7 +12526,7 @@ var _user$project$Text$preprocess = function (text) {
 };
 
 var _user$project$Main$init = _user$project$And$noCommand(
-	{fileASTs: _elm_lang$core$Dict$empty, exposedFunctions: _elm_lang$core$Dict$empty, allFunctionMetaData: _elm_lang$core$Dict$empty, lowerCaseRefsByFile: _elm_lang$core$Dict$empty});
+	{fileASTs: _elm_lang$core$Dict$empty, exposedFunctions: _elm_lang$core$Dict$empty, allFunctionMetaData: _elm_lang$core$Dict$empty, internalRefsByFile: _elm_lang$core$Dict$empty});
 var _user$project$Main$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -12513,7 +12534,7 @@ var _user$project$Main$report = _elm_lang$core$Native_Platform.outgoingPort(
 			fileName: v.fileName,
 			functions: _elm_lang$core$Native_List.toArray(v.functions).map(
 				function (v) {
-					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed};
+					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs};
 				})
 		};
 	});
@@ -12564,7 +12585,7 @@ var _user$project$Main$process = _elm_lang$core$Native_Platform.incomingPort(
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
 var _user$project$Main$Model = F4(
 	function (a, b, c, d) {
-		return {fileASTs: a, exposedFunctions: b, allFunctionMetaData: c, lowerCaseRefsByFile: d};
+		return {fileASTs: a, exposedFunctions: b, allFunctionMetaData: c, internalRefsByFile: d};
 	});
 var _user$project$Main$ProcessLines = function (a) {
 	return {ctor: 'ProcessLines', _0: a};

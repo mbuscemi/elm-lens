@@ -2,4 +2,9 @@
 .elm-lens-marker {
     font-size: 12px;
     font-weight: bold;
+    color: gray;
+}
+
+.elm-lens-marker .divider {
+    padding: 0 10px;
 }

@@ -11,4 +11,5 @@ type alias FunctionData =
     { name : String
     , lineNumber : Int
     , isExposed : Bool
+    , numInternalRefs : Int
     }

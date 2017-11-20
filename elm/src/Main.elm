@@ -20,7 +20,7 @@ type alias Model =
     { fileASTs : Dict String (List Statement)
     , exposedFunctions : Dict String (Set String)
     , allFunctionMetaData : Dict String (Dict String FunctionMetaData)
-    , lowerCaseRefsByFile : Dict String (Dict String ReferenceMetaData)
+    , internalRefsByFile : Dict String (Dict String ReferenceMetaData)
     }
 
 
@@ -42,7 +42,7 @@ init =
     { fileASTs = Dict.empty
     , exposedFunctions = Dict.empty
     , allFunctionMetaData = Dict.empty
-    , lowerCaseRefsByFile = Dict.empty
+    , internalRefsByFile = Dict.empty
     }
         |> And.noCommand
 

@@ -1,4 +1,4 @@
-module ReferenceMetaData exposing (ReferenceMetaData, addInstance, empty)
+module ReferenceMetaData exposing (ReferenceMetaData, addInstance, empty, numInstances)
 
 
 type alias Instance =
@@ -23,3 +23,8 @@ empty =
 addInstance : Int -> String -> ReferenceMetaData -> ReferenceMetaData
 addInstance lineNumber line (ReferenceMetaData data) =
     ReferenceMetaData { data | instances = Instance lineNumber line :: data.instances }
+
+
+numInstances : ReferenceMetaData -> Int
+numInstances (ReferenceMetaData data) =
+    List.length data.instances
