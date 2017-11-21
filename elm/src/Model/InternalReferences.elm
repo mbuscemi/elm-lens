@@ -75,7 +75,7 @@ findInExpression : Expression -> List String -> List String
 findInExpression expression functions =
     case expression of
         Ast.Expression.Variable names ->
-            functions ++ names
+            names ++ functions
 
         Ast.Expression.List expressions ->
             List.foldl findInExpression functions expressions
@@ -84,22 +84,22 @@ findInExpression expression functions =
             List.foldl findInExpression functions expressions
 
         Ast.Expression.Record list ->
-            List.foldl (\( _, expression ) funcs -> findInExpression expression funcs) functions list
+            List.foldl (\( _, exp ) funcs -> findInExpression exp funcs) functions list
 
         Ast.Expression.RecordUpdate _ list ->
-            List.foldl (\( _, expression ) funcs -> findInExpression expression funcs) functions list
+            List.foldl (\( _, exp ) funcs -> findInExpression exp funcs) functions list
 
-        Ast.Expression.If expression1 expression2 expression3 ->
-            findInExpression expression1 [] ++ findInExpression expression2 [] ++ findInExpression expression3 [] ++ functions
+        Ast.Expression.If exp1 exp2 exp3 ->
+            concatExpressions3 exp1 exp2 exp3 functions
 
         Ast.Expression.Let list expression ->
-            findInExpression expression functions ++ List.foldl concatExpression2Tuple [] list
+            List.foldl findInExpression functions (expression :: flattenExpressionTuples list)
 
         Ast.Expression.Case expression list ->
-            findInExpression expression functions ++ List.foldl concatExpression2Tuple [] list
+            List.foldl findInExpression functions (expression :: flattenExpressionTuples list)
 
         Ast.Expression.Lambda list expression ->
-            findInExpression expression functions ++ List.foldl (\exp funcs -> findInExpression exp funcs) [] list
+            List.foldl findInExpression functions (expression :: list)
 
         Ast.Expression.Application exp1 exp2 ->
             concatExpressions2 exp1 exp2 functions
@@ -111,16 +111,16 @@ findInExpression expression functions =
             functions
 
 
-concatExpression2Tuple : ( Expression, Expression ) -> List String -> List String
-concatExpression2Tuple ( exp1, exp2 ) functions =
-    concatExpressions2 exp1 exp2 functions
+flattenExpressionTuples : List ( Expression, Expression ) -> List Expression
+flattenExpressionTuples expressionTuples =
+    List.foldl (\( exp1, exp2 ) list -> exp1 :: exp2 :: list) [] expressionTuples
 
 
 concatExpressions2 : Expression -> Expression -> List String -> List String
 concatExpressions2 exp1 exp2 functions =
-    findInExpression exp1 [] ++ findInExpression exp2 [] ++ functions
+    List.foldl findInExpression functions [ exp1, exp2 ]
 
 
 concatExpressions3 : Expression -> Expression -> Expression -> List String -> List String
 concatExpressions3 exp1 exp2 exp3 functions =
-    findInExpression exp1 [] ++ findInExpression exp2 [] ++ findInExpression exp3 [] ++ functions
+    List.foldl findInExpression functions [ exp1, exp2, exp3 ]

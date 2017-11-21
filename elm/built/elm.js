@@ -12211,27 +12211,32 @@ var _user$project$ReferenceMetaData$addInstance = F3(
 				}));
 	});
 
+var _user$project$Model_InternalReferences$flattenExpressionTuples = function (expressionTuples) {
+	return A3(
+		_elm_lang$core$List$foldl,
+		F2(
+			function (_p0, list) {
+				var _p1 = _p0;
+				return {
+					ctor: '::',
+					_0: _p1._0,
+					_1: {ctor: '::', _0: _p1._1, _1: list}
+				};
+			}),
+		{ctor: '[]'},
+		expressionTuples);
+};
 var _user$project$Model_InternalReferences$findInExpression = F2(
 	function (expression, functions) {
-		var _p0 = expression;
-		switch (_p0.ctor) {
+		var _p2 = expression;
+		switch (_p2.ctor) {
 			case 'Variable':
-				return A2(_elm_lang$core$Basics_ops['++'], functions, _p0._0);
+				return A2(_elm_lang$core$Basics_ops['++'], _p2._0, functions);
 			case 'List':
-				return A3(_elm_lang$core$List$foldl, _user$project$Model_InternalReferences$findInExpression, functions, _p0._0);
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_InternalReferences$findInExpression, functions, _p2._0);
 			case 'Tuple':
-				return A3(_elm_lang$core$List$foldl, _user$project$Model_InternalReferences$findInExpression, functions, _p0._0);
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_InternalReferences$findInExpression, functions, _p2._0);
 			case 'Record':
-				return A3(
-					_elm_lang$core$List$foldl,
-					F2(
-						function (_p1, funcs) {
-							var _p2 = _p1;
-							return A2(_user$project$Model_InternalReferences$findInExpression, _p2._1, funcs);
-						}),
-					functions,
-					_p0._0);
-			case 'RecordUpdate':
 				return A3(
 					_elm_lang$core$List$foldl,
 					F2(
@@ -12240,107 +12245,88 @@ var _user$project$Model_InternalReferences$findInExpression = F2(
 							return A2(_user$project$Model_InternalReferences$findInExpression, _p4._1, funcs);
 						}),
 					functions,
-					_p0._1);
+					_p2._0);
+			case 'RecordUpdate':
+				return A3(
+					_elm_lang$core$List$foldl,
+					F2(
+						function (_p5, funcs) {
+							var _p6 = _p5;
+							return A2(_user$project$Model_InternalReferences$findInExpression, _p6._1, funcs);
+						}),
+					functions,
+					_p2._1);
 			case 'If':
-				return A2(
-					_elm_lang$core$Basics_ops['++'],
-					A2(
-						_user$project$Model_InternalReferences$findInExpression,
-						_p0._0,
-						{ctor: '[]'}),
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						A2(
-							_user$project$Model_InternalReferences$findInExpression,
-							_p0._1,
-							{ctor: '[]'}),
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							A2(
-								_user$project$Model_InternalReferences$findInExpression,
-								_p0._2,
-								{ctor: '[]'}),
-							functions)));
+				return A4(_user$project$Model_InternalReferences$concatExpressions3, _p2._0, _p2._1, _p2._2, functions);
 			case 'Let':
-				return A2(
-					_elm_lang$core$Basics_ops['++'],
-					A2(_user$project$Model_InternalReferences$findInExpression, _p0._1, functions),
-					A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_InternalReferences$concatExpression2Tuple,
-						{ctor: '[]'},
-						_p0._0));
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_InternalReferences$findInExpression,
+					functions,
+					{
+						ctor: '::',
+						_0: _p2._1,
+						_1: _user$project$Model_InternalReferences$flattenExpressionTuples(_p2._0)
+					});
 			case 'Case':
-				return A2(
-					_elm_lang$core$Basics_ops['++'],
-					A2(_user$project$Model_InternalReferences$findInExpression, _p0._0, functions),
-					A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_InternalReferences$concatExpression2Tuple,
-						{ctor: '[]'},
-						_p0._1));
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_InternalReferences$findInExpression,
+					functions,
+					{
+						ctor: '::',
+						_0: _p2._0,
+						_1: _user$project$Model_InternalReferences$flattenExpressionTuples(_p2._1)
+					});
 			case 'Lambda':
-				return A2(
-					_elm_lang$core$Basics_ops['++'],
-					A2(_user$project$Model_InternalReferences$findInExpression, _p0._1, functions),
-					A3(
-						_elm_lang$core$List$foldl,
-						F2(
-							function (exp, funcs) {
-								return A2(_user$project$Model_InternalReferences$findInExpression, exp, funcs);
-							}),
-						{ctor: '[]'},
-						_p0._0));
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_InternalReferences$findInExpression,
+					functions,
+					{ctor: '::', _0: _p2._1, _1: _p2._0});
 			case 'Application':
-				return A3(_user$project$Model_InternalReferences$concatExpressions2, _p0._0, _p0._1, functions);
+				return A3(_user$project$Model_InternalReferences$concatExpressions2, _p2._0, _p2._1, functions);
 			case 'BinOp':
-				return A4(_user$project$Model_InternalReferences$concatExpressions3, _p0._0, _p0._1, _p0._2, functions);
+				return A4(_user$project$Model_InternalReferences$concatExpressions3, _p2._0, _p2._1, _p2._2, functions);
 			default:
 				return functions;
 		}
 	});
-var _user$project$Model_InternalReferences$concatExpression2Tuple = F2(
-	function (_p5, functions) {
-		var _p6 = _p5;
-		return A3(_user$project$Model_InternalReferences$concatExpressions2, _p6._0, _p6._1, functions);
-	});
 var _user$project$Model_InternalReferences$concatExpressions2 = F3(
 	function (exp1, exp2, functions) {
-		return A2(
-			_elm_lang$core$Basics_ops['++'],
-			A2(
-				_user$project$Model_InternalReferences$findInExpression,
-				exp1,
-				{ctor: '[]'}),
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				A2(
-					_user$project$Model_InternalReferences$findInExpression,
-					exp2,
-					{ctor: '[]'}),
-				functions));
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$Model_InternalReferences$findInExpression,
+			functions,
+			{
+				ctor: '::',
+				_0: exp1,
+				_1: {
+					ctor: '::',
+					_0: exp2,
+					_1: {ctor: '[]'}
+				}
+			});
 	});
 var _user$project$Model_InternalReferences$concatExpressions3 = F4(
 	function (exp1, exp2, exp3, functions) {
-		return A2(
-			_elm_lang$core$Basics_ops['++'],
-			A2(
-				_user$project$Model_InternalReferences$findInExpression,
-				exp1,
-				{ctor: '[]'}),
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				A2(
-					_user$project$Model_InternalReferences$findInExpression,
-					exp2,
-					{ctor: '[]'}),
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					A2(
-						_user$project$Model_InternalReferences$findInExpression,
-						exp3,
-						{ctor: '[]'}),
-					functions)));
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$Model_InternalReferences$findInExpression,
+			functions,
+			{
+				ctor: '::',
+				_0: exp1,
+				_1: {
+					ctor: '::',
+					_0: exp2,
+					_1: {
+						ctor: '::',
+						_0: exp3,
+						_1: {ctor: '[]'}
+					}
+				}
+			});
 	});
 var _user$project$Model_InternalReferences$searchDeclarations = F2(
 	function (statement, functions) {
