@@ -35,15 +35,8 @@ main =
 init : ( Model, Cmd Message )
 init =
     { fileAST = []
-    , topLevelExpressions =
-        { functions = []
-        , types = []
-        , typeAliases = []
-        }
-    , exposings =
-        { functions = []
-        , types = []
-        }
+    , topLevelExpressions = Types.TopLevelExpressions.default
+    , exposings = Types.Exposings.default
     }
         |> And.noCommand
 
