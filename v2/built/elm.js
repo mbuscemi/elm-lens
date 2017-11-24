@@ -12058,7 +12058,65 @@ var _user$project$Types_TopLevelExpressions$decoder = A4(
 	A2(_elm_lang$core$Json_Decode$field, 'types', _user$project$Types_TopLevelExpressions$expressionDictDecoder),
 	A2(_elm_lang$core$Json_Decode$field, 'typeAliases', _user$project$Types_TopLevelExpressions$expressionDictDecoder));
 
-var _user$project$Main$decode = F4(
+var _user$project$Types_FileData$empty = {
+	topLevelExpressions: {functions: _elm_lang$core$Dict$empty, types: _elm_lang$core$Dict$empty, typeAliases: _elm_lang$core$Dict$empty},
+	exposings: {
+		functions: {ctor: '[]'},
+		types: {ctor: '[]'}
+	},
+	references: {ctor: '[]'}
+};
+var _user$project$Types_FileData$FileData = F3(
+	function (a, b, c) {
+		return {topLevelExpressions: a, exposings: b, references: c};
+	});
+
+var _user$project$Types_FileMarkup$default = {
+	fileName: '',
+	expressions: {ctor: '[]'}
+};
+var _user$project$Types_FileMarkup$FileMarkup = F2(
+	function (a, b) {
+		return {fileName: a, expressions: b};
+	});
+var _user$project$Types_FileMarkup$ExpressionData = F4(
+	function (a, b, c, d) {
+		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d};
+	});
+
+
+var _user$project$Model_ProjectFileData$makeExpressions = function (fileData) {
+	return A3(
+		_elm_lang$core$Dict$foldl,
+		F3(
+			function (funcName, funcData, list) {
+				return {
+					ctor: '::',
+					_0: A4(_user$project$Types_FileMarkup$ExpressionData, funcName, funcData.lineNumber, false, 0),
+					_1: list
+				};
+			}),
+		{ctor: '[]'},
+		fileData.topLevelExpressions.functions);
+};
+var _user$project$Model_ProjectFileData$toFileMarkup = F2(
+	function (fileName, fileData) {
+		return A2(
+			_user$project$Types_FileMarkup$FileMarkup,
+			fileName,
+			_user$project$Model_ProjectFileData$makeExpressions(fileData));
+	});
+var _user$project$Model_ProjectFileData$make = F2(
+	function (fileName, projectFileData) {
+		return A2(
+			_user$project$Model_ProjectFileData$toFileMarkup,
+			fileName,
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				_user$project$Types_FileData$empty,
+				A2(_elm_lang$core$Dict$get, fileName, projectFileData)));
+	});
+var _user$project$Model_ProjectFileData$decode = F4(
 	function (value, fieldName, decoder, $default) {
 		return A2(
 			_elm_lang$core$Result$withDefault,
@@ -12068,36 +12126,63 @@ var _user$project$Main$decode = F4(
 				A2(_elm_lang$core$Json_Decode$field, fieldName, decoder),
 				value));
 	});
+var _user$project$Model_ProjectFileData$add = F2(
+	function (value, model) {
+		return A3(
+			_elm_lang$core$Dict$insert,
+			A4(_user$project$Model_ProjectFileData$decode, value, 'fileName', _elm_lang$core$Json_Decode$string, ''),
+			{
+				topLevelExpressions: A4(_user$project$Model_ProjectFileData$decode, value, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
+				exposings: A4(_user$project$Model_ProjectFileData$decode, value, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
+				references: A4(
+					_user$project$Model_ProjectFileData$decode,
+					value,
+					'references',
+					_user$project$Types_Reference$listDecoder,
+					{
+						ctor: '::',
+						_0: _user$project$Types_Reference$default,
+						_1: {ctor: '[]'}
+					})
+			},
+			model);
+	});
+
+var _user$project$Main$init = _user$project$And$noCommand(_elm_lang$core$Dict$empty);
+var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
+var _user$project$Main$fileMarkupRequest = _elm_lang$core$Native_Platform.incomingPort('fileMarkupRequest', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPort(
+	'markupForFile',
+	function (v) {
+		return {
+			fileName: v.fileName,
+			expressions: _elm_lang$core$Native_List.toArray(v.expressions).map(
+				function (v) {
+					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs};
+				})
+		};
+	});
+var _user$project$Main$andTransmitFileMarkup = F2(
+	function (fileName, model) {
+		return A2(
+			_user$project$And$execute,
+			_user$project$Main$markupForFile(
+				A2(_user$project$Model_ProjectFileData$make, fileName, model)),
+			model);
+	});
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		var _p1 = _p0._0;
-		return _user$project$And$noCommand(
-			A3(
-				_elm_lang$core$Dict$insert,
-				A4(_user$project$Main$decode, _p1, 'fileName', _elm_lang$core$Json_Decode$string, ''),
-				{
-					topLevelExpressions: A4(_user$project$Main$decode, _p1, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
-					exposings: A4(_user$project$Main$decode, _p1, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
-					references: A4(
-						_user$project$Main$decode,
-						_p1,
-						'references',
-						_user$project$Types_Reference$listDecoder,
-						{
-							ctor: '::',
-							_0: _user$project$Types_Reference$default,
-							_1: {ctor: '[]'}
-						})
-				},
-				model));
+		if (_p0.ctor === 'AddFileData') {
+			return _user$project$And$noCommand(
+				A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
+		} else {
+			return A2(_user$project$Main$andTransmitFileMarkup, _p0._0, model);
+		}
 	});
-var _user$project$Main$init = _user$project$And$noCommand(_elm_lang$core$Dict$empty);
-var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$FileData = F3(
-	function (a, b, c) {
-		return {topLevelExpressions: a, exposings: b, references: c};
-	});
+var _user$project$Main$FileMarkupRequest = function (a) {
+	return {ctor: 'FileMarkupRequest', _0: a};
+};
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
 };

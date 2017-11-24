@@ -2,26 +2,19 @@ port module Main exposing (main)
 
 import And
 import Dict exposing (Dict)
-import Json.Decode exposing (Decoder, decodeValue, field, string)
 import Json.Encode exposing (Value)
-import Types.Exposings exposing (Exposings)
-import Types.Reference exposing (Reference)
-import Types.TopLevelExpressions exposing (TopLevelExpressions)
-
-
-type alias FileData =
-    { topLevelExpressions : TopLevelExpressions
-    , exposings : Exposings
-    , references : List Reference
-    }
+import Model.ProjectFileData
+import Types.FileMarkup exposing (FileMarkup)
+import Types.ProjectFileData exposing (ProjectFileData)
 
 
 type alias Model =
-    Dict String FileData
+    ProjectFileData
 
 
 type Message
     = AddFileData Value
+    | FileMarkupRequest String
 
 
 main : Program Never Model Message
@@ -43,18 +36,12 @@ update message model =
     case message of
         AddFileData value ->
             model
-                |> Dict.insert (decode value "fileName" string "")
-                    { topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
-                    , exposings = decode value "exposings" Types.Exposings.decoder Types.Exposings.default
-                    , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
-                    }
+                |> Model.ProjectFileData.add value
                 |> And.noCommand
 
-
-decode : Value -> String -> Decoder something -> something -> something
-decode value fieldName decoder default =
-    decodeValue (field fieldName decoder) value
-        |> Result.withDefault default
+        FileMarkupRequest fileName ->
+            model
+                |> andTransmitFileMarkup fileName
 
 
 subscriptions : Model -> Sub Message
@@ -63,4 +50,15 @@ subscriptions model =
         [ processReport AddFileData ]
 
 
+andTransmitFileMarkup : String -> Model -> ( Model, Cmd Message )
+andTransmitFileMarkup fileName model =
+    And.execute (markupForFile <| Model.ProjectFileData.make fileName model) model
+
+
 port processReport : (Value -> message) -> Sub message
+
+
+port fileMarkupRequest : (String -> message) -> Sub message
+
+
+port markupForFile : FileMarkup -> Cmd message
