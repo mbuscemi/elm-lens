@@ -3,6 +3,7 @@ port module Main exposing (main)
 import And
 import Dict exposing (Dict)
 import Json.Encode exposing (Value)
+import Model.FileMarkup
 import Model.ProjectFileData
 import Types.FileMarkup exposing (FileMarkup)
 import Types.ProjectFileData exposing (ProjectFileData)
@@ -47,12 +48,14 @@ update message model =
 subscriptions : Model -> Sub Message
 subscriptions model =
     Sub.batch
-        [ processReport AddFileData ]
+        [ processReport AddFileData
+        , fileMarkupRequest FileMarkupRequest
+        ]
 
 
 andTransmitFileMarkup : String -> Model -> ( Model, Cmd Message )
 andTransmitFileMarkup fileName model =
-    And.execute (markupForFile <| Model.ProjectFileData.make fileName model) model
+    And.execute (markupForFile <| Model.FileMarkup.make fileName model) model
 
 
 port processReport : (Value -> message) -> Sub message

@@ -59,12 +59,9 @@ encoder expressions =
 
 expressionValue : Dict String Expression -> Value
 expressionValue dict =
-    list <| Dict.foldl expressionFold [] dict
-
-
-expressionFold : String -> Expression -> List Value -> List Value
-expressionFold key expression list =
-    object [ ( "name", string key ), ( "lineNumber", JE.int expression.lineNumber ) ] :: list
+    Dict.toList dict
+        |> List.map (\( name, exp ) -> ( name, object [ ( "lineNumber", JE.int exp.lineNumber ) ] ))
+        |> object
 
 
 decoder : Decoder TopLevelExpressions

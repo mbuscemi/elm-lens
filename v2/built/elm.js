@@ -11952,38 +11952,28 @@ var _user$project$Types_TopLevelExpressions$expressionDecoder = A2(
 	_user$project$Types_Expression$Expression,
 	A2(_elm_lang$core$Json_Decode$field, 'lineNumber', _elm_lang$core$Json_Decode$int));
 var _user$project$Types_TopLevelExpressions$expressionDictDecoder = _elm_lang$core$Json_Decode$dict(_user$project$Types_TopLevelExpressions$expressionDecoder);
-var _user$project$Types_TopLevelExpressions$expressionFold = F3(
-	function (key, expression, list) {
-		return {
-			ctor: '::',
-			_0: _elm_lang$core$Json_Encode$object(
-				{
-					ctor: '::',
-					_0: {
-						ctor: '_Tuple2',
-						_0: 'name',
-						_1: _elm_lang$core$Json_Encode$string(key)
-					},
-					_1: {
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: 'lineNumber',
-							_1: _elm_lang$core$Json_Encode$int(expression.lineNumber)
-						},
-						_1: {ctor: '[]'}
-					}
-				}),
-			_1: list
-		};
-	});
 var _user$project$Types_TopLevelExpressions$expressionValue = function (dict) {
-	return _elm_lang$core$Json_Encode$list(
-		A3(
-			_elm_lang$core$Dict$foldl,
-			_user$project$Types_TopLevelExpressions$expressionFold,
-			{ctor: '[]'},
-			dict));
+	return _elm_lang$core$Json_Encode$object(
+		A2(
+			_elm_lang$core$List$map,
+			function (_p0) {
+				var _p1 = _p0;
+				return {
+					ctor: '_Tuple2',
+					_0: _p1._0,
+					_1: _elm_lang$core$Json_Encode$object(
+						{
+							ctor: '::',
+							_0: {
+								ctor: '_Tuple2',
+								_0: 'lineNumber',
+								_1: _elm_lang$core$Json_Encode$int(_p1._1.lineNumber)
+							},
+							_1: {ctor: '[]'}
+						})
+				};
+			},
+			_elm_lang$core$Dict$toList(dict)));
 };
 var _user$project$Types_TopLevelExpressions$encoder = function (expressions) {
 	return _elm_lang$core$Json_Encode$object(
@@ -12085,7 +12075,7 @@ var _user$project$Types_FileMarkup$ExpressionData = F4(
 	});
 
 
-var _user$project$Model_ProjectFileData$makeExpressions = function (fileData) {
+var _user$project$Model_FileMarkup$makeExpressions = function (fileData) {
 	return A3(
 		_elm_lang$core$Dict$foldl,
 		F3(
@@ -12099,23 +12089,24 @@ var _user$project$Model_ProjectFileData$makeExpressions = function (fileData) {
 		{ctor: '[]'},
 		fileData.topLevelExpressions.functions);
 };
-var _user$project$Model_ProjectFileData$toFileMarkup = F2(
+var _user$project$Model_FileMarkup$toFileMarkup = F2(
 	function (fileName, fileData) {
 		return A2(
 			_user$project$Types_FileMarkup$FileMarkup,
 			fileName,
-			_user$project$Model_ProjectFileData$makeExpressions(fileData));
+			_user$project$Model_FileMarkup$makeExpressions(fileData));
 	});
-var _user$project$Model_ProjectFileData$make = F2(
+var _user$project$Model_FileMarkup$make = F2(
 	function (fileName, projectFileData) {
 		return A2(
-			_user$project$Model_ProjectFileData$toFileMarkup,
+			_user$project$Model_FileMarkup$toFileMarkup,
 			fileName,
 			A2(
 				_elm_lang$core$Maybe$withDefault,
 				_user$project$Types_FileData$empty,
 				A2(_elm_lang$core$Dict$get, fileName, projectFileData)));
 	});
+
 var _user$project$Model_ProjectFileData$decode = F4(
 	function (value, fieldName, decoder, $default) {
 		return A2(
@@ -12167,7 +12158,7 @@ var _user$project$Main$andTransmitFileMarkup = F2(
 		return A2(
 			_user$project$And$execute,
 			_user$project$Main$markupForFile(
-				A2(_user$project$Model_ProjectFileData$make, fileName, model)),
+				A2(_user$project$Model_FileMarkup$make, fileName, model)),
 			model);
 	});
 var _user$project$Main$update = F2(
@@ -12191,7 +12182,11 @@ var _user$project$Main$subscriptions = function (model) {
 		{
 			ctor: '::',
 			_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: _user$project$Main$fileMarkupRequest(_user$project$Main$FileMarkupRequest),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$Main$main = _elm_lang$core$Platform$program(
