@@ -27,7 +27,7 @@ makeExpressions fileData =
                 funcName
                 funcData.lineNumber
                 (isExposed funcName fileData)
-                0
+                (numOccurencesInOwnReferences funcName fileData)
                 :: list
         )
         []
@@ -37,3 +37,16 @@ makeExpressions fileData =
 isExposed : String -> FileData -> Bool
 isExposed funcName fileData =
     Set.member funcName fileData.exposings.functions
+
+
+numOccurencesInOwnReferences : String -> FileData -> Int
+numOccurencesInOwnReferences funcName fileData =
+    List.foldl
+        (\ref count ->
+            if ref.name == funcName then
+                count + 1
+            else
+                count
+        )
+        0
+        fileData.references

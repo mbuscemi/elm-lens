@@ -12733,6 +12733,17 @@ var _user$project$Types_FileMarkup$ExpressionData = F4(
 	});
 
 
+var _user$project$Model_FileMarkup$numOccurencesInOwnReferences = F2(
+	function (funcName, fileData) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			F2(
+				function (ref, count) {
+					return _elm_lang$core$Native_Utils.eq(ref.name, funcName) ? (count + 1) : count;
+				}),
+			0,
+			fileData.references);
+	});
 var _user$project$Model_FileMarkup$isExposed = F2(
 	function (funcName, fileData) {
 		return A2(_elm_lang$core$Set$member, funcName, fileData.exposings.functions);
@@ -12749,7 +12760,7 @@ var _user$project$Model_FileMarkup$makeExpressions = function (fileData) {
 						funcName,
 						funcData.lineNumber,
 						A2(_user$project$Model_FileMarkup$isExposed, funcName, fileData),
-						0),
+						A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData)),
 					_1: list
 				};
 			}),
@@ -12971,7 +12982,11 @@ var _user$project$Model_References$findInExpression = F2(
 		var _p2 = expression;
 		switch (_p2.ctor) {
 			case 'Variable':
-				return A2(_elm_lang$core$Basics_ops['++'], _p2._0, references);
+				if (((_p2._0.ctor === '::') && (_p2._0._0 === '_')) && (_p2._0._1.ctor === '[]')) {
+					return references;
+				} else {
+					return A2(_elm_lang$core$Basics_ops['++'], _p2._0, references);
+				}
 			case 'List':
 				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$findInExpression, references, _p2._0);
 			case 'Tuple':
@@ -13033,11 +13048,11 @@ var _user$project$Model_References$findInExpression = F2(
 		}
 	});
 var _user$project$Model_References$concatExpressions2 = F3(
-	function (exp1, exp2, functions) {
+	function (exp1, exp2, references) {
 		return A3(
 			_elm_lang$core$List$foldl,
 			_user$project$Model_References$findInExpression,
-			functions,
+			references,
 			{
 				ctor: '::',
 				_0: exp1,
@@ -13049,11 +13064,11 @@ var _user$project$Model_References$concatExpressions2 = F3(
 			});
 	});
 var _user$project$Model_References$concatExpressions3 = F4(
-	function (exp1, exp2, exp3, functions) {
+	function (exp1, exp2, exp3, references) {
 		return A3(
 			_elm_lang$core$List$foldl,
 			_user$project$Model_References$findInExpression,
-			functions,
+			references,
 			{
 				ctor: '::',
 				_0: exp1,
@@ -13072,22 +13087,24 @@ var _user$project$Model_References$collectReferences = F2(
 	function (statement, references) {
 		var _p7 = statement;
 		if (_p7.ctor === 'FunctionDeclaration') {
-			return A2(
-				_elm_lang$core$List$map,
-				_user$project$Types_Reference$Reference,
-				A2(
-					_user$project$Model_References$findInExpression,
-					_p7._2,
-					{ctor: '[]'}));
+			return A2(_user$project$Model_References$findInExpression, _p7._2, references);
 		} else {
 			return references;
 		}
 	});
+var _user$project$Model_References$stringsToRefs = function (refStrings) {
+	return A2(_elm_lang$core$List$map, _user$project$Types_Reference$Reference, refStrings);
+};
 var _user$project$Model_References$collect = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			references: A3(_elm_lang$core$List$foldl, _user$project$Model_References$collectReferences, model.references, model.fileAST)
+			references: _user$project$Model_References$stringsToRefs(
+				A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_References$collectReferences,
+					{ctor: '[]'},
+					model.fileAST))
 		});
 };
 

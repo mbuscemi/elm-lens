@@ -14,15 +14,23 @@ type alias Model model =
 
 collect : Model model -> Model model
 collect model =
-    { model | references = List.foldl collectReferences model.references model.fileAST }
+    { model
+        | references =
+            List.foldl collectReferences [] model.fileAST
+                |> stringsToRefs
+    }
 
 
-collectReferences : Statement -> List Reference -> List Reference
+stringsToRefs : List String -> List Reference
+stringsToRefs refStrings =
+    List.map Reference refStrings
+
+
+collectReferences : Statement -> List String -> List String
 collectReferences statement references =
     case statement of
         FunctionDeclaration _ _ expression ->
-            findInExpression expression []
-                |> List.map Reference
+            findInExpression expression references
 
         _ ->
             references
@@ -31,6 +39,9 @@ collectReferences statement references =
 findInExpression : Expression -> List String -> List String
 findInExpression expression references =
     case expression of
+        Ast.Expression.Variable [ "_" ] ->
+            references
+
         Ast.Expression.Variable names ->
             names ++ references
 
@@ -74,10 +85,10 @@ flattenExpressionTuples expressionTuples =
 
 
 concatExpressions2 : Expression -> Expression -> List String -> List String
-concatExpressions2 exp1 exp2 functions =
-    List.foldl findInExpression functions [ exp1, exp2 ]
+concatExpressions2 exp1 exp2 references =
+    List.foldl findInExpression references [ exp1, exp2 ]
 
 
 concatExpressions3 : Expression -> Expression -> Expression -> List String -> List String
-concatExpressions3 exp1 exp2 exp3 functions =
-    List.foldl findInExpression functions [ exp1, exp2, exp3 ]
+concatExpressions3 exp1 exp2 exp3 references =
+    List.foldl findInExpression references [ exp1, exp2, exp3 ]
