@@ -12733,6 +12733,10 @@ var _user$project$Types_FileMarkup$ExpressionData = F4(
 	});
 
 
+var _user$project$Model_FileMarkup$isExposed = F2(
+	function (funcName, fileData) {
+		return A2(_elm_lang$core$Set$member, funcName, fileData.exposings.functions);
+	});
 var _user$project$Model_FileMarkup$makeExpressions = function (fileData) {
 	return A3(
 		_elm_lang$core$Dict$foldl,
@@ -12740,7 +12744,12 @@ var _user$project$Model_FileMarkup$makeExpressions = function (fileData) {
 			function (funcName, funcData, list) {
 				return {
 					ctor: '::',
-					_0: A4(_user$project$Types_FileMarkup$ExpressionData, funcName, funcData.lineNumber, false, 0),
+					_0: A4(
+						_user$project$Types_FileMarkup$ExpressionData,
+						funcName,
+						funcData.lineNumber,
+						A2(_user$project$Model_FileMarkup$isExposed, funcName, fileData),
+						0),
 					_1: list
 				};
 			}),
@@ -12887,28 +12896,45 @@ var _user$project$Model_Exposings$collectFromExports = F2(
 				return exposings;
 		}
 	});
+var _user$project$Model_Exposings$collectAll = F2(
+	function (exports, exposings) {
+		return A3(_elm_lang$core$List$foldl, _user$project$Model_Exposings$collectFromExports, exposings, exports);
+	});
+var _user$project$Model_Exposings$useAllTopLevelExpressions = function (model) {
+	return {
+		functions: _elm_lang$core$Set$fromList(
+			_elm_lang$core$Dict$keys(model.topLevelExpressions.functions)),
+		types: _elm_lang$core$Set$fromList(
+			_elm_lang$core$Dict$keys(
+				A2(_elm_lang$core$Dict$union, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases)))
+	};
+};
 var _user$project$Model_Exposings$collectExposings = F3(
 	function (model, statement, exposings) {
 		var _p1 = statement;
-		_v1_2:
+		_v1_4:
 		do {
-			if (_p1.ctor === 'ModuleDeclaration') {
-				switch (_p1._1.ctor) {
-					case 'AllExport':
-						return {
-							functions: _elm_lang$core$Set$fromList(
-								_elm_lang$core$Dict$keys(model.topLevelExpressions.functions)),
-							types: _elm_lang$core$Set$fromList(
-								_elm_lang$core$Dict$keys(
-									A2(_elm_lang$core$Dict$union, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases)))
-						};
-					case 'SubsetExport':
-						return A3(_elm_lang$core$List$foldl, _user$project$Model_Exposings$collectFromExports, exposings, _p1._1._0);
-					default:
-						break _v1_2;
-				}
-			} else {
-				break _v1_2;
+			switch (_p1.ctor) {
+				case 'ModuleDeclaration':
+					switch (_p1._1.ctor) {
+						case 'AllExport':
+							return _user$project$Model_Exposings$useAllTopLevelExpressions(model);
+						case 'SubsetExport':
+							return A2(_user$project$Model_Exposings$collectAll, _p1._1._0, exposings);
+						default:
+							break _v1_4;
+					}
+				case 'PortModuleDeclaration':
+					switch (_p1._1.ctor) {
+						case 'AllExport':
+							return _user$project$Model_Exposings$useAllTopLevelExpressions(model);
+						case 'SubsetExport':
+							return A2(_user$project$Model_Exposings$collectAll, _p1._1._0, exposings);
+						default:
+							break _v1_4;
+					}
+				default:
+					break _v1_4;
 			}
 		} while(false);
 		return exposings;

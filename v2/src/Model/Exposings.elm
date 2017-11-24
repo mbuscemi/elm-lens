@@ -1,6 +1,6 @@
 module Model.Exposings exposing (collect)
 
-import Ast.Statement exposing (ExportSet(AllExport, FunctionExport, SubsetExport, TypeExport), Statement(ModuleDeclaration))
+import Ast.Statement exposing (ExportSet(AllExport, FunctionExport, SubsetExport, TypeExport), Statement(ModuleDeclaration, PortModuleDeclaration))
 import Dict
 import Set
 import Types.Exposings exposing (Exposings)
@@ -24,21 +24,37 @@ collectExposings : Model model -> Statement -> Exposings -> Exposings
 collectExposings model statement exposings =
     case statement of
         ModuleDeclaration _ AllExport ->
-            { functions =
-                model.topLevelExpressions.functions
-                    |> Dict.keys
-                    |> Set.fromList
-            , types =
-                Dict.union model.topLevelExpressions.types model.topLevelExpressions.typeAliases
-                    |> Dict.keys
-                    |> Set.fromList
-            }
+            useAllTopLevelExpressions model
+
+        PortModuleDeclaration _ AllExport ->
+            useAllTopLevelExpressions model
 
         ModuleDeclaration _ (SubsetExport exports) ->
-            List.foldl collectFromExports exposings exports
+            collectAll exports exposings
+
+        PortModuleDeclaration _ (SubsetExport exports) ->
+            collectAll exports exposings
 
         _ ->
             exposings
+
+
+useAllTopLevelExpressions : Model model -> Exposings
+useAllTopLevelExpressions model =
+    { functions =
+        model.topLevelExpressions.functions
+            |> Dict.keys
+            |> Set.fromList
+    , types =
+        Dict.union model.topLevelExpressions.types model.topLevelExpressions.typeAliases
+            |> Dict.keys
+            |> Set.fromList
+    }
+
+
+collectAll : List ExportSet -> Exposings -> Exposings
+collectAll exports exposings =
+    List.foldl collectFromExports exposings exports
 
 
 collectFromExports : ExportSet -> Exposings -> Exposings

@@ -1,6 +1,7 @@
 module Model.FileMarkup exposing (make)
 
 import Dict
+import Set
 import Types.FileData exposing (FileData)
 import Types.FileMarkup exposing (ExpressionData, FileMarkup)
 import Types.ProjectFileData exposing (ProjectFileData)
@@ -22,7 +23,17 @@ makeExpressions : FileData -> List ExpressionData
 makeExpressions fileData =
     Dict.foldl
         (\funcName funcData list ->
-            ExpressionData funcName funcData.lineNumber False 0 :: list
+            ExpressionData
+                funcName
+                funcData.lineNumber
+                (isExposed funcName fileData)
+                0
+                :: list
         )
         []
         fileData.topLevelExpressions.functions
+
+
+isExposed : String -> FileData -> Bool
+isExposed funcName fileData =
+    Set.member funcName fileData.exposings.functions
