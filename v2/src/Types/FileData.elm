@@ -1,6 +1,7 @@
 module Types.FileData exposing (FileData, empty)
 
 import Dict
+import Set
 import Types.Exposings exposing (Exposings)
 import Types.Reference exposing (Reference)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
@@ -21,8 +22,8 @@ empty =
         , typeAliases = Dict.empty
         }
     , exposings =
-        { functions = []
-        , types = []
+        { functions = Set.empty
+        , types = Set.empty
         }
     , references = []
     }

@@ -8843,6 +8843,484 @@ var _Bogdanp$elm_ast$Ast$parseExpression = function (ops) {
 			_elm_community$parser_combinators$Combine$end));
 };
 
+//import Result //
+
+var _elm_lang$core$Native_Date = function() {
+
+function fromString(str)
+{
+	var date = new Date(str);
+	return isNaN(date.getTime())
+		? _elm_lang$core$Result$Err('Unable to parse \'' + str + '\' as a date. Dates must be in the ISO 8601 format.')
+		: _elm_lang$core$Result$Ok(date);
+}
+
+var dayTable = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var monthTable =
+	['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+	 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+return {
+	fromString: fromString,
+	year: function(d) { return d.getFullYear(); },
+	month: function(d) { return { ctor: monthTable[d.getMonth()] }; },
+	day: function(d) { return d.getDate(); },
+	hour: function(d) { return d.getHours(); },
+	minute: function(d) { return d.getMinutes(); },
+	second: function(d) { return d.getSeconds(); },
+	millisecond: function(d) { return d.getMilliseconds(); },
+	toTime: function(d) { return d.getTime(); },
+	fromTime: function(t) { return new Date(t); },
+	dayOfWeek: function(d) { return { ctor: dayTable[d.getDay()] }; }
+};
+
+}();
+var _elm_lang$core$Task$onError = _elm_lang$core$Native_Scheduler.onError;
+var _elm_lang$core$Task$andThen = _elm_lang$core$Native_Scheduler.andThen;
+var _elm_lang$core$Task$spawnCmd = F2(
+	function (router, _p0) {
+		var _p1 = _p0;
+		return _elm_lang$core$Native_Scheduler.spawn(
+			A2(
+				_elm_lang$core$Task$andThen,
+				_elm_lang$core$Platform$sendToApp(router),
+				_p1._0));
+	});
+var _elm_lang$core$Task$fail = _elm_lang$core$Native_Scheduler.fail;
+var _elm_lang$core$Task$mapError = F2(
+	function (convert, task) {
+		return A2(
+			_elm_lang$core$Task$onError,
+			function (_p2) {
+				return _elm_lang$core$Task$fail(
+					convert(_p2));
+			},
+			task);
+	});
+var _elm_lang$core$Task$succeed = _elm_lang$core$Native_Scheduler.succeed;
+var _elm_lang$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return _elm_lang$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return _elm_lang$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map3 = F4(
+	function (func, taskA, taskB, taskC) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (c) {
+								return _elm_lang$core$Task$succeed(
+									A3(func, a, b, c));
+							},
+							taskC);
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map4 = F5(
+	function (func, taskA, taskB, taskC, taskD) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (c) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									function (d) {
+										return _elm_lang$core$Task$succeed(
+											A4(func, a, b, c, d));
+									},
+									taskD);
+							},
+							taskC);
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$map5 = F6(
+	function (func, taskA, taskB, taskC, taskD, taskE) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (a) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (b) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (c) {
+								return A2(
+									_elm_lang$core$Task$andThen,
+									function (d) {
+										return A2(
+											_elm_lang$core$Task$andThen,
+											function (e) {
+												return _elm_lang$core$Task$succeed(
+													A5(func, a, b, c, d, e));
+											},
+											taskE);
+									},
+									taskD);
+							},
+							taskC);
+					},
+					taskB);
+			},
+			taskA);
+	});
+var _elm_lang$core$Task$sequence = function (tasks) {
+	var _p3 = tasks;
+	if (_p3.ctor === '[]') {
+		return _elm_lang$core$Task$succeed(
+			{ctor: '[]'});
+	} else {
+		return A3(
+			_elm_lang$core$Task$map2,
+			F2(
+				function (x, y) {
+					return {ctor: '::', _0: x, _1: y};
+				}),
+			_p3._0,
+			_elm_lang$core$Task$sequence(_p3._1));
+	}
+};
+var _elm_lang$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			_elm_lang$core$Task$map,
+			function (_p4) {
+				return {ctor: '_Tuple0'};
+			},
+			_elm_lang$core$Task$sequence(
+				A2(
+					_elm_lang$core$List$map,
+					_elm_lang$core$Task$spawnCmd(router),
+					commands)));
+	});
+var _elm_lang$core$Task$init = _elm_lang$core$Task$succeed(
+	{ctor: '_Tuple0'});
+var _elm_lang$core$Task$onSelfMsg = F3(
+	function (_p7, _p6, _p5) {
+		return _elm_lang$core$Task$succeed(
+			{ctor: '_Tuple0'});
+	});
+var _elm_lang$core$Task$command = _elm_lang$core$Native_Platform.leaf('Task');
+var _elm_lang$core$Task$Perform = function (a) {
+	return {ctor: 'Perform', _0: a};
+};
+var _elm_lang$core$Task$perform = F2(
+	function (toMessage, task) {
+		return _elm_lang$core$Task$command(
+			_elm_lang$core$Task$Perform(
+				A2(_elm_lang$core$Task$map, toMessage, task)));
+	});
+var _elm_lang$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return _elm_lang$core$Task$command(
+			_elm_lang$core$Task$Perform(
+				A2(
+					_elm_lang$core$Task$onError,
+					function (_p8) {
+						return _elm_lang$core$Task$succeed(
+							resultToMessage(
+								_elm_lang$core$Result$Err(_p8)));
+					},
+					A2(
+						_elm_lang$core$Task$andThen,
+						function (_p9) {
+							return _elm_lang$core$Task$succeed(
+								resultToMessage(
+									_elm_lang$core$Result$Ok(_p9)));
+						},
+						task))));
+	});
+var _elm_lang$core$Task$cmdMap = F2(
+	function (tagger, _p10) {
+		var _p11 = _p10;
+		return _elm_lang$core$Task$Perform(
+			A2(_elm_lang$core$Task$map, tagger, _p11._0));
+	});
+_elm_lang$core$Native_Platform.effectManagers['Task'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Task$init, onEffects: _elm_lang$core$Task$onEffects, onSelfMsg: _elm_lang$core$Task$onSelfMsg, tag: 'cmd', cmdMap: _elm_lang$core$Task$cmdMap};
+
+//import Native.Scheduler //
+
+var _elm_lang$core$Native_Time = function() {
+
+var now = _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+{
+	callback(_elm_lang$core$Native_Scheduler.succeed(Date.now()));
+});
+
+function setInterval_(interval, task)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		var id = setInterval(function() {
+			_elm_lang$core$Native_Scheduler.rawSpawn(task);
+		}, interval);
+
+		return function() { clearInterval(id); };
+	});
+}
+
+return {
+	now: now,
+	setInterval_: F2(setInterval_)
+};
+
+}();
+var _elm_lang$core$Time$setInterval = _elm_lang$core$Native_Time.setInterval_;
+var _elm_lang$core$Time$spawnHelp = F3(
+	function (router, intervals, processes) {
+		var _p0 = intervals;
+		if (_p0.ctor === '[]') {
+			return _elm_lang$core$Task$succeed(processes);
+		} else {
+			var _p1 = _p0._0;
+			var spawnRest = function (id) {
+				return A3(
+					_elm_lang$core$Time$spawnHelp,
+					router,
+					_p0._1,
+					A3(_elm_lang$core$Dict$insert, _p1, id, processes));
+			};
+			var spawnTimer = _elm_lang$core$Native_Scheduler.spawn(
+				A2(
+					_elm_lang$core$Time$setInterval,
+					_p1,
+					A2(_elm_lang$core$Platform$sendToSelf, router, _p1)));
+			return A2(_elm_lang$core$Task$andThen, spawnRest, spawnTimer);
+		}
+	});
+var _elm_lang$core$Time$addMySub = F2(
+	function (_p2, state) {
+		var _p3 = _p2;
+		var _p6 = _p3._1;
+		var _p5 = _p3._0;
+		var _p4 = A2(_elm_lang$core$Dict$get, _p5, state);
+		if (_p4.ctor === 'Nothing') {
+			return A3(
+				_elm_lang$core$Dict$insert,
+				_p5,
+				{
+					ctor: '::',
+					_0: _p6,
+					_1: {ctor: '[]'}
+				},
+				state);
+		} else {
+			return A3(
+				_elm_lang$core$Dict$insert,
+				_p5,
+				{ctor: '::', _0: _p6, _1: _p4._0},
+				state);
+		}
+	});
+var _elm_lang$core$Time$inMilliseconds = function (t) {
+	return t;
+};
+var _elm_lang$core$Time$millisecond = 1;
+var _elm_lang$core$Time$second = 1000 * _elm_lang$core$Time$millisecond;
+var _elm_lang$core$Time$minute = 60 * _elm_lang$core$Time$second;
+var _elm_lang$core$Time$hour = 60 * _elm_lang$core$Time$minute;
+var _elm_lang$core$Time$inHours = function (t) {
+	return t / _elm_lang$core$Time$hour;
+};
+var _elm_lang$core$Time$inMinutes = function (t) {
+	return t / _elm_lang$core$Time$minute;
+};
+var _elm_lang$core$Time$inSeconds = function (t) {
+	return t / _elm_lang$core$Time$second;
+};
+var _elm_lang$core$Time$now = _elm_lang$core$Native_Time.now;
+var _elm_lang$core$Time$onSelfMsg = F3(
+	function (router, interval, state) {
+		var _p7 = A2(_elm_lang$core$Dict$get, interval, state.taggers);
+		if (_p7.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var tellTaggers = function (time) {
+				return _elm_lang$core$Task$sequence(
+					A2(
+						_elm_lang$core$List$map,
+						function (tagger) {
+							return A2(
+								_elm_lang$core$Platform$sendToApp,
+								router,
+								tagger(time));
+						},
+						_p7._0));
+			};
+			return A2(
+				_elm_lang$core$Task$andThen,
+				function (_p8) {
+					return _elm_lang$core$Task$succeed(state);
+				},
+				A2(_elm_lang$core$Task$andThen, tellTaggers, _elm_lang$core$Time$now));
+		}
+	});
+var _elm_lang$core$Time$subscription = _elm_lang$core$Native_Platform.leaf('Time');
+var _elm_lang$core$Time$State = F2(
+	function (a, b) {
+		return {taggers: a, processes: b};
+	});
+var _elm_lang$core$Time$init = _elm_lang$core$Task$succeed(
+	A2(_elm_lang$core$Time$State, _elm_lang$core$Dict$empty, _elm_lang$core$Dict$empty));
+var _elm_lang$core$Time$onEffects = F3(
+	function (router, subs, _p9) {
+		var _p10 = _p9;
+		var rightStep = F3(
+			function (_p12, id, _p11) {
+				var _p13 = _p11;
+				return {
+					ctor: '_Tuple3',
+					_0: _p13._0,
+					_1: _p13._1,
+					_2: A2(
+						_elm_lang$core$Task$andThen,
+						function (_p14) {
+							return _p13._2;
+						},
+						_elm_lang$core$Native_Scheduler.kill(id))
+				};
+			});
+		var bothStep = F4(
+			function (interval, taggers, id, _p15) {
+				var _p16 = _p15;
+				return {
+					ctor: '_Tuple3',
+					_0: _p16._0,
+					_1: A3(_elm_lang$core$Dict$insert, interval, id, _p16._1),
+					_2: _p16._2
+				};
+			});
+		var leftStep = F3(
+			function (interval, taggers, _p17) {
+				var _p18 = _p17;
+				return {
+					ctor: '_Tuple3',
+					_0: {ctor: '::', _0: interval, _1: _p18._0},
+					_1: _p18._1,
+					_2: _p18._2
+				};
+			});
+		var newTaggers = A3(_elm_lang$core$List$foldl, _elm_lang$core$Time$addMySub, _elm_lang$core$Dict$empty, subs);
+		var _p19 = A6(
+			_elm_lang$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			newTaggers,
+			_p10.processes,
+			{
+				ctor: '_Tuple3',
+				_0: {ctor: '[]'},
+				_1: _elm_lang$core$Dict$empty,
+				_2: _elm_lang$core$Task$succeed(
+					{ctor: '_Tuple0'})
+			});
+		var spawnList = _p19._0;
+		var existingDict = _p19._1;
+		var killTask = _p19._2;
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (newProcesses) {
+				return _elm_lang$core$Task$succeed(
+					A2(_elm_lang$core$Time$State, newTaggers, newProcesses));
+			},
+			A2(
+				_elm_lang$core$Task$andThen,
+				function (_p20) {
+					return A3(_elm_lang$core$Time$spawnHelp, router, spawnList, existingDict);
+				},
+				killTask));
+	});
+var _elm_lang$core$Time$Every = F2(
+	function (a, b) {
+		return {ctor: 'Every', _0: a, _1: b};
+	});
+var _elm_lang$core$Time$every = F2(
+	function (interval, tagger) {
+		return _elm_lang$core$Time$subscription(
+			A2(_elm_lang$core$Time$Every, interval, tagger));
+	});
+var _elm_lang$core$Time$subMap = F2(
+	function (f, _p21) {
+		var _p22 = _p21;
+		return A2(
+			_elm_lang$core$Time$Every,
+			_p22._0,
+			function (_p23) {
+				return f(
+					_p22._1(_p23));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Time'] = {pkg: 'elm-lang/core', init: _elm_lang$core$Time$init, onEffects: _elm_lang$core$Time$onEffects, onSelfMsg: _elm_lang$core$Time$onSelfMsg, tag: 'sub', subMap: _elm_lang$core$Time$subMap};
+
+var _elm_lang$core$Date$millisecond = _elm_lang$core$Native_Date.millisecond;
+var _elm_lang$core$Date$second = _elm_lang$core$Native_Date.second;
+var _elm_lang$core$Date$minute = _elm_lang$core$Native_Date.minute;
+var _elm_lang$core$Date$hour = _elm_lang$core$Native_Date.hour;
+var _elm_lang$core$Date$dayOfWeek = _elm_lang$core$Native_Date.dayOfWeek;
+var _elm_lang$core$Date$day = _elm_lang$core$Native_Date.day;
+var _elm_lang$core$Date$month = _elm_lang$core$Native_Date.month;
+var _elm_lang$core$Date$year = _elm_lang$core$Native_Date.year;
+var _elm_lang$core$Date$fromTime = _elm_lang$core$Native_Date.fromTime;
+var _elm_lang$core$Date$toTime = _elm_lang$core$Native_Date.toTime;
+var _elm_lang$core$Date$fromString = _elm_lang$core$Native_Date.fromString;
+var _elm_lang$core$Date$now = A2(_elm_lang$core$Task$map, _elm_lang$core$Date$fromTime, _elm_lang$core$Time$now);
+var _elm_lang$core$Date$Date = {ctor: 'Date'};
+var _elm_lang$core$Date$Sun = {ctor: 'Sun'};
+var _elm_lang$core$Date$Sat = {ctor: 'Sat'};
+var _elm_lang$core$Date$Fri = {ctor: 'Fri'};
+var _elm_lang$core$Date$Thu = {ctor: 'Thu'};
+var _elm_lang$core$Date$Wed = {ctor: 'Wed'};
+var _elm_lang$core$Date$Tue = {ctor: 'Tue'};
+var _elm_lang$core$Date$Mon = {ctor: 'Mon'};
+var _elm_lang$core$Date$Dec = {ctor: 'Dec'};
+var _elm_lang$core$Date$Nov = {ctor: 'Nov'};
+var _elm_lang$core$Date$Oct = {ctor: 'Oct'};
+var _elm_lang$core$Date$Sep = {ctor: 'Sep'};
+var _elm_lang$core$Date$Aug = {ctor: 'Aug'};
+var _elm_lang$core$Date$Jul = {ctor: 'Jul'};
+var _elm_lang$core$Date$Jun = {ctor: 'Jun'};
+var _elm_lang$core$Date$May = {ctor: 'May'};
+var _elm_lang$core$Date$Apr = {ctor: 'Apr'};
+var _elm_lang$core$Date$Mar = {ctor: 'Mar'};
+var _elm_lang$core$Date$Feb = {ctor: 'Feb'};
+var _elm_lang$core$Date$Jan = {ctor: 'Jan'};
+
 //import Native.List //
 
 var _elm_lang$core$Native_Array = function() {
@@ -10515,6 +10993,186 @@ var _elm_lang$core$Json_Decode$bool = _elm_lang$core$Native_Json.decodePrimitive
 var _elm_lang$core$Json_Decode$string = _elm_lang$core$Native_Json.decodePrimitive('string');
 var _elm_lang$core$Json_Decode$Decoder = {ctor: 'Decoder'};
 
+var _elm_community$json_extra$Json_Decode_Extra$combine = A2(
+	_elm_lang$core$List$foldr,
+	_elm_lang$core$Json_Decode$map2(
+		F2(
+			function (x, y) {
+				return {ctor: '::', _0: x, _1: y};
+			})),
+	_elm_lang$core$Json_Decode$succeed(
+		{ctor: '[]'}));
+var _elm_community$json_extra$Json_Decode_Extra$collection = function (decoder) {
+	return A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (length) {
+			return _elm_community$json_extra$Json_Decode_Extra$combine(
+				A2(
+					_elm_lang$core$List$map,
+					function (index) {
+						return A2(
+							_elm_lang$core$Json_Decode$field,
+							_elm_lang$core$Basics$toString(index),
+							decoder);
+					},
+					A2(_elm_lang$core$List$range, 0, length - 1)));
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'length', _elm_lang$core$Json_Decode$int));
+};
+var _elm_community$json_extra$Json_Decode_Extra$fromResult = function (result) {
+	var _p0 = result;
+	if (_p0.ctor === 'Ok') {
+		return _elm_lang$core$Json_Decode$succeed(_p0._0);
+	} else {
+		return _elm_lang$core$Json_Decode$fail(_p0._0);
+	}
+};
+var _elm_community$json_extra$Json_Decode_Extra$parseInt = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	function (_p1) {
+		return _elm_community$json_extra$Json_Decode_Extra$fromResult(
+			_elm_lang$core$String$toInt(_p1));
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_community$json_extra$Json_Decode_Extra$parseFloat = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	function (_p2) {
+		return _elm_community$json_extra$Json_Decode_Extra$fromResult(
+			_elm_lang$core$String$toFloat(_p2));
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_community$json_extra$Json_Decode_Extra$doubleEncoded = function (decoder) {
+	return A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (_p3) {
+			return _elm_community$json_extra$Json_Decode_Extra$fromResult(
+				A2(_elm_lang$core$Json_Decode$decodeString, decoder, _p3));
+		},
+		_elm_lang$core$Json_Decode$string);
+};
+var _elm_community$json_extra$Json_Decode_Extra$keys = A2(
+	_elm_lang$core$Json_Decode$map,
+	A2(
+		_elm_lang$core$List$foldl,
+		F2(
+			function (_p4, acc) {
+				var _p5 = _p4;
+				return {ctor: '::', _0: _p5._0, _1: acc};
+			}),
+		{ctor: '[]'}),
+	_elm_lang$core$Json_Decode$keyValuePairs(
+		_elm_lang$core$Json_Decode$succeed(
+			{ctor: '_Tuple0'})));
+var _elm_community$json_extra$Json_Decode_Extra$sequenceHelp = F2(
+	function (decoders, jsonValues) {
+		return (!_elm_lang$core$Native_Utils.eq(
+			_elm_lang$core$List$length(jsonValues),
+			_elm_lang$core$List$length(decoders))) ? _elm_lang$core$Json_Decode$fail('Number of decoders does not match number of values') : _elm_community$json_extra$Json_Decode_Extra$fromResult(
+			A3(
+				_elm_lang$core$List$foldr,
+				_elm_lang$core$Result$map2(
+					F2(
+						function (x, y) {
+							return {ctor: '::', _0: x, _1: y};
+						})),
+				_elm_lang$core$Result$Ok(
+					{ctor: '[]'}),
+				A3(_elm_lang$core$List$map2, _elm_lang$core$Json_Decode$decodeValue, decoders, jsonValues)));
+	});
+var _elm_community$json_extra$Json_Decode_Extra$sequence = function (decoders) {
+	return A2(
+		_elm_lang$core$Json_Decode$andThen,
+		_elm_community$json_extra$Json_Decode_Extra$sequenceHelp(decoders),
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$value));
+};
+var _elm_community$json_extra$Json_Decode_Extra$indexedList = function (indexedDecoder) {
+	return A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (values) {
+			return _elm_community$json_extra$Json_Decode_Extra$sequence(
+				A2(
+					_elm_lang$core$List$map,
+					indexedDecoder,
+					A2(
+						_elm_lang$core$List$range,
+						0,
+						_elm_lang$core$List$length(values) - 1)));
+		},
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$value));
+};
+var _elm_community$json_extra$Json_Decode_Extra$optionalField = F2(
+	function (fieldName, decoder) {
+		var finishDecoding = function (json) {
+			var _p6 = A2(
+				_elm_lang$core$Json_Decode$decodeValue,
+				A2(_elm_lang$core$Json_Decode$field, fieldName, _elm_lang$core$Json_Decode$value),
+				json);
+			if (_p6.ctor === 'Ok') {
+				return A2(
+					_elm_lang$core$Json_Decode$map,
+					_elm_lang$core$Maybe$Just,
+					A2(_elm_lang$core$Json_Decode$field, fieldName, decoder));
+			} else {
+				return _elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing);
+			}
+		};
+		return A2(_elm_lang$core$Json_Decode$andThen, finishDecoding, _elm_lang$core$Json_Decode$value);
+	});
+var _elm_community$json_extra$Json_Decode_Extra$withDefault = F2(
+	function (fallback, decoder) {
+		return A2(
+			_elm_lang$core$Json_Decode$map,
+			_elm_lang$core$Maybe$withDefault(fallback),
+			_elm_lang$core$Json_Decode$maybe(decoder));
+	});
+var _elm_community$json_extra$Json_Decode_Extra$decodeDictFromTuples = F2(
+	function (keyDecoder, tuples) {
+		var _p7 = tuples;
+		if (_p7.ctor === '[]') {
+			return _elm_lang$core$Json_Decode$succeed(_elm_lang$core$Dict$empty);
+		} else {
+			var _p8 = A2(_elm_lang$core$Json_Decode$decodeString, keyDecoder, _p7._0._0);
+			if (_p8.ctor === 'Ok') {
+				return A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (_p9) {
+						return _elm_lang$core$Json_Decode$succeed(
+							A3(_elm_lang$core$Dict$insert, _p8._0, _p7._0._1, _p9));
+					},
+					A2(_elm_community$json_extra$Json_Decode_Extra$decodeDictFromTuples, keyDecoder, _p7._1));
+			} else {
+				return _elm_lang$core$Json_Decode$fail(_p8._0);
+			}
+		}
+	});
+var _elm_community$json_extra$Json_Decode_Extra$dict2 = F2(
+	function (keyDecoder, valueDecoder) {
+		return A2(
+			_elm_lang$core$Json_Decode$andThen,
+			_elm_community$json_extra$Json_Decode_Extra$decodeDictFromTuples(keyDecoder),
+			_elm_lang$core$Json_Decode$keyValuePairs(valueDecoder));
+	});
+var _elm_community$json_extra$Json_Decode_Extra$set = function (decoder) {
+	return A2(
+		_elm_lang$core$Json_Decode$map,
+		_elm_lang$core$Set$fromList,
+		_elm_lang$core$Json_Decode$list(decoder));
+};
+var _elm_community$json_extra$Json_Decode_Extra$date = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	function (_p10) {
+		return _elm_community$json_extra$Json_Decode_Extra$fromResult(
+			_elm_lang$core$Date$fromString(_p10));
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_community$json_extra$Json_Decode_Extra$andMap = _elm_lang$core$Json_Decode$map2(
+	F2(
+		function (x, y) {
+			return y(x);
+		}));
+var _elm_community$json_extra$Json_Decode_Extra_ops = _elm_community$json_extra$Json_Decode_Extra_ops || {};
+_elm_community$json_extra$Json_Decode_Extra_ops['|:'] = _elm_lang$core$Basics$flip(_elm_community$json_extra$Json_Decode_Extra$andMap);
+
 var _elm_tools$parser_primitives$Native_ParserPrimitives = function() {
 
 
@@ -11880,7 +12538,10 @@ var _user$project$Types_Exposings$encoder = function (exposings) {
 				ctor: '_Tuple2',
 				_0: 'functions',
 				_1: _elm_lang$core$Json_Encode$list(
-					A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, exposings.functions))
+					A2(
+						_elm_lang$core$List$map,
+						_elm_lang$core$Json_Encode$string,
+						_elm_lang$core$Set$toList(exposings.functions)))
 			},
 			_1: {
 				ctor: '::',
@@ -11888,16 +12549,16 @@ var _user$project$Types_Exposings$encoder = function (exposings) {
 					ctor: '_Tuple2',
 					_0: 'types',
 					_1: _elm_lang$core$Json_Encode$list(
-						A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, exposings.types))
+						A2(
+							_elm_lang$core$List$map,
+							_elm_lang$core$Json_Encode$string,
+							_elm_lang$core$Set$toList(exposings.types)))
 				},
 				_1: {ctor: '[]'}
 			}
 		});
 };
-var _user$project$Types_Exposings$default = {
-	functions: {ctor: '[]'},
-	types: {ctor: '[]'}
-};
+var _user$project$Types_Exposings$default = {functions: _elm_lang$core$Set$empty, types: _elm_lang$core$Set$empty};
 var _user$project$Types_Exposings$Exposings = F2(
 	function (a, b) {
 		return {functions: a, types: b};
@@ -11908,11 +12569,11 @@ var _user$project$Types_Exposings$decoder = A3(
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'functions',
-		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
+		_elm_community$json_extra$Json_Decode_Extra$set(_elm_lang$core$Json_Decode$string)),
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'types',
-		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
+		_elm_community$json_extra$Json_Decode_Extra$set(_elm_lang$core$Json_Decode$string)));
 
 var _user$project$Types_Reference$encoder = function (reference) {
 	return _elm_lang$core$Json_Encode$object(
@@ -12050,10 +12711,7 @@ var _user$project$Types_TopLevelExpressions$decoder = A4(
 
 var _user$project$Types_FileData$empty = {
 	topLevelExpressions: {functions: _elm_lang$core$Dict$empty, types: _elm_lang$core$Dict$empty, typeAliases: _elm_lang$core$Dict$empty},
-	exposings: {
-		functions: {ctor: '[]'},
-		types: {ctor: '[]'}
-	},
+	exposings: {functions: _elm_lang$core$Set$empty, types: _elm_lang$core$Set$empty},
 	references: {ctor: '[]'}
 };
 var _user$project$Types_FileData$FileData = F3(
@@ -12217,13 +12875,13 @@ var _user$project$Model_Exposings$collectFromExports = F2(
 				return _elm_lang$core$Native_Utils.update(
 					exposings,
 					{
-						functions: {ctor: '::', _0: _p0._0, _1: exposings.functions}
+						functions: A2(_elm_lang$core$Set$insert, _p0._0, exposings.functions)
 					});
 			case 'TypeExport':
 				return _elm_lang$core$Native_Utils.update(
 					exposings,
 					{
-						types: {ctor: '::', _0: _p0._0, _1: exposings.types}
+						types: A2(_elm_lang$core$Set$insert, _p0._0, exposings.types)
 					});
 			default:
 				return exposings;
@@ -12238,9 +12896,11 @@ var _user$project$Model_Exposings$collectExposings = F3(
 				switch (_p1._1.ctor) {
 					case 'AllExport':
 						return {
-							functions: _elm_lang$core$Dict$keys(model.topLevelExpressions.functions),
-							types: _elm_lang$core$Dict$keys(
-								A2(_elm_lang$core$Dict$union, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases))
+							functions: _elm_lang$core$Set$fromList(
+								_elm_lang$core$Dict$keys(model.topLevelExpressions.functions)),
+							types: _elm_lang$core$Set$fromList(
+								_elm_lang$core$Dict$keys(
+									A2(_elm_lang$core$Dict$union, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases)))
 						};
 					case 'SubsetExport':
 						return A3(_elm_lang$core$List$foldl, _user$project$Model_Exposings$collectFromExports, exposings, _p1._1._0);
