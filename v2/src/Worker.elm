@@ -2,7 +2,7 @@ port module Worker exposing (main)
 
 import And
 import Ast.Statement exposing (Statement)
-import Json.Decode
+import Json.Decode exposing (Value)
 import Model.AST
 import Model.Exposings
 import Model.References
@@ -10,7 +10,6 @@ import Model.Report
 import Model.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
 import Types.Reference exposing (Reference)
-import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
@@ -54,6 +53,7 @@ update message model =
                 |> Model.TopLevelExpressions.collect
                 |> Model.Exposings.collect
                 |> Model.References.collect
+                |> Model.TopLevelExpressions.addLineNumbers text
                 |> andSendReport fileName
 
 
@@ -68,7 +68,7 @@ andSendReport fileName model =
     And.execute (report <| Model.Report.make fileName model) model
 
 
-port report : Report -> Cmd message
+port report : Value -> Cmd message
 
 
 port process : (( String, String ) -> message) -> Sub message

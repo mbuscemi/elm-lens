@@ -1,14 +1,16 @@
-module Types.Expression exposing (Expression, from)
+module Types.Expression exposing (Expression, default, updateLineNumber)
 
 
 type alias Expression =
-    { name : String
-    , lineNumber : Int
+    { lineNumber : Int
     }
 
 
-from : String -> Expression
-from name =
-    { name = name
-    , lineNumber = 0
-    }
+default : Expression
+default =
+    { lineNumber = 0 }
+
+
+updateLineNumber : Int -> Expression -> Expression
+updateLineNumber lineNumber expression =
+    { expression | lineNumber = lineNumber }

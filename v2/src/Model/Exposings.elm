@@ -1,6 +1,7 @@
 module Model.Exposings exposing (collect)
 
 import Ast.Statement exposing (ExportSet(AllExport, FunctionExport, SubsetExport, TypeExport), Statement(ModuleDeclaration))
+import Dict
 import Types.Exposings exposing (Exposings)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
@@ -24,10 +25,10 @@ collectExposings model statement exposings =
         ModuleDeclaration _ AllExport ->
             { functions =
                 model.topLevelExpressions.functions
-                    |> List.map .name
+                    |> Dict.keys
             , types =
-                List.append model.topLevelExpressions.types model.topLevelExpressions.typeAliases
-                    |> List.map .name
+                Dict.union model.topLevelExpressions.types model.topLevelExpressions.typeAliases
+                    |> Dict.keys
             }
 
         ModuleDeclaration _ (SubsetExport exports) ->

@@ -2,9 +2,10 @@ port module Main exposing (main)
 
 import And
 import Dict exposing (Dict)
+import Json.Decode exposing (Decoder, decodeValue, field, string)
+import Json.Encode exposing (Value)
 import Types.Exposings exposing (Exposings)
 import Types.Reference exposing (Reference)
-import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
@@ -20,7 +21,7 @@ type alias Model =
 
 
 type Message
-    = AddFileData Report
+    = AddFileData Value
 
 
 main : Program Never Model Message
@@ -40,14 +41,20 @@ init =
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        AddFileData report ->
+        AddFileData value ->
             model
-                |> Dict.insert report.fileName
-                    { topLevelExpressions = report.topLevelExpressions
-                    , exposings = report.exposings
-                    , references = report.references
+                |> Dict.insert (decode value "fileName" string "")
+                    { topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
+                    , exposings = decode value "exposings" Types.Exposings.decoder Types.Exposings.default
+                    , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
                     }
                 |> And.noCommand
+
+
+decode : Value -> String -> Decoder something -> something -> something
+decode value fieldName decoder default =
+    decodeValue (field fieldName decoder) value
+        |> Result.withDefault default
 
 
 subscriptions : Model -> Sub Message
@@ -56,4 +63,4 @@ subscriptions model =
         [ processReport AddFileData ]
 
 
-port processReport : (Report -> message) -> Sub message
+port processReport : (Value -> message) -> Sub message

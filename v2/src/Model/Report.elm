@@ -1,8 +1,8 @@
 module Model.Report exposing (make)
 
+import Json.Encode exposing (Value, list, object, string)
 import Types.Exposings exposing (Exposings)
 import Types.Reference exposing (Reference)
-import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
@@ -14,10 +14,11 @@ type alias Model model =
     }
 
 
-make : String -> Model model -> Report
+make : String -> Model model -> Value
 make fileName model =
-    { fileName = fileName
-    , topLevelExpressions = model.topLevelExpressions
-    , exposings = model.exposings
-    , references = model.references
-    }
+    object
+        [ ( "fileName", string fileName )
+        , ( "topLevelExpressions", Types.TopLevelExpressions.encoder model.topLevelExpressions )
+        , ( "exposings", Types.Exposings.encoder model.exposings )
+        , ( "references", list <| List.map Types.Reference.encoder model.references )
+        ]
