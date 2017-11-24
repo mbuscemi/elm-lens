@@ -3,6 +3,7 @@ port module Main exposing (main)
 import And
 import Dict exposing (Dict)
 import Types.Exposings exposing (Exposings)
+import Types.Reference exposing (Reference)
 import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
@@ -10,6 +11,7 @@ import Types.TopLevelExpressions exposing (TopLevelExpressions)
 type alias FileData =
     { topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
+    , references : List Reference
     }
 
 
@@ -43,6 +45,7 @@ update message model =
                 |> Dict.insert report.fileName
                     { topLevelExpressions = report.topLevelExpressions
                     , exposings = report.exposings
+                    , references = report.references
                     }
                 |> And.noCommand
 

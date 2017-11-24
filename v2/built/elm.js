@@ -10523,19 +10523,32 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
+var _user$project$Types_Exposings$default = {
+	functions: {ctor: '[]'},
+	types: {ctor: '[]'}
+};
 var _user$project$Types_Exposings$Exposings = F2(
 	function (a, b) {
 		return {functions: a, types: b};
 	});
 
+var _user$project$Types_Reference$Reference = function (a) {
+	return {name: a};
+};
+
+var _user$project$Types_TopLevelExpressions$default = {
+	functions: {ctor: '[]'},
+	types: {ctor: '[]'},
+	typeAliases: {ctor: '[]'}
+};
 var _user$project$Types_TopLevelExpressions$TopLevelExpressions = F3(
 	function (a, b, c) {
 		return {functions: a, types: b, typeAliases: c};
 	});
 
-var _user$project$Types_Report$Report = F3(
-	function (a, b, c) {
-		return {fileName: a, topLevelExpressions: b, exposings: c};
+var _user$project$Types_Report$Report = F4(
+	function (a, b, c, d) {
+		return {fileName: a, topLevelExpressions: b, exposings: c, references: d};
 	});
 
 var _user$project$Main$update = F2(
@@ -10546,7 +10559,7 @@ var _user$project$Main$update = F2(
 			A3(
 				_elm_lang$core$Dict$insert,
 				_p1.fileName,
-				{topLevelExpressions: _p1.topLevelExpressions, exposings: _p1.exposings},
+				{topLevelExpressions: _p1.topLevelExpressions, exposings: _p1.exposings, references: _p1.references},
 				model));
 	});
 var _user$project$Main$init = _user$project$And$noCommand(_elm_lang$core$Dict$empty);
@@ -10561,8 +10574,23 @@ var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPo
 					return A2(
 						_elm_lang$core$Json_Decode$andThen,
 						function (exposings) {
-							return _elm_lang$core$Json_Decode$succeed(
-								{fileName: fileName, topLevelExpressions: topLevelExpressions, exposings: exposings});
+							return A2(
+								_elm_lang$core$Json_Decode$andThen,
+								function (references) {
+									return _elm_lang$core$Json_Decode$succeed(
+										{fileName: fileName, topLevelExpressions: topLevelExpressions, exposings: exposings, references: references});
+								},
+								A2(
+									_elm_lang$core$Json_Decode$field,
+									'references',
+									_elm_lang$core$Json_Decode$list(
+										A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (name) {
+												return _elm_lang$core$Json_Decode$succeed(
+													{name: name});
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string)))));
 						},
 						A2(
 							_elm_lang$core$Json_Decode$field,
@@ -10617,9 +10645,9 @@ var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPo
 							_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)))));
 		},
 		A2(_elm_lang$core$Json_Decode$field, 'fileName', _elm_lang$core$Json_Decode$string)));
-var _user$project$Main$FileData = F2(
-	function (a, b) {
-		return {topLevelExpressions: a, exposings: b};
+var _user$project$Main$FileData = F3(
+	function (a, b, c) {
+		return {topLevelExpressions: a, exposings: b, references: c};
 	});
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
@@ -10707,9 +10735,149 @@ var _user$project$Model_Exposings$collect = function (model) {
 		});
 };
 
+var _user$project$Model_References$flattenExpressionTuples = function (expressionTuples) {
+	return A3(
+		_elm_lang$core$List$foldl,
+		F2(
+			function (_p0, list) {
+				var _p1 = _p0;
+				return {
+					ctor: '::',
+					_0: _p1._0,
+					_1: {ctor: '::', _0: _p1._1, _1: list}
+				};
+			}),
+		{ctor: '[]'},
+		expressionTuples);
+};
+var _user$project$Model_References$findInExpression = F2(
+	function (expression, references) {
+		var _p2 = expression;
+		switch (_p2.ctor) {
+			case 'Variable':
+				return A2(_elm_lang$core$Basics_ops['++'], _p2._0, references);
+			case 'List':
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$findInExpression, references, _p2._0);
+			case 'Tuple':
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$findInExpression, references, _p2._0);
+			case 'Record':
+				return A3(
+					_elm_lang$core$List$foldl,
+					F2(
+						function (_p3, funcs) {
+							var _p4 = _p3;
+							return A2(_user$project$Model_References$findInExpression, _p4._1, funcs);
+						}),
+					references,
+					_p2._0);
+			case 'RecordUpdate':
+				return A3(
+					_elm_lang$core$List$foldl,
+					F2(
+						function (_p5, funcs) {
+							var _p6 = _p5;
+							return A2(_user$project$Model_References$findInExpression, _p6._1, funcs);
+						}),
+					references,
+					_p2._1);
+			case 'If':
+				return A4(_user$project$Model_References$concatExpressions3, _p2._0, _p2._1, _p2._2, references);
+			case 'Let':
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_References$findInExpression,
+					references,
+					{
+						ctor: '::',
+						_0: _p2._1,
+						_1: _user$project$Model_References$flattenExpressionTuples(_p2._0)
+					});
+			case 'Case':
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_References$findInExpression,
+					references,
+					{
+						ctor: '::',
+						_0: _p2._0,
+						_1: _user$project$Model_References$flattenExpressionTuples(_p2._1)
+					});
+			case 'Lambda':
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_References$findInExpression,
+					references,
+					{ctor: '::', _0: _p2._1, _1: _p2._0});
+			case 'Application':
+				return A3(_user$project$Model_References$concatExpressions2, _p2._0, _p2._1, references);
+			case 'BinOp':
+				return A4(_user$project$Model_References$concatExpressions3, _p2._0, _p2._1, _p2._2, references);
+			default:
+				return references;
+		}
+	});
+var _user$project$Model_References$concatExpressions2 = F3(
+	function (exp1, exp2, functions) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$Model_References$findInExpression,
+			functions,
+			{
+				ctor: '::',
+				_0: exp1,
+				_1: {
+					ctor: '::',
+					_0: exp2,
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$Model_References$concatExpressions3 = F4(
+	function (exp1, exp2, exp3, functions) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$Model_References$findInExpression,
+			functions,
+			{
+				ctor: '::',
+				_0: exp1,
+				_1: {
+					ctor: '::',
+					_0: exp2,
+					_1: {
+						ctor: '::',
+						_0: exp3,
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	});
+var _user$project$Model_References$collectReferences = F2(
+	function (statement, references) {
+		var _p7 = statement;
+		if (_p7.ctor === 'FunctionDeclaration') {
+			return A2(
+				_elm_lang$core$List$map,
+				_user$project$Types_Reference$Reference,
+				A2(
+					_user$project$Model_References$findInExpression,
+					_p7._2,
+					{ctor: '[]'}));
+		} else {
+			return references;
+		}
+	});
+var _user$project$Model_References$collect = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			references: A3(_elm_lang$core$List$foldl, _user$project$Model_References$collectReferences, model.references, model.fileAST)
+		});
+};
+
 var _user$project$Model_Report$make = F2(
 	function (fileName, model) {
-		return {fileName: fileName, topLevelExpressions: model.topLevelExpressions, exposings: model.exposings};
+		return {fileName: fileName, topLevelExpressions: model.topLevelExpressions, exposings: model.exposings, references: model.references};
 	});
 
 var _user$project$Model_TopLevelExpressions$firstElement = function (singleEntry) {
@@ -10775,15 +10943,9 @@ var _user$project$Model_TopLevelExpressions$collect = function (model) {
 var _user$project$Worker$init = _user$project$And$noCommand(
 	{
 		fileAST: {ctor: '[]'},
-		topLevelExpressions: {
-			functions: {ctor: '[]'},
-			types: {ctor: '[]'},
-			typeAliases: {ctor: '[]'}
-		},
-		exposings: {
-			functions: {ctor: '[]'},
-			types: {ctor: '[]'}
-		}
+		topLevelExpressions: _user$project$Types_TopLevelExpressions$default,
+		exposings: _user$project$Types_Exposings$default,
+		references: {ctor: '[]'}
 	});
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
@@ -10813,7 +10975,11 @@ var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 					function (v) {
 						return v;
 					})
-			}
+			},
+			references: _elm_lang$core$Native_List.toArray(v.references).map(
+				function (v) {
+					return {name: v.name};
+				})
 		};
 	});
 var _user$project$Worker$andSendReport = F2(
@@ -10830,9 +10996,10 @@ var _user$project$Worker$update = F2(
 		return A2(
 			_user$project$Worker$andSendReport,
 			_p0._0._0,
-			_user$project$Model_Exposings$collect(
-				_user$project$Model_TopLevelExpressions$collect(
-					A2(_user$project$Model_AST$buildFrom, _p0._0._1, model))));
+			_user$project$Model_References$collect(
+				_user$project$Model_Exposings$collect(
+					_user$project$Model_TopLevelExpressions$collect(
+						A2(_user$project$Model_AST$buildFrom, _p0._0._1, model)))));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',
@@ -10848,9 +11015,9 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Worker$Model = F3(
-	function (a, b, c) {
-		return {fileAST: a, topLevelExpressions: b, exposings: c};
+var _user$project$Worker$Model = F4(
+	function (a, b, c, d) {
+		return {fileAST: a, topLevelExpressions: b, exposings: c, references: d};
 	});
 var _user$project$Worker$ProcessFile = function (a) {
 	return {ctor: 'ProcessFile', _0: a};

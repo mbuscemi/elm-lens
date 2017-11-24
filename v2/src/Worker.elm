@@ -5,9 +5,11 @@ import Ast.Statement exposing (Statement)
 import Json.Decode
 import Model.AST
 import Model.Exposings
+import Model.References
 import Model.Report
 import Model.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
+import Types.Reference exposing (Reference)
 import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
@@ -16,6 +18,7 @@ type alias Model =
     { fileAST : List Statement
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
+    , references : List Reference
     }
 
 
@@ -37,6 +40,7 @@ init =
     { fileAST = []
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
+    , references = []
     }
         |> And.noCommand
 
@@ -49,6 +53,7 @@ update message model =
                 |> Model.AST.buildFrom text
                 |> Model.TopLevelExpressions.collect
                 |> Model.Exposings.collect
+                |> Model.References.collect
                 |> andSendReport fileName
 
 
