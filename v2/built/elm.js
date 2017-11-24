@@ -10523,14 +10523,19 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
+var _user$project$Types_Exposings$Exposings = F2(
+	function (a, b) {
+		return {functions: a, types: b};
+	});
+
 var _user$project$Types_TopLevelExpressions$TopLevelExpressions = F3(
 	function (a, b, c) {
 		return {functions: a, types: b, typeAliases: c};
 	});
 
-var _user$project$Types_Report$Report = F2(
-	function (a, b) {
-		return {fileName: a, topLevelExpressions: b};
+var _user$project$Types_Report$Report = F3(
+	function (a, b, c) {
+		return {fileName: a, topLevelExpressions: b, exposings: c};
 	});
 
 var _user$project$Main$update = F2(
@@ -10541,7 +10546,7 @@ var _user$project$Main$update = F2(
 			A3(
 				_elm_lang$core$Dict$insert,
 				_p1.fileName,
-				{topLevelExpressions: _p1.topLevelExpressions},
+				{topLevelExpressions: _p1.topLevelExpressions, exposings: _p1.exposings},
 				model));
 	});
 var _user$project$Main$init = _user$project$And$noCommand(_elm_lang$core$Dict$empty);
@@ -10553,8 +10558,33 @@ var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPo
 			return A2(
 				_elm_lang$core$Json_Decode$andThen,
 				function (topLevelExpressions) {
-					return _elm_lang$core$Json_Decode$succeed(
-						{fileName: fileName, topLevelExpressions: topLevelExpressions});
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (exposings) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{fileName: fileName, topLevelExpressions: topLevelExpressions, exposings: exposings});
+						},
+						A2(
+							_elm_lang$core$Json_Decode$field,
+							'exposings',
+							A2(
+								_elm_lang$core$Json_Decode$andThen,
+								function (functions) {
+									return A2(
+										_elm_lang$core$Json_Decode$andThen,
+										function (types) {
+											return _elm_lang$core$Json_Decode$succeed(
+												{functions: functions, types: types});
+										},
+										A2(
+											_elm_lang$core$Json_Decode$field,
+											'types',
+											_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
+								},
+								A2(
+									_elm_lang$core$Json_Decode$field,
+									'functions',
+									_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)))));
 				},
 				A2(
 					_elm_lang$core$Json_Decode$field,
@@ -10587,9 +10617,10 @@ var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPo
 							_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)))));
 		},
 		A2(_elm_lang$core$Json_Decode$field, 'fileName', _elm_lang$core$Json_Decode$string)));
-var _user$project$Main$FileData = function (a) {
-	return {topLevelExpressions: a};
-};
+var _user$project$Main$FileData = F2(
+	function (a, b) {
+		return {topLevelExpressions: a, exposings: b};
+	});
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
 };
@@ -10621,9 +10652,64 @@ var _user$project$Model_AST$buildFrom = F2(
 			});
 	});
 
+var _user$project$Model_Exposings$collectFromExports = F2(
+	function ($export, exposings) {
+		var _p0 = $export;
+		switch (_p0.ctor) {
+			case 'FunctionExport':
+				return _elm_lang$core$Native_Utils.update(
+					exposings,
+					{
+						functions: {ctor: '::', _0: _p0._0, _1: exposings.functions}
+					});
+			case 'TypeExport':
+				return _elm_lang$core$Native_Utils.update(
+					exposings,
+					{
+						types: {ctor: '::', _0: _p0._0, _1: exposings.types}
+					});
+			default:
+				return exposings;
+		}
+	});
+var _user$project$Model_Exposings$collectExposings = F3(
+	function (model, statement, exposings) {
+		var _p1 = statement;
+		_v1_2:
+		do {
+			if (_p1.ctor === 'ModuleDeclaration') {
+				switch (_p1._1.ctor) {
+					case 'AllExport':
+						return {
+							functions: model.topLevelExpressions.functions,
+							types: A2(_elm_lang$core$List$append, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases)
+						};
+					case 'SubsetExport':
+						return A3(_elm_lang$core$List$foldl, _user$project$Model_Exposings$collectFromExports, exposings, _p1._1._0);
+					default:
+						break _v1_2;
+				}
+			} else {
+				break _v1_2;
+			}
+		} while(false);
+		return exposings;
+	});
+var _user$project$Model_Exposings$collect = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			exposings: A3(
+				_elm_lang$core$List$foldl,
+				_user$project$Model_Exposings$collectExposings(model),
+				model.exposings,
+				model.fileAST)
+		});
+};
+
 var _user$project$Model_Report$make = F2(
 	function (fileName, model) {
-		return {fileName: fileName, topLevelExpressions: model.topLevelExpressions};
+		return {fileName: fileName, topLevelExpressions: model.topLevelExpressions, exposings: model.exposings};
 	});
 
 var _user$project$Model_TopLevelExpressions$firstElement = function (singleEntry) {
@@ -10693,6 +10779,10 @@ var _user$project$Worker$init = _user$project$And$noCommand(
 			functions: {ctor: '[]'},
 			types: {ctor: '[]'},
 			typeAliases: {ctor: '[]'}
+		},
+		exposings: {
+			functions: {ctor: '[]'},
+			types: {ctor: '[]'}
 		}
 	});
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
@@ -10713,6 +10803,16 @@ var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 					function (v) {
 						return v;
 					})
+			},
+			exposings: {
+				functions: _elm_lang$core$Native_List.toArray(v.exposings.functions).map(
+					function (v) {
+						return v;
+					}),
+				types: _elm_lang$core$Native_List.toArray(v.exposings.types).map(
+					function (v) {
+						return v;
+					})
 			}
 		};
 	});
@@ -10730,8 +10830,9 @@ var _user$project$Worker$update = F2(
 		return A2(
 			_user$project$Worker$andSendReport,
 			_p0._0._0,
-			_user$project$Model_TopLevelExpressions$collect(
-				A2(_user$project$Model_AST$buildFrom, _p0._0._1, model)));
+			_user$project$Model_Exposings$collect(
+				_user$project$Model_TopLevelExpressions$collect(
+					A2(_user$project$Model_AST$buildFrom, _p0._0._1, model))));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',
@@ -10747,9 +10848,9 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Worker$Model = F2(
-	function (a, b) {
-		return {fileAST: a, topLevelExpressions: b};
+var _user$project$Worker$Model = F3(
+	function (a, b, c) {
+		return {fileAST: a, topLevelExpressions: b, exposings: c};
 	});
 var _user$project$Worker$ProcessFile = function (a) {
 	return {ctor: 'ProcessFile', _0: a};

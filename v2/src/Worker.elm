@@ -4,8 +4,10 @@ import And
 import Ast.Statement exposing (Statement)
 import Json.Decode
 import Model.AST
+import Model.Exposings
 import Model.Report
 import Model.TopLevelExpressions
+import Types.Exposings exposing (Exposings)
 import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
@@ -13,6 +15,7 @@ import Types.TopLevelExpressions exposing (TopLevelExpressions)
 type alias Model =
     { fileAST : List Statement
     , topLevelExpressions : TopLevelExpressions
+    , exposings : Exposings
     }
 
 
@@ -37,6 +40,10 @@ init =
         , types = []
         , typeAliases = []
         }
+    , exposings =
+        { functions = []
+        , types = []
+        }
     }
         |> And.noCommand
 
@@ -48,6 +55,7 @@ update message model =
             model
                 |> Model.AST.buildFrom text
                 |> Model.TopLevelExpressions.collect
+                |> Model.Exposings.collect
                 |> andSendReport fileName
 
 

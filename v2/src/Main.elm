@@ -2,12 +2,14 @@ port module Main exposing (main)
 
 import And
 import Dict exposing (Dict)
+import Types.Exposings exposing (Exposings)
 import Types.Report exposing (Report)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias FileData =
     { topLevelExpressions : TopLevelExpressions
+    , exposings : Exposings
     }
 
 
@@ -38,7 +40,10 @@ update message model =
     case message of
         AddFileData report ->
             model
-                |> Dict.insert report.fileName { topLevelExpressions = report.topLevelExpressions }
+                |> Dict.insert report.fileName
+                    { topLevelExpressions = report.topLevelExpressions
+                    , exposings = report.exposings
+                    }
                 |> And.noCommand
 
 
