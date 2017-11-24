@@ -10536,6 +10536,14 @@ var _user$project$Types_Reference$Reference = function (a) {
 	return {name: a};
 };
 
+var _user$project$Types_Expression$from = function (name) {
+	return {name: name, lineNumber: 0};
+};
+var _user$project$Types_Expression$Expression = F2(
+	function (a, b) {
+		return {name: a, lineNumber: b};
+	});
+
 var _user$project$Types_TopLevelExpressions$default = {
 	functions: {ctor: '[]'},
 	types: {ctor: '[]'},
@@ -10632,17 +10640,53 @@ var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPo
 										A2(
 											_elm_lang$core$Json_Decode$field,
 											'typeAliases',
-											_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
+											_elm_lang$core$Json_Decode$list(
+												A2(
+													_elm_lang$core$Json_Decode$andThen,
+													function (name) {
+														return A2(
+															_elm_lang$core$Json_Decode$andThen,
+															function (lineNumber) {
+																return _elm_lang$core$Json_Decode$succeed(
+																	{name: name, lineNumber: lineNumber});
+															},
+															A2(_elm_lang$core$Json_Decode$field, 'lineNumber', _elm_lang$core$Json_Decode$int));
+													},
+													A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string)))));
 								},
 								A2(
 									_elm_lang$core$Json_Decode$field,
 									'types',
-									_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
+									_elm_lang$core$Json_Decode$list(
+										A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (name) {
+												return A2(
+													_elm_lang$core$Json_Decode$andThen,
+													function (lineNumber) {
+														return _elm_lang$core$Json_Decode$succeed(
+															{name: name, lineNumber: lineNumber});
+													},
+													A2(_elm_lang$core$Json_Decode$field, 'lineNumber', _elm_lang$core$Json_Decode$int));
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string)))));
 						},
 						A2(
 							_elm_lang$core$Json_Decode$field,
 							'functions',
-							_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)))));
+							_elm_lang$core$Json_Decode$list(
+								A2(
+									_elm_lang$core$Json_Decode$andThen,
+									function (name) {
+										return A2(
+											_elm_lang$core$Json_Decode$andThen,
+											function (lineNumber) {
+												return _elm_lang$core$Json_Decode$succeed(
+													{name: name, lineNumber: lineNumber});
+											},
+											A2(_elm_lang$core$Json_Decode$field, 'lineNumber', _elm_lang$core$Json_Decode$int));
+									},
+									A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string)))))));
 		},
 		A2(_elm_lang$core$Json_Decode$field, 'fileName', _elm_lang$core$Json_Decode$string)));
 var _user$project$Main$FileData = F3(
@@ -10709,8 +10753,18 @@ var _user$project$Model_Exposings$collectExposings = F3(
 				switch (_p1._1.ctor) {
 					case 'AllExport':
 						return {
-							functions: model.topLevelExpressions.functions,
-							types: A2(_elm_lang$core$List$append, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases)
+							functions: A2(
+								_elm_lang$core$List$map,
+								function (_) {
+									return _.name;
+								},
+								model.topLevelExpressions.functions),
+							types: A2(
+								_elm_lang$core$List$map,
+								function (_) {
+									return _.name;
+								},
+								A2(_elm_lang$core$List$append, model.topLevelExpressions.types, model.topLevelExpressions.typeAliases))
 						};
 					case 'SubsetExport':
 						return A3(_elm_lang$core$List$foldl, _user$project$Model_Exposings$collectFromExports, exposings, _p1._1._0);
@@ -10896,7 +10950,11 @@ var _user$project$Model_TopLevelExpressions$collectExpressions = F2(
 					return _elm_lang$core$Native_Utils.update(
 						expressions,
 						{
-							functions: {ctor: '::', _0: _p0._0, _1: expressions.functions}
+							functions: {
+								ctor: '::',
+								_0: _user$project$Types_Expression$from(_p0._0),
+								_1: expressions.functions
+							}
 						});
 				case 'TypeDeclaration':
 					if (_p0._0.ctor === 'TypeConstructor') {
@@ -10905,7 +10963,8 @@ var _user$project$Model_TopLevelExpressions$collectExpressions = F2(
 							{
 								types: {
 									ctor: '::',
-									_0: _user$project$Model_TopLevelExpressions$firstElement(_p0._0._0),
+									_0: _user$project$Types_Expression$from(
+										_user$project$Model_TopLevelExpressions$firstElement(_p0._0._0)),
 									_1: expressions.types
 								}
 							});
@@ -10919,7 +10978,8 @@ var _user$project$Model_TopLevelExpressions$collectExpressions = F2(
 							{
 								typeAliases: {
 									ctor: '::',
-									_0: _user$project$Model_TopLevelExpressions$firstElement(_p0._0._0),
+									_0: _user$project$Types_Expression$from(
+										_user$project$Model_TopLevelExpressions$firstElement(_p0._0._0)),
 									_1: expressions.typeAliases
 								}
 							});
@@ -10955,15 +11015,15 @@ var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 			topLevelExpressions: {
 				functions: _elm_lang$core$Native_List.toArray(v.topLevelExpressions.functions).map(
 					function (v) {
-						return v;
+						return {name: v.name, lineNumber: v.lineNumber};
 					}),
 				types: _elm_lang$core$Native_List.toArray(v.topLevelExpressions.types).map(
 					function (v) {
-						return v;
+						return {name: v.name, lineNumber: v.lineNumber};
 					}),
 				typeAliases: _elm_lang$core$Native_List.toArray(v.topLevelExpressions.typeAliases).map(
 					function (v) {
-						return v;
+						return {name: v.name, lineNumber: v.lineNumber};
 					})
 			},
 			exposings: {

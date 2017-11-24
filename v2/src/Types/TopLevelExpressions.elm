@@ -1,10 +1,12 @@
 module Types.TopLevelExpressions exposing (TopLevelExpressions, default)
 
+import Types.Expression exposing (Expression)
+
 
 type alias TopLevelExpressions =
-    { functions : List String
-    , types : List String
-    , typeAliases : List String
+    { functions : List Expression
+    , types : List Expression
+    , typeAliases : List Expression
     }
 
 

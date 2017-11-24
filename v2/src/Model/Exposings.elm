@@ -22,8 +22,12 @@ collectExposings : Model model -> Statement -> Exposings -> Exposings
 collectExposings model statement exposings =
     case statement of
         ModuleDeclaration _ AllExport ->
-            { functions = model.topLevelExpressions.functions
-            , types = List.append model.topLevelExpressions.types model.topLevelExpressions.typeAliases
+            { functions =
+                model.topLevelExpressions.functions
+                    |> List.map .name
+            , types =
+                List.append model.topLevelExpressions.types model.topLevelExpressions.typeAliases
+                    |> List.map .name
             }
 
         ModuleDeclaration _ (SubsetExport exports) ->

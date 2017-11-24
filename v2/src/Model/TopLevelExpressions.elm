@@ -1,6 +1,7 @@
 module Model.TopLevelExpressions exposing (collect)
 
 import Ast.Statement exposing (Statement(FunctionDeclaration, TypeAliasDeclaration, TypeDeclaration), Type(TypeConstructor))
+import Types.Expression exposing (Expression)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
@@ -20,13 +21,19 @@ collectExpressions : Statement -> TopLevelExpressions -> TopLevelExpressions
 collectExpressions statement expressions =
     case statement of
         FunctionDeclaration name _ _ ->
-            { expressions | functions = name :: expressions.functions }
+            { expressions
+                | functions = Types.Expression.from name :: expressions.functions
+            }
 
         TypeDeclaration (TypeConstructor names _) _ ->
-            { expressions | types = firstElement names :: expressions.types }
+            { expressions
+                | types = Types.Expression.from (firstElement names) :: expressions.types
+            }
 
         TypeAliasDeclaration (TypeConstructor names _) _ ->
-            { expressions | typeAliases = firstElement names :: expressions.typeAliases }
+            { expressions
+                | typeAliases = Types.Expression.from (firstElement names) :: expressions.typeAliases
+            }
 
         _ ->
             expressions
