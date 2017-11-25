@@ -12987,16 +12987,52 @@ var _user$project$Model_Exposings$collect = function (model) {
 		});
 };
 
+var _user$project$Model_References$findInType = F2(
+	function (type_, references) {
+		var _p0 = type_;
+		_v0_2:
+		do {
+			switch (_p0.ctor) {
+				case 'TypeConstructor':
+					if (_p0._0.ctor === '::') {
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$Model_References$findInType,
+							{ctor: '::', _0: _p0._0._0, _1: references},
+							_p0._1);
+					} else {
+						break _v0_2;
+					}
+				case 'TypeApplication':
+					return A3(
+						_elm_lang$core$List$foldl,
+						_user$project$Model_References$findInType,
+						references,
+						{
+							ctor: '::',
+							_0: _p0._0,
+							_1: {
+								ctor: '::',
+								_0: _p0._1,
+								_1: {ctor: '[]'}
+							}
+						});
+				default:
+					break _v0_2;
+			}
+		} while(false);
+		return references;
+	});
 var _user$project$Model_References$flattenExpressionTuples = function (expressionTuples) {
 	return A3(
 		_elm_lang$core$List$foldl,
 		F2(
-			function (_p0, list) {
-				var _p1 = _p0;
+			function (_p1, list) {
+				var _p2 = _p1;
 				return {
 					ctor: '::',
-					_0: _p1._0,
-					_1: {ctor: '::', _0: _p1._1, _1: list}
+					_0: _p2._0,
+					_1: {ctor: '::', _0: _p2._1, _1: list}
 				};
 			}),
 		{ctor: '[]'},
@@ -13006,12 +13042,12 @@ var _user$project$Model_References$collectFuncArguments = F2(
 	function (expression, args) {
 		collectFuncArguments:
 		while (true) {
-			var _p2 = expression;
-			if ((_p2.ctor === 'Variable') && (_p2._0.ctor === '::')) {
-				var _v2 = _Bogdanp$elm_ast$Ast_Expression$Variable(_p2._0._1),
-					_v3 = A2(_elm_lang$core$Set$insert, _p2._0._0, args);
-				expression = _v2;
-				args = _v3;
+			var _p3 = expression;
+			if ((_p3.ctor === 'Variable') && (_p3._0.ctor === '::')) {
+				var _v3 = _Bogdanp$elm_ast$Ast_Expression$Variable(_p3._0._1),
+					_v4 = A2(_elm_lang$core$Set$insert, _p3._0._0, args);
+				expression = _v3;
+				args = _v4;
 				continue collectFuncArguments;
 			} else {
 				return args;
@@ -13025,68 +13061,68 @@ var _user$project$Model_References$findInExpression = F3(
 	function ($arguments, expression, references) {
 		findInExpression:
 		while (true) {
-			var _p3 = expression;
-			_v4_11:
+			var _p4 = expression;
+			_v5_11:
 			do {
-				switch (_p3.ctor) {
+				switch (_p4.ctor) {
 					case 'Variable':
-						if (_p3._0.ctor === '::') {
-							var _p5 = _p3._0._1;
-							var _p4 = _p3._0._0;
-							if (A2(_elm_lang$core$Set$member, _p4, $arguments)) {
-								var _v5 = $arguments,
-									_v6 = _Bogdanp$elm_ast$Ast_Expression$Variable(_p5),
-									_v7 = references;
-								$arguments = _v5;
-								expression = _v6;
-								references = _v7;
+						if (_p4._0.ctor === '::') {
+							var _p6 = _p4._0._1;
+							var _p5 = _p4._0._0;
+							if (A2(_elm_lang$core$Set$member, _p5, $arguments)) {
+								var _v6 = $arguments,
+									_v7 = _Bogdanp$elm_ast$Ast_Expression$Variable(_p6),
+									_v8 = references;
+								$arguments = _v6;
+								expression = _v7;
+								references = _v8;
 								continue findInExpression;
 							} else {
-								var _v8 = $arguments,
-									_v9 = _Bogdanp$elm_ast$Ast_Expression$Variable(_p5),
-									_v10 = {ctor: '::', _0: _p4, _1: references};
-								$arguments = _v8;
-								expression = _v9;
-								references = _v10;
+								var _v9 = $arguments,
+									_v10 = _Bogdanp$elm_ast$Ast_Expression$Variable(_p6),
+									_v11 = {ctor: '::', _0: _p5, _1: references};
+								$arguments = _v9;
+								expression = _v10;
+								references = _v11;
 								continue findInExpression;
 							}
 						} else {
-							break _v4_11;
+							break _v5_11;
 						}
 					case 'List':
 						return A3(
 							_elm_lang$core$List$foldl,
 							_user$project$Model_References$findInExpression($arguments),
 							references,
-							_p3._0);
+							_p4._0);
 					case 'Tuple':
 						return A3(
 							_elm_lang$core$List$foldl,
 							_user$project$Model_References$findInExpression($arguments),
 							references,
-							_p3._0);
+							_p4._0);
 					case 'Record':
 						return A3(
 							_elm_lang$core$List$foldl,
 							F2(
-								function (_p6, funcs) {
-									var _p7 = _p6;
-									return A3(_user$project$Model_References$findInExpression, $arguments, _p7._1, funcs);
+								function (_p7, funcs) {
+									var _p8 = _p7;
+									return A3(_user$project$Model_References$findInExpression, $arguments, _p8._1, funcs);
 								}),
 							references,
-							_p3._0);
+							_p4._0);
 					case 'RecordUpdate':
 						return A3(
 							_elm_lang$core$List$foldl,
 							F2(
-								function (_p8, funcs) {
-									var _p9 = _p8;
-									return A3(_user$project$Model_References$findInExpression, $arguments, _p9._1, funcs);
+								function (_p9, funcs) {
+									var _p10 = _p9;
+									return A3(_user$project$Model_References$findInExpression, $arguments, _p10._1, funcs);
 								}),
 							references,
-							_p3._1);
+							_p4._1);
 					case 'If':
-						return A5(_user$project$Model_References$concatExpressions3, $arguments, _p3._0, _p3._1, _p3._2, references);
+						return A5(_user$project$Model_References$concatExpressions3, $arguments, _p4._0, _p4._1, _p4._2, references);
 					case 'Let':
 						return A3(
 							_elm_lang$core$List$foldl,
@@ -13094,8 +13130,8 @@ var _user$project$Model_References$findInExpression = F3(
 							references,
 							{
 								ctor: '::',
-								_0: _p3._1,
-								_1: _user$project$Model_References$flattenExpressionTuples(_p3._0)
+								_0: _p4._1,
+								_1: _user$project$Model_References$flattenExpressionTuples(_p4._0)
 							});
 					case 'Case':
 						return A3(
@@ -13104,26 +13140,26 @@ var _user$project$Model_References$findInExpression = F3(
 							references,
 							{
 								ctor: '::',
-								_0: _p3._0,
-								_1: _user$project$Model_References$flattenExpressionTuples(_p3._1)
+								_0: _p4._0,
+								_1: _user$project$Model_References$flattenExpressionTuples(_p4._1)
 							});
 					case 'Lambda':
-						var _v13 = A2(
+						var _v14 = A2(
 							_elm_lang$core$Set$union,
 							$arguments,
-							_user$project$Model_References$funcArguments(_p3._0)),
-							_v14 = _p3._1,
-							_v15 = references;
-						$arguments = _v13;
-						expression = _v14;
-						references = _v15;
+							_user$project$Model_References$funcArguments(_p4._0)),
+							_v15 = _p4._1,
+							_v16 = references;
+						$arguments = _v14;
+						expression = _v15;
+						references = _v16;
 						continue findInExpression;
 					case 'Application':
-						return A4(_user$project$Model_References$concatExpressions2, $arguments, _p3._0, _p3._1, references);
+						return A4(_user$project$Model_References$concatExpressions2, $arguments, _p4._0, _p4._1, references);
 					case 'BinOp':
-						return A4(_user$project$Model_References$concatExpressions2, $arguments, _p3._1, _p3._2, references);
+						return A4(_user$project$Model_References$concatExpressions2, $arguments, _p4._1, _p4._2, references);
 					default:
-						break _v4_11;
+						break _v5_11;
 				}
 			} while(false);
 			return references;
@@ -13167,15 +13203,18 @@ var _user$project$Model_References$concatExpressions3 = F5(
 	});
 var _user$project$Model_References$collectReferences = F2(
 	function (statement, references) {
-		var _p10 = statement;
-		if (_p10.ctor === 'FunctionDeclaration') {
-			return A3(
-				_user$project$Model_References$findInExpression,
-				_user$project$Model_References$funcArguments(_p10._1),
-				_p10._2,
-				references);
-		} else {
-			return references;
+		var _p11 = statement;
+		switch (_p11.ctor) {
+			case 'FunctionDeclaration':
+				return A3(
+					_user$project$Model_References$findInExpression,
+					_user$project$Model_References$funcArguments(_p11._1),
+					_p11._2,
+					references);
+			case 'FunctionTypeDeclaration':
+				return A2(_user$project$Model_References$findInType, _p11._1, references);
+			default:
+				return references;
 		}
 	});
 var _user$project$Model_References$stringsToRefs = function (refStrings) {

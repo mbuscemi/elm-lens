@@ -1,7 +1,7 @@
 module Model.References exposing (collect)
 
 import Ast.Expression exposing (Expression)
-import Ast.Statement exposing (Statement(FunctionDeclaration))
+import Ast.Statement exposing (Statement(FunctionDeclaration, FunctionTypeDeclaration), Type)
 import Set exposing (Set)
 import Types.Reference exposing (Reference)
 
@@ -32,6 +32,9 @@ collectReferences statement references =
     case statement of
         FunctionDeclaration _ args expression ->
             findInExpression (funcArguments args) expression references
+
+        FunctionTypeDeclaration _ type_ ->
+            findInType type_ references
 
         _ ->
             references
@@ -108,3 +111,16 @@ concatExpressions2 arguments exp1 exp2 references =
 concatExpressions3 : Set String -> Expression -> Expression -> Expression -> List String -> List String
 concatExpressions3 arguments exp1 exp2 exp3 references =
     List.foldl (findInExpression arguments) references [ exp1, exp2, exp3 ]
+
+
+findInType : Type -> List String -> List String
+findInType type_ references =
+    case type_ of
+        Ast.Statement.TypeConstructor (name :: rest) subTypes ->
+            List.foldl findInType (name :: references) subTypes
+
+        Ast.Statement.TypeApplication type1 type2 ->
+            List.foldl findInType references [ type1, type2 ]
+
+        _ ->
+            references
