@@ -14,7 +14,6 @@ type alias Model =
     { projectFileData : ProjectFileData
     , projectFileRegistry : Set String
     , activeTextEditors : Set String
-    , lastUpdatedFile : String
     }
 
 
@@ -39,7 +38,6 @@ init =
     { projectFileData = Dict.empty
     , projectFileRegistry = Set.empty
     , activeTextEditors = Set.empty
-    , lastUpdatedFile = ""
     }
         |> And.noCommand
 
@@ -77,7 +75,17 @@ subscriptions model =
 
 andTransmitFileMarkup : Model -> ( Model, Cmd Message )
 andTransmitFileMarkup model =
-    And.execute (markupForFile <| Model.FileMarkup.make model.lastUpdatedFile model) model
+    And.execute (Cmd.batch <| transmitToActiveEditors model) model
+
+
+transmitToActiveEditors : Model -> List (Cmd Message)
+transmitToActiveEditors model =
+    List.map (transmitFileMarkup model) (Set.toList model.activeTextEditors)
+
+
+transmitFileMarkup : Model -> String -> Cmd Message
+transmitFileMarkup model filePath =
+    markupForFile <| Model.FileMarkup.make filePath model
 
 
 port registerProjectFiles : (List String -> message) -> Sub message

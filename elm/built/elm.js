@@ -12851,13 +12851,12 @@ var _user$project$Model_ProjectFileData$add = F2(
 								_1: {ctor: '[]'}
 							})
 					},
-					model.projectFileData),
-				lastUpdatedFile: fileName
+					model.projectFileData)
 			});
 	});
 
 var _user$project$Main$init = _user$project$And$noCommand(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: ''});
+	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty});
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
 	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
@@ -12876,11 +12875,22 @@ var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPo
 				})
 		};
 	});
+var _user$project$Main$transmitFileMarkup = F2(
+	function (model, filePath) {
+		return _user$project$Main$markupForFile(
+			A2(_user$project$Model_FileMarkup$make, filePath, model));
+	});
+var _user$project$Main$transmitToActiveEditors = function (model) {
+	return A2(
+		_elm_lang$core$List$map,
+		_user$project$Main$transmitFileMarkup(model),
+		_elm_lang$core$Set$toList(model.activeTextEditors));
+};
 var _user$project$Main$andTransmitFileMarkup = function (model) {
 	return A2(
 		_user$project$And$execute,
-		_user$project$Main$markupForFile(
-			A2(_user$project$Model_FileMarkup$make, model.lastUpdatedFile, model)),
+		_elm_lang$core$Platform_Cmd$batch(
+			_user$project$Main$transmitToActiveEditors(model)),
 		model);
 };
 var _user$project$Main$update = F2(
@@ -12913,9 +12923,9 @@ var _user$project$Main$update = F2(
 					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
 		}
 	});
-var _user$project$Main$Model = F4(
-	function (a, b, c, d) {
-		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c};
 	});
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
