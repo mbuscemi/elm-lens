@@ -12849,14 +12849,12 @@ var _user$project$Model_ProjectFileData$add = F2(
 	});
 
 var _user$project$Main$init = _user$project$And$noCommand(
-	{
-		projectFileData: _elm_lang$core$Dict$empty,
-		projectFileRegistry: {ctor: '[]'},
-		lastUpdatedFile: ''
-	});
+	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: ''});
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
 	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
+var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
 var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPort(
 	'markupForFile',
@@ -12879,22 +12877,45 @@ var _user$project$Main$andTransmitFileMarkup = function (model) {
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		if (_p0.ctor === 'RegisterProjectFiles') {
-			return _user$project$And$noCommand(
-				_elm_lang$core$Native_Utils.update(
-					model,
-					{projectFileRegistry: _p0._0}));
-		} else {
-			return _user$project$Main$andTransmitFileMarkup(
-				A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
+		switch (_p0.ctor) {
+			case 'RegisterProjectFiles':
+				return _user$project$And$noCommand(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							projectFileRegistry: _elm_lang$core$Set$fromList(_p0._0)
+						}));
+			case 'RegisterTextEditor':
+				return _user$project$And$noCommand(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							activeTextEditors: A2(_elm_lang$core$Set$insert, _p0._0, model.activeTextEditors)
+						}));
+			case 'UnregisterTextEditor':
+				return _user$project$And$noCommand(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							activeTextEditors: A2(_elm_lang$core$Set$remove, _p0._0, model.activeTextEditors)
+						}));
+			default:
+				return _user$project$Main$andTransmitFileMarkup(
+					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
 		}
 	});
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {projectFileData: a, projectFileRegistry: b, lastUpdatedFile: c};
+var _user$project$Main$Model = F4(
+	function (a, b, c, d) {
+		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d};
 	});
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
+};
+var _user$project$Main$UnregisterTextEditor = function (a) {
+	return {ctor: 'UnregisterTextEditor', _0: a};
+};
+var _user$project$Main$RegisterTextEditor = function (a) {
+	return {ctor: 'RegisterTextEditor', _0: a};
 };
 var _user$project$Main$RegisterProjectFiles = function (a) {
 	return {ctor: 'RegisterProjectFiles', _0: a};
@@ -12906,8 +12927,16 @@ var _user$project$Main$subscriptions = function (model) {
 			_0: _user$project$Main$registerProjectFiles(_user$project$Main$RegisterProjectFiles),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
-				_1: {ctor: '[]'}
+				_0: _user$project$Main$registerTextEditor(_user$project$Main$RegisterTextEditor),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Main$unregisterTextEditor(_user$project$Main$UnregisterTextEditor),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
+						_1: {ctor: '[]'}
+					}
+				}
 			}
 		});
 };
