@@ -9,11 +9,17 @@ import Types.ProjectFileData exposing (ProjectFileData)
 import Types.Reference exposing (Reference)
 
 
-make : String -> ProjectFileData -> FileMarkup
-make fileName projectFileData =
-    Dict.get fileName projectFileData
+type alias Model model =
+    { model
+        | projectFileData : ProjectFileData
+    }
+
+
+make : String -> Model model -> FileMarkup
+make fileName model =
+    Dict.get fileName model.projectFileData
         |> Maybe.withDefault Types.FileData.empty
-        |> toFileMarkup fileName projectFileData
+        |> toFileMarkup fileName model.projectFileData
 
 
 toFileMarkup : String -> ProjectFileData -> FileData -> FileMarkup

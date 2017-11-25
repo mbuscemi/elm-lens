@@ -12799,15 +12799,15 @@ var _user$project$Model_FileMarkup$toFileMarkup = F3(
 			A3(_user$project$Model_FileMarkup$collectExpressions, fileName, projectFileData, fileData));
 	});
 var _user$project$Model_FileMarkup$make = F2(
-	function (fileName, projectFileData) {
+	function (fileName, model) {
 		return A3(
 			_user$project$Model_FileMarkup$toFileMarkup,
 			fileName,
-			projectFileData,
+			model.projectFileData,
 			A2(
 				_elm_lang$core$Maybe$withDefault,
 				_user$project$Types_FileData$empty,
-				A2(_elm_lang$core$Dict$get, fileName, projectFileData)));
+				A2(_elm_lang$core$Dict$get, fileName, model.projectFileData)));
 	});
 
 var _user$project$Model_ProjectFileData$decode = F4(
@@ -12822,27 +12822,38 @@ var _user$project$Model_ProjectFileData$decode = F4(
 	});
 var _user$project$Model_ProjectFileData$add = F2(
 	function (value, model) {
-		return A3(
-			_elm_lang$core$Dict$insert,
-			A4(_user$project$Model_ProjectFileData$decode, value, 'fileName', _elm_lang$core$Json_Decode$string, ''),
+		return _elm_lang$core$Native_Utils.update(
+			model,
 			{
-				topLevelExpressions: A4(_user$project$Model_ProjectFileData$decode, value, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
-				exposings: A4(_user$project$Model_ProjectFileData$decode, value, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
-				references: A4(
-					_user$project$Model_ProjectFileData$decode,
-					value,
-					'references',
-					_user$project$Types_Reference$listDecoder,
+				projectFileData: A3(
+					_elm_lang$core$Dict$insert,
+					A4(_user$project$Model_ProjectFileData$decode, value, 'fileName', _elm_lang$core$Json_Decode$string, ''),
 					{
-						ctor: '::',
-						_0: _user$project$Types_Reference$default,
-						_1: {ctor: '[]'}
-					})
-			},
-			model);
+						topLevelExpressions: A4(_user$project$Model_ProjectFileData$decode, value, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
+						exposings: A4(_user$project$Model_ProjectFileData$decode, value, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
+						references: A4(
+							_user$project$Model_ProjectFileData$decode,
+							value,
+							'references',
+							_user$project$Types_Reference$listDecoder,
+							{
+								ctor: '::',
+								_0: _user$project$Types_Reference$default,
+								_1: {ctor: '[]'}
+							})
+					},
+					model.projectFileData)
+			});
 	});
 
-var _user$project$Main$init = _user$project$And$noCommand(_elm_lang$core$Dict$empty);
+var _user$project$Main$init = _user$project$And$noCommand(
+	{
+		projectFileData: _elm_lang$core$Dict$empty,
+		projectFileRegistry: {ctor: '[]'}
+	});
+var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
+	'registerProjectFiles',
+	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
 var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
 var _user$project$Main$fileMarkupRequest = _elm_lang$core$Native_Platform.incomingPort('fileMarkupRequest', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPort(
@@ -12867,12 +12878,22 @@ var _user$project$Main$andTransmitFileMarkup = F2(
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		if (_p0.ctor === 'AddFileData') {
-			return _user$project$And$noCommand(
-				A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
-		} else {
-			return A2(_user$project$Main$andTransmitFileMarkup, _p0._0, model);
+		switch (_p0.ctor) {
+			case 'RegisterProjectFiles':
+				return _user$project$And$noCommand(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{projectFileRegistry: _p0._0}));
+			case 'AddFileData':
+				return _user$project$And$noCommand(
+					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
+			default:
+				return A2(_user$project$Main$andTransmitFileMarkup, _p0._0, model);
 		}
+	});
+var _user$project$Main$Model = F2(
+	function (a, b) {
+		return {projectFileData: a, projectFileRegistry: b};
 	});
 var _user$project$Main$FileMarkupRequest = function (a) {
 	return {ctor: 'FileMarkupRequest', _0: a};
@@ -12880,15 +12901,22 @@ var _user$project$Main$FileMarkupRequest = function (a) {
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
 };
+var _user$project$Main$RegisterProjectFiles = function (a) {
+	return {ctor: 'RegisterProjectFiles', _0: a};
+};
 var _user$project$Main$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
+			_0: _user$project$Main$registerProjectFiles(_user$project$Main$RegisterProjectFiles),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$fileMarkupRequest(_user$project$Main$FileMarkupRequest),
-				_1: {ctor: '[]'}
+				_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Main$fileMarkupRequest(_user$project$Main$FileMarkupRequest),
+					_1: {ctor: '[]'}
+				}
 			}
 		});
 };

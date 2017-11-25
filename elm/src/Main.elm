@@ -10,11 +10,14 @@ import Types.ProjectFileData exposing (ProjectFileData)
 
 
 type alias Model =
-    ProjectFileData
+    { projectFileData : ProjectFileData
+    , projectFileRegistry : List String
+    }
 
 
 type Message
-    = AddFileData Value
+    = RegisterProjectFiles (List String)
+    | AddFileData Value
     | FileMarkupRequest String
 
 
@@ -29,12 +32,19 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    Dict.empty |> And.noCommand
+    { projectFileData = Dict.empty
+    , projectFileRegistry = []
+    }
+        |> And.noCommand
 
 
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
+        RegisterProjectFiles files ->
+            { model | projectFileRegistry = files }
+                |> And.noCommand
+
         AddFileData value ->
             model
                 |> Model.ProjectFileData.add value
@@ -48,7 +58,8 @@ update message model =
 subscriptions : Model -> Sub Message
 subscriptions model =
     Sub.batch
-        [ processReport AddFileData
+        [ registerProjectFiles RegisterProjectFiles
+        , processReport AddFileData
         , fileMarkupRequest FileMarkupRequest
         ]
 
@@ -56,6 +67,9 @@ subscriptions model =
 andTransmitFileMarkup : String -> Model -> ( Model, Cmd Message )
 andTransmitFileMarkup fileName model =
     And.execute (markupForFile <| Model.FileMarkup.make fileName model) model
+
+
+port registerProjectFiles : (List String -> message) -> Sub message
 
 
 port processReport : (Value -> message) -> Sub message

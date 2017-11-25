@@ -8,15 +8,24 @@ import Types.Reference
 import Types.TopLevelExpressions
 
 
-add : Value -> ProjectFileData -> ProjectFileData
+type alias Model model =
+    { model
+        | projectFileData : ProjectFileData
+    }
+
+
+add : Value -> Model model -> Model model
 add value model =
-    Dict.insert
-        (decode value "fileName" string "")
-        { topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
-        , exposings = decode value "exposings" Types.Exposings.decoder Types.Exposings.default
-        , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
-        }
-        model
+    { model
+        | projectFileData =
+            Dict.insert
+                (decode value "fileName" string "")
+                { topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
+                , exposings = decode value "exposings" Types.Exposings.decoder Types.Exposings.default
+                , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
+                }
+                model.projectFileData
+    }
 
 
 decode : Value -> String -> Decoder a -> a -> a
