@@ -12727,9 +12727,9 @@ var _user$project$Types_FileMarkup$FileMarkup = F2(
 	function (a, b) {
 		return {fileName: a, expressions: b};
 	});
-var _user$project$Types_FileMarkup$ExpressionData = F4(
-	function (a, b, c, d) {
-		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d};
+var _user$project$Types_FileMarkup$ExpressionData = F5(
+	function (a, b, c, d, e) {
+		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d, numExternalRefs: e};
 	});
 
 
@@ -12755,12 +12755,13 @@ var _user$project$Model_FileMarkup$makeExpressions = function (fileData) {
 			function (funcName, funcData, list) {
 				return {
 					ctor: '::',
-					_0: A4(
+					_0: A5(
 						_user$project$Types_FileMarkup$ExpressionData,
 						funcName,
 						funcData.lineNumber,
 						A2(_user$project$Model_FileMarkup$isExposed, funcName, fileData),
-						A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData)),
+						A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData),
+						0),
 					_1: list
 				};
 			}),
@@ -12827,7 +12828,7 @@ var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPo
 			fileName: v.fileName,
 			expressions: _elm_lang$core$Native_List.toArray(v.expressions).map(
 				function (v) {
-					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs};
+					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs, numExternalRefs: v.numExternalRefs};
 				})
 		};
 	});

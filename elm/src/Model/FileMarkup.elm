@@ -28,6 +28,7 @@ makeExpressions fileData =
                 funcData.lineNumber
                 (isExposed funcName fileData)
                 (numOccurencesInOwnReferences funcName fileData)
+                0
                 :: list
         )
         []

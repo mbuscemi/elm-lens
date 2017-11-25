@@ -12,6 +12,7 @@ type alias ExpressionData =
     , lineNumber : Int
     , isExposed : Bool
     , numInternalRefs : Int
+    , numExternalRefs : Int
     }
 
 
