@@ -1,7 +1,7 @@
 module Model.FileMarkup exposing (make)
 
 import Dict
-import Set
+import Set exposing (Set)
 import Types.Expression exposing (Expression)
 import Types.FileData exposing (FileData)
 import Types.FileMarkup exposing (ExpressionData, FileMarkup)
@@ -12,6 +12,7 @@ import Types.Reference exposing (Reference)
 type alias Model model =
     { model
         | projectFileData : ProjectFileData
+        , projectFileRegistry : Set String
     }
 
 
@@ -19,12 +20,20 @@ make : String -> Model model -> FileMarkup
 make fileName model =
     Dict.get fileName model.projectFileData
         |> Maybe.withDefault Types.FileData.empty
-        |> toFileMarkup fileName model.projectFileData
+        |> toFileMarkup fileName model
 
 
-toFileMarkup : String -> ProjectFileData -> FileData -> FileMarkup
-toFileMarkup fileName projectFileData fileData =
-    FileMarkup fileName (collectExpressions fileName projectFileData fileData)
+toFileMarkup : String -> Model model -> FileData -> FileMarkup
+toFileMarkup fileName model fileData =
+    FileMarkup
+        fileName
+        (isBatchProcessComplete model.projectFileData model.projectFileRegistry)
+        (collectExpressions fileName model.projectFileData fileData)
+
+
+isBatchProcessComplete : ProjectFileData -> Set String -> Bool
+isBatchProcessComplete projectFileData projectFileRegistry =
+    Dict.size projectFileData == Set.size projectFileRegistry
 
 
 collectExpressions : String -> ProjectFileData -> FileData -> List ExpressionData

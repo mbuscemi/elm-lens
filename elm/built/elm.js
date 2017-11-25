@@ -12721,11 +12721,12 @@ var _user$project$Types_FileData$FileData = F3(
 
 var _user$project$Types_FileMarkup$default = {
 	fileName: '',
+	projectIsProcessed: false,
 	expressions: {ctor: '[]'}
 };
-var _user$project$Types_FileMarkup$FileMarkup = F2(
-	function (a, b) {
-		return {fileName: a, expressions: b};
+var _user$project$Types_FileMarkup$FileMarkup = F3(
+	function (a, b, c) {
+		return {fileName: a, projectIsProcessed: b, expressions: c};
 	});
 var _user$project$Types_FileMarkup$ExpressionData = F5(
 	function (a, b, c, d, e) {
@@ -12791,19 +12792,26 @@ var _user$project$Model_FileMarkup$collectExpressions = F3(
 					{ctor: '[]'},
 					fileData.topLevelExpressions.functions)));
 	});
+var _user$project$Model_FileMarkup$isBatchProcessComplete = F2(
+	function (projectFileData, projectFileRegistry) {
+		return _elm_lang$core$Native_Utils.eq(
+			_elm_lang$core$Dict$size(projectFileData),
+			_elm_lang$core$Set$size(projectFileRegistry));
+	});
 var _user$project$Model_FileMarkup$toFileMarkup = F3(
-	function (fileName, projectFileData, fileData) {
-		return A2(
+	function (fileName, model, fileData) {
+		return A3(
 			_user$project$Types_FileMarkup$FileMarkup,
 			fileName,
-			A3(_user$project$Model_FileMarkup$collectExpressions, fileName, projectFileData, fileData));
+			A2(_user$project$Model_FileMarkup$isBatchProcessComplete, model.projectFileData, model.projectFileRegistry),
+			A3(_user$project$Model_FileMarkup$collectExpressions, fileName, model.projectFileData, fileData));
 	});
 var _user$project$Model_FileMarkup$make = F2(
 	function (fileName, model) {
 		return A3(
 			_user$project$Model_FileMarkup$toFileMarkup,
 			fileName,
-			model.projectFileData,
+			model,
 			A2(
 				_elm_lang$core$Maybe$withDefault,
 				_user$project$Types_FileData$empty,
@@ -12861,6 +12869,7 @@ var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPo
 	function (v) {
 		return {
 			fileName: v.fileName,
+			projectIsProcessed: v.projectIsProcessed,
 			expressions: _elm_lang$core$Native_List.toArray(v.expressions).map(
 				function (v) {
 					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs, numExternalRefs: v.numExternalRefs};
