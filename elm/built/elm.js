@@ -12758,8 +12758,8 @@ var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F4(
 			projectFileData) : 0;
 	});
 var _user$project$Model_FileMarkup$isExposed = F2(
-	function (funcName, fileData) {
-		return A2(_elm_lang$core$Set$member, funcName, fileData.exposings.functions);
+	function (expName, fileData) {
+		return A2(_elm_lang$core$Set$member, expName, fileData.exposings.functions) || A2(_elm_lang$core$Set$member, expName, fileData.exposings.types);
 	});
 var _user$project$Model_FileMarkup$makeExpression = F6(
 	function (fileName, projectFileData, fileData, funcName, funcData, list) {

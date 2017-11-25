@@ -48,8 +48,8 @@ makeExpression fileName projectFileData fileData funcName funcData list =
 
 
 isExposed : String -> FileData -> Bool
-isExposed funcName fileData =
-    Set.member funcName fileData.exposings.functions
+isExposed expName fileData =
+    Set.member expName fileData.exposings.functions || Set.member expName fileData.exposings.types
 
 
 numOccurencesInOwnReferences : String -> FileData -> Int
