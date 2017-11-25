@@ -12,6 +12,7 @@ import Types.ProjectFileData exposing (ProjectFileData)
 type alias Model =
     { projectFileData : ProjectFileData
     , projectFileRegistry : List String
+    , lastUpdatedFile : String
     }
 
 
@@ -33,6 +34,7 @@ init : ( Model, Cmd Message )
 init =
     { projectFileData = Dict.empty
     , projectFileRegistry = []
+    , lastUpdatedFile = ""
     }
         |> And.noCommand
 
@@ -47,7 +49,7 @@ update message model =
         AddFileData value ->
             model
                 |> Model.ProjectFileData.add value
-                |> And.noCommand
+                |> andTransmitFileMarkup
 
 
 subscriptions : Model -> Sub Message
@@ -58,9 +60,9 @@ subscriptions model =
         ]
 
 
-andTransmitFileMarkup : String -> Model -> ( Model, Cmd Message )
-andTransmitFileMarkup fileName model =
-    And.execute (markupForFile <| Model.FileMarkup.make fileName model) model
+andTransmitFileMarkup : Model -> ( Model, Cmd Message )
+andTransmitFileMarkup model =
+    And.execute (markupForFile <| Model.FileMarkup.make model.lastUpdatedFile model) model
 
 
 port registerProjectFiles : (List String -> message) -> Sub message

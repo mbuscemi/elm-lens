@@ -11,20 +11,26 @@ import Types.TopLevelExpressions
 type alias Model model =
     { model
         | projectFileData : ProjectFileData
+        , lastUpdatedFile : String
     }
 
 
 add : Value -> Model model -> Model model
 add value model =
+    let
+        fileName =
+            decode value "fileName" string ""
+    in
     { model
         | projectFileData =
             Dict.insert
-                (decode value "fileName" string "")
+                fileName
                 { topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
                 , exposings = decode value "exposings" Types.Exposings.decoder Types.Exposings.default
                 , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
                 }
                 model.projectFileData
+        , lastUpdatedFile = fileName
     }
 
 

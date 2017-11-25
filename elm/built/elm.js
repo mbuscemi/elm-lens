@@ -12822,12 +12822,13 @@ var _user$project$Model_ProjectFileData$decode = F4(
 	});
 var _user$project$Model_ProjectFileData$add = F2(
 	function (value, model) {
+		var fileName = A4(_user$project$Model_ProjectFileData$decode, value, 'fileName', _elm_lang$core$Json_Decode$string, '');
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
 				projectFileData: A3(
 					_elm_lang$core$Dict$insert,
-					A4(_user$project$Model_ProjectFileData$decode, value, 'fileName', _elm_lang$core$Json_Decode$string, ''),
+					fileName,
 					{
 						topLevelExpressions: A4(_user$project$Model_ProjectFileData$decode, value, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
 						exposings: A4(_user$project$Model_ProjectFileData$decode, value, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
@@ -12842,27 +12843,16 @@ var _user$project$Model_ProjectFileData$add = F2(
 								_1: {ctor: '[]'}
 							})
 					},
-					model.projectFileData)
+					model.projectFileData),
+				lastUpdatedFile: fileName
 			});
 	});
 
-var _user$project$Main$update = F2(
-	function (message, model) {
-		var _p0 = message;
-		if (_p0.ctor === 'RegisterProjectFiles') {
-			return _user$project$And$noCommand(
-				_elm_lang$core$Native_Utils.update(
-					model,
-					{projectFileRegistry: _p0._0}));
-		} else {
-			return _user$project$And$noCommand(
-				A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
-		}
-	});
 var _user$project$Main$init = _user$project$And$noCommand(
 	{
 		projectFileData: _elm_lang$core$Dict$empty,
-		projectFileRegistry: {ctor: '[]'}
+		projectFileRegistry: {ctor: '[]'},
+		lastUpdatedFile: ''
 	});
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
@@ -12879,17 +12869,29 @@ var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPo
 				})
 		};
 	});
-var _user$project$Main$andTransmitFileMarkup = F2(
-	function (fileName, model) {
-		return A2(
-			_user$project$And$execute,
-			_user$project$Main$markupForFile(
-				A2(_user$project$Model_FileMarkup$make, fileName, model)),
-			model);
+var _user$project$Main$andTransmitFileMarkup = function (model) {
+	return A2(
+		_user$project$And$execute,
+		_user$project$Main$markupForFile(
+			A2(_user$project$Model_FileMarkup$make, model.lastUpdatedFile, model)),
+		model);
+};
+var _user$project$Main$update = F2(
+	function (message, model) {
+		var _p0 = message;
+		if (_p0.ctor === 'RegisterProjectFiles') {
+			return _user$project$And$noCommand(
+				_elm_lang$core$Native_Utils.update(
+					model,
+					{projectFileRegistry: _p0._0}));
+		} else {
+			return _user$project$Main$andTransmitFileMarkup(
+				A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
+		}
 	});
-var _user$project$Main$Model = F2(
-	function (a, b) {
-		return {projectFileData: a, projectFileRegistry: b};
+var _user$project$Main$Model = F3(
+	function (a, b, c) {
+		return {projectFileData: a, projectFileRegistry: b, lastUpdatedFile: c};
 	});
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
