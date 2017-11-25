@@ -13059,7 +13059,7 @@ var _user$project$Model_References$findInExpression = F2(
 			case 'Application':
 				return A3(_user$project$Model_References$concatExpressions2, _p2._0, _p2._1, references);
 			case 'BinOp':
-				return A4(_user$project$Model_References$concatExpressions3, _p2._0, _p2._1, _p2._2, references);
+				return A3(_user$project$Model_References$concatExpressions2, _p2._1, _p2._2, references);
 			default:
 				return references;
 		}

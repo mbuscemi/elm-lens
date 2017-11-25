@@ -72,8 +72,8 @@ findInExpression expression references =
         Ast.Expression.Application exp1 exp2 ->
             concatExpressions2 exp1 exp2 references
 
-        Ast.Expression.BinOp exp1 exp2 exp3 ->
-            concatExpressions3 exp1 exp2 exp3 references
+        Ast.Expression.BinOp _ exp1 exp2 ->
+            concatExpressions2 exp1 exp2 references
 
         _ ->
             references
