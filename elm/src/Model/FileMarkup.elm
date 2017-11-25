@@ -2,6 +2,7 @@ module Model.FileMarkup exposing (make)
 
 import Dict
 import Set
+import Types.Expression exposing (Expression)
 import Types.FileData exposing (FileData)
 import Types.FileMarkup exposing (ExpressionData, FileMarkup)
 import Types.ProjectFileData exposing (ProjectFileData)
@@ -17,31 +18,27 @@ make fileName projectFileData =
 
 toFileMarkup : String -> ProjectFileData -> FileData -> FileMarkup
 toFileMarkup fileName projectFileData fileData =
-    FileMarkup fileName (makeExpressions fileName projectFileData fileData)
+    FileMarkup fileName (collectExpressions fileName projectFileData fileData)
 
 
-makeExpressions : String -> ProjectFileData -> FileData -> List ExpressionData
-makeExpressions fileName projectFileData fileData =
-    Dict.foldl
-        (\funcName funcData list ->
-            let
-                fileIsExposed =
-                    isExposed funcName fileData
-            in
-            ExpressionData
-                funcName
-                funcData.lineNumber
-                fileIsExposed
-                (numOccurencesInOwnReferences funcName fileData)
-                (if fileIsExposed then
-                    numOccurencesInOtherReferences funcName fileName projectFileData
-                 else
-                    0
-                )
-                :: list
-        )
-        []
-        fileData.topLevelExpressions.functions
+collectExpressions : String -> ProjectFileData -> FileData -> List ExpressionData
+collectExpressions fileName projectFileData fileData =
+    Dict.foldl (makeExpression fileName projectFileData fileData) [] fileData.topLevelExpressions.functions
+
+
+makeExpression : String -> ProjectFileData -> FileData -> String -> Expression -> List ExpressionData -> List ExpressionData
+makeExpression fileName projectFileData fileData funcName funcData list =
+    let
+        fileIsExposed =
+            isExposed funcName fileData
+    in
+    ExpressionData
+        funcName
+        funcData.lineNumber
+        fileIsExposed
+        (numOccurencesInOwnReferences funcName fileData)
+        (numOccurencesInOtherReferences fileIsExposed funcName fileName projectFileData)
+        :: list
 
 
 isExposed : String -> FileData -> Bool
@@ -62,9 +59,12 @@ referenceCounter funcName reference count =
         count
 
 
-numOccurencesInOtherReferences : String -> String -> ProjectFileData -> Int
-numOccurencesInOtherReferences funcName fileName projectFileData =
-    Dict.foldl (otherReferenceCounter funcName fileName) 0 projectFileData
+numOccurencesInOtherReferences : Bool -> String -> String -> ProjectFileData -> Int
+numOccurencesInOtherReferences fileIsExposed funcName fileName projectFileData =
+    if fileIsExposed then
+        Dict.foldl (otherReferenceCounter funcName fileName) 0 projectFileData
+    else
+        0
 
 
 otherReferenceCounter : String -> String -> String -> FileData -> Int -> Int
