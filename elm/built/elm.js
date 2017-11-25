@@ -12530,6 +12530,17 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
+var _user$project$Types_Expression$updateLineNumber = F2(
+	function (lineNumber, expression) {
+		return _elm_lang$core$Native_Utils.update(
+			expression,
+			{lineNumber: lineNumber});
+	});
+var _user$project$Types_Expression$default = {lineNumber: 0};
+var _user$project$Types_Expression$Expression = function (a) {
+	return {lineNumber: a};
+};
+
 var _user$project$Types_Exposings$encoder = function (exposings) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -12596,17 +12607,6 @@ var _user$project$Types_Reference$decoder = A2(
 	_user$project$Types_Reference$Reference,
 	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
 var _user$project$Types_Reference$listDecoder = _elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder);
-
-var _user$project$Types_Expression$updateLineNumber = F2(
-	function (lineNumber, expression) {
-		return _elm_lang$core$Native_Utils.update(
-			expression,
-			{lineNumber: lineNumber});
-	});
-var _user$project$Types_Expression$default = {lineNumber: 0};
-var _user$project$Types_Expression$Expression = function (a) {
-	return {lineNumber: a};
-};
 
 var _user$project$Types_TopLevelExpressions$expressionDecoder = A2(
 	_elm_lang$core$Json_Decode$map,
@@ -12749,46 +12749,54 @@ var _user$project$Model_FileMarkup$otherReferenceCounter = F5(
 	function (funcName, fileName, curFileName, fileData, count) {
 		return _elm_lang$core$Native_Utils.eq(curFileName, fileName) ? count : (count + A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData));
 	});
-var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F3(
-	function (funcName, fileName, projectFileData) {
-		return A3(
+var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F4(
+	function (fileIsExposed, funcName, fileName, projectFileData) {
+		return fileIsExposed ? A3(
 			_elm_lang$core$Dict$foldl,
 			A2(_user$project$Model_FileMarkup$otherReferenceCounter, funcName, fileName),
 			0,
-			projectFileData);
+			projectFileData) : 0;
 	});
 var _user$project$Model_FileMarkup$isExposed = F2(
 	function (funcName, fileData) {
 		return A2(_elm_lang$core$Set$member, funcName, fileData.exposings.functions);
 	});
-var _user$project$Model_FileMarkup$makeExpressions = F3(
+var _user$project$Model_FileMarkup$makeExpression = F6(
+	function (fileName, projectFileData, fileData, funcName, funcData, list) {
+		var fileIsExposed = A2(_user$project$Model_FileMarkup$isExposed, funcName, fileData);
+		return {
+			ctor: '::',
+			_0: A5(
+				_user$project$Types_FileMarkup$ExpressionData,
+				funcName,
+				funcData.lineNumber,
+				fileIsExposed,
+				A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData),
+				A4(_user$project$Model_FileMarkup$numOccurencesInOtherReferences, fileIsExposed, funcName, fileName, projectFileData)),
+			_1: list
+		};
+	});
+var _user$project$Model_FileMarkup$collectExpressions = F3(
 	function (fileName, projectFileData, fileData) {
-		return A3(
-			_elm_lang$core$Dict$foldl,
-			F3(
-				function (funcName, funcData, list) {
-					var fileIsExposed = A2(_user$project$Model_FileMarkup$isExposed, funcName, fileData);
-					return {
-						ctor: '::',
-						_0: A5(
-							_user$project$Types_FileMarkup$ExpressionData,
-							funcName,
-							funcData.lineNumber,
-							fileIsExposed,
-							A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData),
-							fileIsExposed ? A3(_user$project$Model_FileMarkup$numOccurencesInOtherReferences, funcName, fileName, projectFileData) : 0),
-						_1: list
-					};
-				}),
-			{ctor: '[]'},
-			fileData.topLevelExpressions.functions);
+		var expressionBuilder = A3(_user$project$Model_FileMarkup$makeExpression, fileName, projectFileData, fileData);
+		return function (expressionData) {
+			return A3(_elm_lang$core$Dict$foldl, expressionBuilder, expressionData, fileData.topLevelExpressions.typeAliases);
+		}(
+			function (expressionData) {
+				return A3(_elm_lang$core$Dict$foldl, expressionBuilder, expressionData, fileData.topLevelExpressions.types);
+			}(
+				A3(
+					_elm_lang$core$Dict$foldl,
+					expressionBuilder,
+					{ctor: '[]'},
+					fileData.topLevelExpressions.functions)));
 	});
 var _user$project$Model_FileMarkup$toFileMarkup = F3(
 	function (fileName, projectFileData, fileData) {
 		return A2(
 			_user$project$Types_FileMarkup$FileMarkup,
 			fileName,
-			A3(_user$project$Model_FileMarkup$makeExpressions, fileName, projectFileData, fileData));
+			A3(_user$project$Model_FileMarkup$collectExpressions, fileName, projectFileData, fileData));
 	});
 var _user$project$Model_FileMarkup$make = F2(
 	function (fileName, projectFileData) {

@@ -23,7 +23,13 @@ toFileMarkup fileName projectFileData fileData =
 
 collectExpressions : String -> ProjectFileData -> FileData -> List ExpressionData
 collectExpressions fileName projectFileData fileData =
-    Dict.foldl (makeExpression fileName projectFileData fileData) [] fileData.topLevelExpressions.functions
+    let
+        expressionBuilder =
+            makeExpression fileName projectFileData fileData
+    in
+    Dict.foldl expressionBuilder [] fileData.topLevelExpressions.functions
+        |> (\expressionData -> Dict.foldl expressionBuilder expressionData fileData.topLevelExpressions.types)
+        |> (\expressionData -> Dict.foldl expressionBuilder expressionData fileData.topLevelExpressions.typeAliases)
 
 
 makeExpression : String -> ProjectFileData -> FileData -> String -> Expression -> List ExpressionData -> List ExpressionData
