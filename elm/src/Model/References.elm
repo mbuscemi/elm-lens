@@ -2,6 +2,7 @@ module Model.References exposing (collect)
 
 import Ast.Expression exposing (Expression)
 import Ast.Statement exposing (Statement(FunctionDeclaration))
+import Set exposing (Set)
 import Types.Reference exposing (Reference)
 
 
@@ -29,51 +30,66 @@ stringsToRefs refStrings =
 collectReferences : Statement -> List String -> List String
 collectReferences statement references =
     case statement of
-        FunctionDeclaration _ _ expression ->
-            findInExpression expression references
+        FunctionDeclaration _ args expression ->
+            findInExpression (funcArguments args) expression references
 
         _ ->
             references
 
 
-findInExpression : Expression -> List String -> List String
-findInExpression expression references =
-    case expression of
-        Ast.Expression.Variable [ "_" ] ->
-            references
+funcArguments : List Expression -> Set String
+funcArguments expressions =
+    List.foldl collectFuncArguments Set.empty expressions
 
-        Ast.Expression.Variable names ->
-            names ++ references
+
+collectFuncArguments : Expression -> Set String -> Set String
+collectFuncArguments expression args =
+    case expression of
+        Ast.Expression.Variable (name :: rest) ->
+            collectFuncArguments (Ast.Expression.Variable rest) (Set.insert name args)
+
+        _ ->
+            args
+
+
+findInExpression : Set String -> Expression -> List String -> List String
+findInExpression arguments expression references =
+    case expression of
+        Ast.Expression.Variable (name :: rest) ->
+            if Set.member name arguments then
+                findInExpression arguments (Ast.Expression.Variable rest) references
+            else
+                findInExpression arguments (Ast.Expression.Variable rest) (name :: references)
 
         Ast.Expression.List expressions ->
-            List.foldl findInExpression references expressions
+            List.foldl (findInExpression arguments) references expressions
 
         Ast.Expression.Tuple expressions ->
-            List.foldl findInExpression references expressions
+            List.foldl (findInExpression arguments) references expressions
 
         Ast.Expression.Record list ->
-            List.foldl (\( _, exp ) funcs -> findInExpression exp funcs) references list
+            List.foldl (\( _, exp ) funcs -> findInExpression arguments exp funcs) references list
 
         Ast.Expression.RecordUpdate _ list ->
-            List.foldl (\( _, exp ) funcs -> findInExpression exp funcs) references list
+            List.foldl (\( _, exp ) funcs -> findInExpression arguments exp funcs) references list
 
         Ast.Expression.If exp1 exp2 exp3 ->
-            concatExpressions3 exp1 exp2 exp3 references
+            concatExpressions3 arguments exp1 exp2 exp3 references
 
         Ast.Expression.Let list expression ->
-            List.foldl findInExpression references (expression :: flattenExpressionTuples list)
+            List.foldl (findInExpression arguments) references (expression :: flattenExpressionTuples list)
 
         Ast.Expression.Case expression list ->
-            List.foldl findInExpression references (expression :: flattenExpressionTuples list)
+            List.foldl (findInExpression arguments) references (expression :: flattenExpressionTuples list)
 
         Ast.Expression.Lambda list expression ->
-            List.foldl findInExpression references (expression :: list)
+            List.foldl (findInExpression arguments) references (expression :: list)
 
         Ast.Expression.Application exp1 exp2 ->
-            concatExpressions2 exp1 exp2 references
+            concatExpressions2 arguments exp1 exp2 references
 
         Ast.Expression.BinOp _ exp1 exp2 ->
-            concatExpressions2 exp1 exp2 references
+            concatExpressions2 arguments exp1 exp2 references
 
         _ ->
             references
@@ -84,11 +100,11 @@ flattenExpressionTuples expressionTuples =
     List.foldl (\( exp1, exp2 ) list -> exp1 :: exp2 :: list) [] expressionTuples
 
 
-concatExpressions2 : Expression -> Expression -> List String -> List String
-concatExpressions2 exp1 exp2 references =
-    List.foldl findInExpression references [ exp1, exp2 ]
+concatExpressions2 : Set String -> Expression -> Expression -> List String -> List String
+concatExpressions2 arguments exp1 exp2 references =
+    List.foldl (findInExpression arguments) references [ exp1, exp2 ]
 
 
-concatExpressions3 : Expression -> Expression -> Expression -> List String -> List String
-concatExpressions3 exp1 exp2 exp3 references =
-    List.foldl findInExpression references [ exp1, exp2, exp3 ]
+concatExpressions3 : Set String -> Expression -> Expression -> Expression -> List String -> List String
+concatExpressions3 arguments exp1 exp2 exp3 references =
+    List.foldl (findInExpression arguments) references [ exp1, exp2, exp3 ]
