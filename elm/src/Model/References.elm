@@ -82,8 +82,8 @@ findInExpression arguments expression references =
         Ast.Expression.Case expression list ->
             List.foldl (findInExpression arguments) references (expression :: flattenExpressionTuples list)
 
-        Ast.Expression.Lambda list expression ->
-            List.foldl (findInExpression arguments) references (expression :: list)
+        Ast.Expression.Lambda lambdaArgs expression ->
+            findInExpression (Set.union arguments (funcArguments lambdaArgs)) expression references
 
         Ast.Expression.Application exp1 exp2 ->
             concatExpressions2 arguments exp1 exp2 references
