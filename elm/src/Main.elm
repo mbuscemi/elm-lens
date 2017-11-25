@@ -18,7 +18,6 @@ type alias Model =
 type Message
     = RegisterProjectFiles (List String)
     | AddFileData Value
-    | FileMarkupRequest String
 
 
 main : Program Never Model Message
@@ -50,17 +49,12 @@ update message model =
                 |> Model.ProjectFileData.add value
                 |> And.noCommand
 
-        FileMarkupRequest fileName ->
-            model
-                |> andTransmitFileMarkup fileName
-
 
 subscriptions : Model -> Sub Message
 subscriptions model =
     Sub.batch
         [ registerProjectFiles RegisterProjectFiles
         , processReport AddFileData
-        , fileMarkupRequest FileMarkupRequest
         ]
 
 
@@ -73,9 +67,6 @@ port registerProjectFiles : (List String -> message) -> Sub message
 
 
 port processReport : (Value -> message) -> Sub message
-
-
-port fileMarkupRequest : (String -> message) -> Sub message
 
 
 port markupForFile : FileMarkup -> Cmd message

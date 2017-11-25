@@ -12846,6 +12846,19 @@ var _user$project$Model_ProjectFileData$add = F2(
 			});
 	});
 
+var _user$project$Main$update = F2(
+	function (message, model) {
+		var _p0 = message;
+		if (_p0.ctor === 'RegisterProjectFiles') {
+			return _user$project$And$noCommand(
+				_elm_lang$core$Native_Utils.update(
+					model,
+					{projectFileRegistry: _p0._0}));
+		} else {
+			return _user$project$And$noCommand(
+				A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
+		}
+	});
 var _user$project$Main$init = _user$project$And$noCommand(
 	{
 		projectFileData: _elm_lang$core$Dict$empty,
@@ -12855,7 +12868,6 @@ var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.inc
 	'registerProjectFiles',
 	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
 var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$fileMarkupRequest = _elm_lang$core$Native_Platform.incomingPort('fileMarkupRequest', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPort(
 	'markupForFile',
 	function (v) {
@@ -12875,29 +12887,10 @@ var _user$project$Main$andTransmitFileMarkup = F2(
 				A2(_user$project$Model_FileMarkup$make, fileName, model)),
 			model);
 	});
-var _user$project$Main$update = F2(
-	function (message, model) {
-		var _p0 = message;
-		switch (_p0.ctor) {
-			case 'RegisterProjectFiles':
-				return _user$project$And$noCommand(
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{projectFileRegistry: _p0._0}));
-			case 'AddFileData':
-				return _user$project$And$noCommand(
-					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
-			default:
-				return A2(_user$project$Main$andTransmitFileMarkup, _p0._0, model);
-		}
-	});
 var _user$project$Main$Model = F2(
 	function (a, b) {
 		return {projectFileData: a, projectFileRegistry: b};
 	});
-var _user$project$Main$FileMarkupRequest = function (a) {
-	return {ctor: 'FileMarkupRequest', _0: a};
-};
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};
 };
@@ -12912,11 +12905,7 @@ var _user$project$Main$subscriptions = function (model) {
 			_1: {
 				ctor: '::',
 				_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$fileMarkupRequest(_user$project$Main$FileMarkupRequest),
-					_1: {ctor: '[]'}
-				}
+				_1: {ctor: '[]'}
 			}
 		});
 };
