@@ -1,6 +1,7 @@
 module Model.FileMarkup exposing (make)
 
 import Dict
+import Model.BatchProcess
 import Set exposing (Set)
 import Types.Expression exposing (Expression)
 import Types.FileData exposing (FileData)
@@ -27,13 +28,8 @@ toFileMarkup : String -> Model model -> FileData -> FileMarkup
 toFileMarkup fileName model fileData =
     FileMarkup
         fileName
-        (isBatchProcessComplete model.projectFileData model.projectFileRegistry)
+        (Model.BatchProcess.isComplete model)
         (collectExpressions fileName model.projectFileData fileData)
-
-
-isBatchProcessComplete : ProjectFileData -> Set String -> Bool
-isBatchProcessComplete projectFileData projectFileRegistry =
-    Dict.size projectFileData == Set.size projectFileRegistry
 
 
 collectExpressions : String -> ProjectFileData -> FileData -> List ExpressionData

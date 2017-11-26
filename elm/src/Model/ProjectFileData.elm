@@ -11,6 +11,7 @@ import Types.TopLevelExpressions
 type alias Model model =
     { model
         | projectFileData : ProjectFileData
+        , lastUpdatedFile : String
     }
 
 
@@ -29,6 +30,7 @@ add value model =
                 , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
                 }
                 model.projectFileData
+        , lastUpdatedFile = fileName
     }
 
 

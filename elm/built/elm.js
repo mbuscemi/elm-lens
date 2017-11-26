@@ -12530,17 +12530,6 @@ var _user$project$And$noCommand = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
-var _user$project$Types_Expression$updateLineNumber = F2(
-	function (lineNumber, expression) {
-		return _elm_lang$core$Native_Utils.update(
-			expression,
-			{lineNumber: lineNumber});
-	});
-var _user$project$Types_Expression$default = {lineNumber: 0};
-var _user$project$Types_Expression$Expression = function (a) {
-	return {lineNumber: a};
-};
-
 var _user$project$Types_Exposings$encoder = function (exposings) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -12607,6 +12596,17 @@ var _user$project$Types_Reference$decoder = A2(
 	_user$project$Types_Reference$Reference,
 	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
 var _user$project$Types_Reference$listDecoder = _elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder);
+
+var _user$project$Types_Expression$updateLineNumber = F2(
+	function (lineNumber, expression) {
+		return _elm_lang$core$Native_Utils.update(
+			expression,
+			{lineNumber: lineNumber});
+	});
+var _user$project$Types_Expression$default = {lineNumber: 0};
+var _user$project$Types_Expression$Expression = function (a) {
+	return {lineNumber: a};
+};
 
 var _user$project$Types_TopLevelExpressions$expressionDecoder = A2(
 	_elm_lang$core$Json_Decode$map,
@@ -12719,6 +12719,13 @@ var _user$project$Types_FileData$FileData = F3(
 		return {topLevelExpressions: a, exposings: b, references: c};
 	});
 
+
+var _user$project$Model_BatchProcess$isComplete = function (model) {
+	return _elm_lang$core$Native_Utils.cmp(
+		_elm_lang$core$Dict$size(model.projectFileData),
+		_elm_lang$core$Set$size(model.projectFileRegistry)) > -1;
+};
+
 var _user$project$Types_FileMarkup$default = {
 	fileName: '',
 	projectIsProcessed: false,
@@ -12732,7 +12739,6 @@ var _user$project$Types_FileMarkup$ExpressionData = F5(
 	function (a, b, c, d, e) {
 		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d, numExternalRefs: e};
 	});
-
 
 var _user$project$Model_FileMarkup$referenceCounter = F3(
 	function (funcName, reference, count) {
@@ -12792,18 +12798,12 @@ var _user$project$Model_FileMarkup$collectExpressions = F3(
 					{ctor: '[]'},
 					fileData.topLevelExpressions.functions)));
 	});
-var _user$project$Model_FileMarkup$isBatchProcessComplete = F2(
-	function (projectFileData, projectFileRegistry) {
-		return _elm_lang$core$Native_Utils.eq(
-			_elm_lang$core$Dict$size(projectFileData),
-			_elm_lang$core$Set$size(projectFileRegistry));
-	});
 var _user$project$Model_FileMarkup$toFileMarkup = F3(
 	function (fileName, model, fileData) {
 		return A3(
 			_user$project$Types_FileMarkup$FileMarkup,
 			fileName,
-			A2(_user$project$Model_FileMarkup$isBatchProcessComplete, model.projectFileData, model.projectFileRegistry),
+			_user$project$Model_BatchProcess$isComplete(model),
 			A3(_user$project$Model_FileMarkup$collectExpressions, fileName, model.projectFileData, fileData));
 	});
 var _user$project$Model_FileMarkup$make = F2(
@@ -12817,6 +12817,47 @@ var _user$project$Model_FileMarkup$make = F2(
 				_user$project$Types_FileData$empty,
 				A2(_elm_lang$core$Dict$get, fileName, model.projectFileData)));
 	});
+
+var _user$project$And_FileMarkup$markupForFile = _elm_lang$core$Native_Platform.outgoingPort(
+	'markupForFile',
+	function (v) {
+		return {
+			fileName: v.fileName,
+			projectIsProcessed: v.projectIsProcessed,
+			expressions: _elm_lang$core$Native_List.toArray(v.expressions).map(
+				function (v) {
+					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs, numExternalRefs: v.numExternalRefs};
+				})
+		};
+	});
+var _user$project$And_FileMarkup$transmitFileMarkup = F2(
+	function (model, filePath) {
+		return _user$project$And_FileMarkup$markupForFile(
+			A2(_user$project$Model_FileMarkup$make, filePath, model));
+	});
+var _user$project$And_FileMarkup$transmitToUpdatedEditor = function (model) {
+	return {
+		ctor: '::',
+		_0: A2(_user$project$And_FileMarkup$transmitFileMarkup, model, model.lastUpdatedFile),
+		_1: {ctor: '[]'}
+	};
+};
+var _user$project$And_FileMarkup$transmitToActiveEditors = function (model) {
+	return A2(
+		_elm_lang$core$List$map,
+		_user$project$And_FileMarkup$transmitFileMarkup(model),
+		_elm_lang$core$Set$toList(model.activeTextEditors));
+};
+var _user$project$And_FileMarkup$transmitTo = function (model) {
+	return _user$project$Model_BatchProcess$isComplete(model) ? _user$project$And_FileMarkup$transmitToActiveEditors(model) : _user$project$And_FileMarkup$transmitToUpdatedEditor(model);
+};
+var _user$project$And_FileMarkup$transmit = function (model) {
+	return A2(
+		_user$project$And$execute,
+		_elm_lang$core$Platform_Cmd$batch(
+			_user$project$And_FileMarkup$transmitTo(model)),
+		model);
+};
 
 var _user$project$Model_ProjectFileData$decode = F4(
 	function (value, fieldName, decoder, $default) {
@@ -12851,48 +12892,11 @@ var _user$project$Model_ProjectFileData$add = F2(
 								_1: {ctor: '[]'}
 							})
 					},
-					model.projectFileData)
+					model.projectFileData),
+				lastUpdatedFile: fileName
 			});
 	});
 
-var _user$project$Main$init = _user$project$And$noCommand(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty});
-var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
-	'registerProjectFiles',
-	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
-var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
-var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
-var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$markupForFile = _elm_lang$core$Native_Platform.outgoingPort(
-	'markupForFile',
-	function (v) {
-		return {
-			fileName: v.fileName,
-			projectIsProcessed: v.projectIsProcessed,
-			expressions: _elm_lang$core$Native_List.toArray(v.expressions).map(
-				function (v) {
-					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs, numExternalRefs: v.numExternalRefs};
-				})
-		};
-	});
-var _user$project$Main$transmitFileMarkup = F2(
-	function (model, filePath) {
-		return _user$project$Main$markupForFile(
-			A2(_user$project$Model_FileMarkup$make, filePath, model));
-	});
-var _user$project$Main$transmitToActiveEditors = function (model) {
-	return A2(
-		_elm_lang$core$List$map,
-		_user$project$Main$transmitFileMarkup(model),
-		_elm_lang$core$Set$toList(model.activeTextEditors));
-};
-var _user$project$Main$andTransmitFileMarkup = function (model) {
-	return A2(
-		_user$project$And$execute,
-		_elm_lang$core$Platform_Cmd$batch(
-			_user$project$Main$transmitToActiveEditors(model)),
-		model);
-};
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
@@ -12919,13 +12923,21 @@ var _user$project$Main$update = F2(
 							activeTextEditors: A2(_elm_lang$core$Set$remove, _p0._0, model.activeTextEditors)
 						}));
 			default:
-				return _user$project$Main$andTransmitFileMarkup(
+				return _user$project$And_FileMarkup$transmit(
 					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
 		}
 	});
-var _user$project$Main$Model = F3(
-	function (a, b, c) {
-		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c};
+var _user$project$Main$init = _user$project$And$noCommand(
+	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: ''});
+var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
+	'registerProjectFiles',
+	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
+var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
+var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
+var _user$project$Main$Model = F4(
+	function (a, b, c, d) {
+		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d};
 	});
 var _user$project$Main$AddFileData = function (a) {
 	return {ctor: 'AddFileData', _0: a};

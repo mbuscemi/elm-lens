@@ -1,12 +1,11 @@
 port module Main exposing (main)
 
 import And
+import And.FileMarkup
 import Dict exposing (Dict)
 import Json.Encode exposing (Value)
-import Model.FileMarkup
 import Model.ProjectFileData
 import Set exposing (Set)
-import Types.FileMarkup exposing (FileMarkup)
 import Types.ProjectFileData exposing (ProjectFileData)
 
 
@@ -14,6 +13,7 @@ type alias Model =
     { projectFileData : ProjectFileData
     , projectFileRegistry : Set String
     , activeTextEditors : Set String
+    , lastUpdatedFile : String
     }
 
 
@@ -38,6 +38,7 @@ init =
     { projectFileData = Dict.empty
     , projectFileRegistry = Set.empty
     , activeTextEditors = Set.empty
+    , lastUpdatedFile = ""
     }
         |> And.noCommand
 
@@ -60,7 +61,7 @@ update message model =
         AddFileData value ->
             model
                 |> Model.ProjectFileData.add value
-                |> andTransmitFileMarkup
+                |> And.FileMarkup.transmit
 
 
 subscriptions : Model -> Sub Message
@@ -73,21 +74,6 @@ subscriptions model =
         ]
 
 
-andTransmitFileMarkup : Model -> ( Model, Cmd Message )
-andTransmitFileMarkup model =
-    And.execute (Cmd.batch <| transmitToActiveEditors model) model
-
-
-transmitToActiveEditors : Model -> List (Cmd Message)
-transmitToActiveEditors model =
-    List.map (transmitFileMarkup model) (Set.toList model.activeTextEditors)
-
-
-transmitFileMarkup : Model -> String -> Cmd Message
-transmitFileMarkup model filePath =
-    markupForFile <| Model.FileMarkup.make filePath model
-
-
 port registerProjectFiles : (List String -> message) -> Sub message
 
 
@@ -98,6 +84,3 @@ port unregisterTextEditor : (String -> message) -> Sub message
 
 
 port processReport : (Value -> message) -> Sub message
-
-
-port markupForFile : FileMarkup -> Cmd message
