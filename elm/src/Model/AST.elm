@@ -1,27 +1,13 @@
 module Model.AST exposing (buildFrom)
 
-import Ast exposing (parse)
-import Ast.Statement exposing (Statement)
-
-
-type alias FileSyntaxMap =
-    List Statement
+import Elm.Parser exposing (parse)
+import Elm.RawFile exposing (RawFile)
 
 
 type alias WithFileAST model =
-    { model | fileAST : FileSyntaxMap }
+    { model | fileAST : Result (List String) RawFile }
 
 
 buildFrom : String -> WithFileAST model -> WithFileAST model
 buildFrom fileText model =
-    { model | fileAST = process fileText }
-
-
-process : String -> List Statement
-process text =
-    case parse text of
-        Ok ( _, _, list ) ->
-            list
-
-        Err _ ->
-            []
+    { model | fileAST = parse fileText }

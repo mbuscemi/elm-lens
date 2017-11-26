@@ -1,7 +1,7 @@
 port module Worker exposing (main)
 
 import And
-import Ast.Statement exposing (Statement)
+import Elm.RawFile exposing (RawFile)
 import Json.Decode exposing (Value)
 import Model.AST
 import Model.Exposings
@@ -14,7 +14,7 @@ import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias Model =
-    { fileAST : List Statement
+    { fileAST : Result (List String) RawFile
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
     , references : List Reference
@@ -36,7 +36,7 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { fileAST = []
+    { fileAST = Err []
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
     , references = []
@@ -53,7 +53,6 @@ update message model =
                 |> Model.TopLevelExpressions.collect
                 |> Model.Exposings.collect
                 |> Model.References.collect
-                |> Model.TopLevelExpressions.addLineNumbers text
                 |> andSendReport fileName
 
 

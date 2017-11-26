@@ -1,70 +1,88 @@
 module Model.Exposings exposing (collect)
 
-import Ast.Statement exposing (ExportSet(AllExport, FunctionExport, SubsetExport, TypeExport), Statement(ModuleDeclaration, PortModuleDeclaration))
 import Dict
-import Set
+import Elm.Processing exposing (init, process)
+import Elm.RawFile exposing (RawFile)
+import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
+import Elm.Syntax.Module exposing (Module(EffectModule, NormalModule, PortModule))
+import Set exposing (Set)
 import Types.Exposings exposing (Exposings)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias Model model =
     { model
-        | fileAST : List Statement
-        , topLevelExpressions : TopLevelExpressions
+        | fileAST : Result (List String) RawFile
         , exposings : Exposings
+        , topLevelExpressions : TopLevelExpressions
     }
 
 
 collect : Model model -> Model model
 collect model =
-    { model | exposings = List.foldl (collectExposings model) model.exposings model.fileAST }
+    { model | exposings = collectExposings model.topLevelExpressions model.fileAST }
 
 
-collectExposings : Model model -> Statement -> Exposings -> Exposings
-collectExposings model statement exposings =
-    case statement of
-        ModuleDeclaration _ AllExport ->
-            useAllTopLevelExpressions model
+collectExposings : TopLevelExpressions -> Result (List String) RawFile -> Exposings
+collectExposings topLevelExpressions parseResult =
+    case parseResult of
+        Ok rawFile ->
+            process init rawFile
+                |> .moduleDefinition
+                |> exposingListFromModule
+                |> gatherExposings topLevelExpressions
 
-        PortModuleDeclaration _ AllExport ->
-            useAllTopLevelExpressions model
-
-        ModuleDeclaration _ (SubsetExport exports) ->
-            collectAll exports exposings
-
-        PortModuleDeclaration _ (SubsetExport exports) ->
-            collectAll exports exposings
-
-        _ ->
-            exposings
+        Err errors ->
+            Types.Exposings.default
 
 
-useAllTopLevelExpressions : Model model -> Exposings
-useAllTopLevelExpressions model =
+exposingListFromModule : Module -> Exposing TopLevelExpose
+exposingListFromModule module_ =
+    case module_ of
+        NormalModule data ->
+            data.exposingList
+
+        PortModule data ->
+            data.exposingList
+
+        EffectModule data ->
+            data.exposingList
+
+
+gatherExposings : TopLevelExpressions -> Exposing TopLevelExpose -> Exposings
+gatherExposings topLevelExpressions topLevelExposeExposing =
+    case topLevelExposeExposing of
+        Elm.Syntax.Exposing.All range ->
+            useAllTopLevelExpressions topLevelExpressions
+
+        Elm.Syntax.Exposing.Explicit exposingsList ->
+            List.foldl processExposing Types.Exposings.default exposingsList
+
+
+useAllTopLevelExpressions : TopLevelExpressions -> Exposings
+useAllTopLevelExpressions topLevelExpressions =
     { functions =
-        model.topLevelExpressions.functions
+        topLevelExpressions.functions
             |> Dict.keys
             |> Set.fromList
     , types =
-        Dict.union model.topLevelExpressions.types model.topLevelExpressions.typeAliases
+        Dict.union topLevelExpressions.types topLevelExpressions.typeAliases
             |> Dict.keys
             |> Set.fromList
     }
 
 
-collectAll : List ExportSet -> Exposings -> Exposings
-collectAll exports exposings =
-    List.foldl collectFromExports exposings exports
+processExposing : TopLevelExpose -> Exposings -> Exposings
+processExposing topLevelExpose exposings =
+    case topLevelExpose of
+        Elm.Syntax.Exposing.InfixExpose name range ->
+            exposings
 
-
-collectFromExports : ExportSet -> Exposings -> Exposings
-collectFromExports export exposings =
-    case export of
-        FunctionExport name ->
+        Elm.Syntax.Exposing.FunctionExpose name range ->
             { exposings | functions = Set.insert name exposings.functions }
 
-        TypeExport name _ ->
+        Elm.Syntax.Exposing.TypeOrAliasExpose name range ->
             { exposings | types = Set.insert name exposings.types }
 
-        _ ->
+        Elm.Syntax.Exposing.TypeExpose exposedType ->
             exposings
