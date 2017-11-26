@@ -13,7 +13,8 @@ type alias Model =
     { projectFileData : ProjectFileData
     , projectFileRegistry : Set String
     , activeTextEditors : Set String
-    , lastUpdatedFile : String
+    , lastUpdatedFile : Maybe String
+    , fileBeingReprocessed : Maybe String
     }
 
 
@@ -22,6 +23,7 @@ type Message
     | RegisterTextEditor String
     | UnregisterTextEditor String
     | AddFileData Value
+    | MarkAsReprocessing String
 
 
 main : Program Never Model Message
@@ -38,7 +40,8 @@ init =
     { projectFileData = Dict.empty
     , projectFileRegistry = Set.empty
     , activeTextEditors = Set.empty
-    , lastUpdatedFile = ""
+    , lastUpdatedFile = Nothing
+    , fileBeingReprocessed = Nothing
     }
         |> And.noCommand
 
@@ -63,6 +66,10 @@ update message model =
                 |> Model.ProjectFileData.add value
                 |> And.FileMarkup.transmit
 
+        MarkAsReprocessing filePath ->
+            { model | fileBeingReprocessed = Just filePath }
+                |> And.FileMarkup.transmitTo filePath
+
 
 subscriptions : Model -> Sub Message
 subscriptions model =
@@ -72,6 +79,9 @@ subscriptions model =
         , unregisterTextEditor UnregisterTextEditor
         , processReport AddFileData
         ]
+
+
+port notifyReprocessingFile : (String -> message) -> Sub message
 
 
 port registerProjectFiles : (List String -> message) -> Sub message

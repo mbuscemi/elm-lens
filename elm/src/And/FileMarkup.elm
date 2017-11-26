@@ -1,4 +1,4 @@
-port module And.FileMarkup exposing (transmit)
+port module And.FileMarkup exposing (transmit, transmitTo)
 
 import And
 import Model.BatchProcess
@@ -13,17 +13,23 @@ type alias Model model =
         | projectFileData : ProjectFileData
         , projectFileRegistry : Set String
         , activeTextEditors : Set String
-        , lastUpdatedFile : String
+        , lastUpdatedFile : Maybe String
+        , fileBeingReprocessed : Maybe String
     }
 
 
 transmit : Model model -> ( Model model, Cmd message )
 transmit model =
-    And.execute (Cmd.batch <| transmitTo model) model
+    And.execute (Cmd.batch <| lifecycleBasedtransmission model) model
 
 
-transmitTo : Model model -> List (Cmd message)
-transmitTo model =
+transmitTo : String -> Model model -> ( Model model, Cmd message )
+transmitTo filePath model =
+    And.execute (transmitFileMarkup model filePath) model
+
+
+lifecycleBasedtransmission : Model model -> List (Cmd message)
+lifecycleBasedtransmission model =
     if Model.BatchProcess.isComplete model then
         transmitToActiveEditors model
     else
@@ -32,7 +38,12 @@ transmitTo model =
 
 transmitToUpdatedEditor : Model model -> List (Cmd message)
 transmitToUpdatedEditor model =
-    [ transmitFileMarkup model model.lastUpdatedFile ]
+    case model.lastUpdatedFile of
+        Just fileName ->
+            [ transmitFileMarkup model fileName ]
+
+        Nothing ->
+            []
 
 
 transmitToActiveEditors : Model model -> List (Cmd message)

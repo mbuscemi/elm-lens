@@ -11,7 +11,8 @@ import Types.TopLevelExpressions
 type alias Model model =
     { model
         | projectFileData : ProjectFileData
-        , lastUpdatedFile : String
+        , lastUpdatedFile : Maybe String
+        , fileBeingReprocessed : Maybe String
     }
 
 
@@ -30,7 +31,8 @@ add value model =
                 , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
                 }
                 model.projectFileData
-        , lastUpdatedFile = fileName
+        , lastUpdatedFile = Just fileName
+        , fileBeingReprocessed = markReprocessedFileComplete fileName model
     }
 
 
@@ -38,3 +40,16 @@ decode : Value -> String -> Decoder a -> a -> a
 decode value fieldName decoder default =
     decodeValue (field fieldName decoder) value
         |> Result.withDefault default
+
+
+markReprocessedFileComplete : String -> Model model -> Maybe String
+markReprocessedFileComplete fileName model =
+    case model.fileBeingReprocessed of
+        Just reprocessingFile ->
+            if reprocessingFile == fileName then
+                Nothing
+            else
+                model.fileBeingReprocessed
+
+        Nothing ->
+            Nothing

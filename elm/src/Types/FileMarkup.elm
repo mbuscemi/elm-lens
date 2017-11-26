@@ -4,6 +4,7 @@ module Types.FileMarkup exposing (ExpressionData, FileMarkup, default)
 type alias FileMarkup =
     { fileName : String
     , projectIsProcessed : Bool
+    , fileIsReprocessing : Bool
     , expressions : List ExpressionData
     }
 
@@ -21,5 +22,6 @@ default : FileMarkup
 default =
     { fileName = ""
     , projectIsProcessed = False
+    , fileIsReprocessing = False
     , expressions = []
     }

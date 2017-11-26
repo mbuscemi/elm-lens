@@ -14,6 +14,7 @@ type alias Model model =
     { model
         | projectFileData : ProjectFileData
         , projectFileRegistry : Set String
+        , fileBeingReprocessed : Maybe String
     }
 
 
@@ -29,7 +30,18 @@ toFileMarkup fileName model fileData =
     FileMarkup
         fileName
         (Model.BatchProcess.isComplete model)
+        (isFileReprocessing fileName model)
         (collectExpressions fileName model.projectFileData fileData)
+
+
+isFileReprocessing : String -> Model model -> Bool
+isFileReprocessing fileName model =
+    case model.fileBeingReprocessed of
+        Just reprocessingFile ->
+            fileName == reprocessingFile
+
+        Nothing ->
+            False
 
 
 collectExpressions : String -> ProjectFileData -> FileData -> List ExpressionData
