@@ -15,6 +15,7 @@ type alias Model =
     , activeTextEditors : Set String
     , lastUpdatedFile : Maybe String
     , fileBeingReprocessed : Maybe String
+    , batchUpdateSent : Bool
     }
 
 
@@ -42,6 +43,7 @@ init =
     , activeTextEditors = Set.empty
     , lastUpdatedFile = Nothing
     , fileBeingReprocessed = Nothing
+    , batchUpdateSent = False
     }
         |> And.noCommand
 

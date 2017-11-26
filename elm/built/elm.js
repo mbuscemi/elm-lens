@@ -12858,29 +12858,43 @@ var _user$project$And_FileMarkup$transmitToUpdatedEditor = function (model) {
 	var _p0 = model.lastUpdatedFile;
 	if (_p0.ctor === 'Just') {
 		return {
-			ctor: '::',
-			_0: A2(_user$project$And_FileMarkup$transmitFileMarkup, model, _p0._0),
-			_1: {ctor: '[]'}
+			ctor: '_Tuple2',
+			_0: model,
+			_1: {
+				ctor: '::',
+				_0: A2(_user$project$And_FileMarkup$transmitFileMarkup, model, _p0._0),
+				_1: {ctor: '[]'}
+			}
 		};
 	} else {
-		return {ctor: '[]'};
+		return {
+			ctor: '_Tuple2',
+			_0: model,
+			_1: {ctor: '[]'}
+		};
 	}
 };
 var _user$project$And_FileMarkup$transmitToActiveEditors = function (model) {
-	return A2(
-		_elm_lang$core$List$map,
-		_user$project$And_FileMarkup$transmitFileMarkup(model),
-		_elm_lang$core$Set$toList(model.activeTextEditors));
+	return {
+		ctor: '_Tuple2',
+		_0: model,
+		_1: A2(
+			_elm_lang$core$List$map,
+			_user$project$And_FileMarkup$transmitFileMarkup(model),
+			_elm_lang$core$Set$toList(model.activeTextEditors))
+	};
 };
 var _user$project$And_FileMarkup$lifecycleBasedtransmission = function (model) {
-	return _user$project$Model_BatchProcess$isComplete(model) ? _user$project$And_FileMarkup$transmitToActiveEditors(model) : _user$project$And_FileMarkup$transmitToUpdatedEditor(model);
+	return (_user$project$Model_BatchProcess$isComplete(model) && (!model.batchUpdateSent)) ? _user$project$And_FileMarkup$transmitToActiveEditors(
+		_elm_lang$core$Native_Utils.update(
+			model,
+			{batchUpdateSent: true})) : _user$project$And_FileMarkup$transmitToUpdatedEditor(model);
 };
 var _user$project$And_FileMarkup$transmit = function (model) {
 	return A2(
-		_user$project$And$execute,
-		_elm_lang$core$Platform_Cmd$batch(
-			_user$project$And_FileMarkup$lifecycleBasedtransmission(model)),
-		model);
+		_elm_lang$core$Tuple$mapSecond,
+		_elm_lang$core$Platform_Cmd$batch,
+		_user$project$And_FileMarkup$lifecycleBasedtransmission(model));
 };
 
 var _user$project$Model_ProjectFileData$markReprocessedFileComplete = F2(
@@ -12972,7 +12986,7 @@ var _user$project$Main$update = F2(
 		}
 	});
 var _user$project$Main$init = _user$project$And$noCommand(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing});
+	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false});
 var _user$project$Main$notifyReprocessingFile = _elm_lang$core$Native_Platform.incomingPort('notifyReprocessingFile', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
@@ -12980,9 +12994,9 @@ var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.inc
 var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$Model = F5(
-	function (a, b, c, d, e) {
-		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d, fileBeingReprocessed: e};
+var _user$project$Main$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d, fileBeingReprocessed: e, batchUpdateSent: f};
 	});
 var _user$project$Main$MarkAsReprocessing = function (a) {
 	return {ctor: 'MarkAsReprocessing', _0: a};

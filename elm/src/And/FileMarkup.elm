@@ -15,12 +15,14 @@ type alias Model model =
         , activeTextEditors : Set String
         , lastUpdatedFile : Maybe String
         , fileBeingReprocessed : Maybe String
+        , batchUpdateSent : Bool
     }
 
 
 transmit : Model model -> ( Model model, Cmd message )
 transmit model =
-    And.execute (Cmd.batch <| lifecycleBasedtransmission model) model
+    lifecycleBasedtransmission model
+        |> Tuple.mapSecond Cmd.batch
 
 
 transmitTo : String -> Model model -> ( Model model, Cmd message )
@@ -28,27 +30,27 @@ transmitTo filePath model =
     And.execute (transmitFileMarkup model filePath) model
 
 
-lifecycleBasedtransmission : Model model -> List (Cmd message)
+lifecycleBasedtransmission : Model model -> ( Model model, List (Cmd message) )
 lifecycleBasedtransmission model =
-    if Model.BatchProcess.isComplete model then
-        transmitToActiveEditors model
+    if Model.BatchProcess.isComplete model && not model.batchUpdateSent then
+        transmitToActiveEditors { model | batchUpdateSent = True }
     else
         transmitToUpdatedEditor model
 
 
-transmitToUpdatedEditor : Model model -> List (Cmd message)
+transmitToUpdatedEditor : Model model -> ( Model model, List (Cmd message) )
 transmitToUpdatedEditor model =
     case model.lastUpdatedFile of
         Just fileName ->
-            [ transmitFileMarkup model fileName ]
+            ( model, [ transmitFileMarkup model fileName ] )
 
         Nothing ->
-            []
+            ( model, [] )
 
 
-transmitToActiveEditors : Model model -> List (Cmd message)
+transmitToActiveEditors : Model model -> ( Model model, List (Cmd message) )
 transmitToActiveEditors model =
-    List.map (transmitFileMarkup model) (Set.toList model.activeTextEditors)
+    ( model, List.map (transmitFileMarkup model) (Set.toList model.activeTextEditors) )
 
 
 transmitFileMarkup : Model model -> String -> Cmd message
