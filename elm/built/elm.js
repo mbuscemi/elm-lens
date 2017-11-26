@@ -13027,7 +13027,11 @@ var _user$project$Main$subscriptions = function (model) {
 					_1: {
 						ctor: '::',
 						_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: _user$project$Main$notifyReprocessingFile(_user$project$Main$MarkAsReprocessing),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			}

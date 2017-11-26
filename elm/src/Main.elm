@@ -80,6 +80,7 @@ subscriptions model =
         , registerTextEditor RegisterTextEditor
         , unregisterTextEditor UnregisterTextEditor
         , processReport AddFileData
+        , notifyReprocessingFile MarkAsReprocessing
         ]
 
 

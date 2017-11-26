@@ -12,3 +12,11 @@
 .elm-lens-marker .divider {
     padding: 0 10px;
 }
+
+.elm-lens-marker.reprocessing {
+    color: gray;
+}
+
+.elm-lens-marker.reprocessing .exposing {
+    color: gray;
+}
