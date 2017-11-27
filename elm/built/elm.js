@@ -14497,11 +14497,16 @@ var _user$project$Model_References$refsInExpression = F2(
 					references = _v8;
 					continue refsInExpression;
 				case 'CaseExpression':
-					var _v9 = _p3._0.expression,
-						_v10 = references;
-					expression = _v9;
-					references = _v10;
-					continue refsInExpression;
+					var _p4 = _p3._0;
+					return A3(
+						_elm_lang$core$List$foldl,
+						_user$project$Model_References$refsInExpression,
+						references,
+						{
+							ctor: '::',
+							_0: _p4.expression,
+							_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4.cases)
+						});
 				case 'RecordExpr':
 					return A3(
 						_elm_lang$core$List$foldl,
@@ -14522,6 +14527,12 @@ var _user$project$Model_References$refsInExpression = F2(
 						_0: _user$project$Types_Reference$Reference(_p3._0),
 						_1: references
 					};
+				case 'RecordUpdateExpression':
+					return A3(
+						_elm_lang$core$List$foldl,
+						_user$project$Model_References$refsInExpression,
+						references,
+						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p3._0.updates));
 				default:
 					return references;
 			}
@@ -14529,16 +14540,16 @@ var _user$project$Model_References$refsInExpression = F2(
 	});
 var _user$project$Model_References$collectRefsFromDeclaration = F2(
 	function (declaration, references) {
-		var _p4 = declaration;
-		switch (_p4.ctor) {
+		var _p5 = declaration;
+		switch (_p5.ctor) {
 			case 'FuncDecl':
-				var _p5 = _p4._0;
+				var _p6 = _p5._0;
 				return A2(
 					_user$project$Model_References$appendSignatureReferences,
-					_p5,
-					A2(_user$project$Model_References$refsInExpression, _p5.declaration.expression, references));
+					_p6,
+					A2(_user$project$Model_References$refsInExpression, _p6.declaration.expression, references));
 			case 'AliasDecl':
-				return A2(_user$project$Model_References$refsInTypeAnnotation, _p4._0.typeAnnotation, references);
+				return A2(_user$project$Model_References$refsInTypeAnnotation, _p5._0.typeAnnotation, references);
 			default:
 				return references;
 		}
@@ -14551,13 +14562,13 @@ var _user$project$Model_References$collectRefsFrom = function (declarations) {
 		declarations);
 };
 var _user$project$Model_References$collectReferences = function (parseResult) {
-	var _p6 = parseResult;
-	if (_p6.ctor === 'Ok') {
+	var _p7 = parseResult;
+	if (_p7.ctor === 'Ok') {
 		return _user$project$Model_References$collectRefsFrom(
 			function (_) {
 				return _.declarations;
 			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p6._0)));
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p7._0)));
 	} else {
 		return {ctor: '[]'};
 	}
