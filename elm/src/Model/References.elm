@@ -3,7 +3,8 @@ module Model.References exposing (collect)
 import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
-import Elm.Syntax.Expression exposing (Expression)
+import Elm.Syntax.Expression exposing (Expression, Function)
+import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Types.Reference exposing (Reference)
 
 
@@ -41,6 +42,10 @@ collectRefsFromDeclaration declaration references =
     case declaration of
         Elm.Syntax.Declaration.FuncDecl function ->
             refsInExpression function.declaration.expression references
+                |> appendSignatureReferences function
+
+        Elm.Syntax.Declaration.AliasDecl typeAlias ->
+            refsInTypeAnnotation typeAlias.typeAnnotation references
 
         _ ->
             references
@@ -87,4 +92,24 @@ refsInExpression expression references =
             Reference name :: references
 
         _ ->
+            references
+
+
+refsInTypeAnnotation : TypeAnnotation -> List Reference -> List Reference
+refsInTypeAnnotation typeAnnotation references =
+    case typeAnnotation of
+        Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations range ->
+            List.foldl refsInTypeAnnotation (Reference name :: references) typeAnnotations
+
+        _ ->
+            references
+
+
+appendSignatureReferences : Function -> List Reference -> List Reference
+appendSignatureReferences function references =
+    case function.signature of
+        Just signature ->
+            refsInTypeAnnotation signature.typeAnnotation references
+
+        Nothing ->
             references
