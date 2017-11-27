@@ -4,7 +4,9 @@ import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Expression, Function)
+import Elm.Syntax.Pattern exposing (Pattern)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
+import Set exposing (Set)
 import Types.Reference exposing (Reference)
 
 
@@ -41,7 +43,8 @@ collectRefsFromDeclaration : Declaration -> List Reference -> List Reference
 collectRefsFromDeclaration declaration references =
     case declaration of
         Elm.Syntax.Declaration.FuncDecl function ->
-            refsInExpression function.declaration.expression references
+            List.foldl argumentsFromPattern Set.empty function.declaration.arguments
+                |> (\args -> refsInExpression args function.declaration.expression references)
                 |> appendSignatureReferences function
 
         Elm.Syntax.Declaration.AliasDecl typeAlias ->
@@ -51,57 +54,75 @@ collectRefsFromDeclaration declaration references =
             references
 
 
-refsInExpression : Expression -> List Reference -> List Reference
-refsInExpression expression references =
+argumentsFromPattern : Pattern -> Set String -> Set String
+argumentsFromPattern pattern arguments =
+    case pattern of
+        Elm.Syntax.Pattern.VarPattern name range ->
+            Set.insert name arguments
+
+        _ ->
+            arguments
+
+
+refsInExpression : Set String -> Expression -> List Reference -> List Reference
+refsInExpression arguments expression references =
     let
         ( range, innerExpression ) =
             expression
     in
     case innerExpression of
         Elm.Syntax.Expression.Application exps ->
-            List.foldl refsInExpression references exps
+            List.foldl (refsInExpression arguments) references exps
 
         Elm.Syntax.Expression.OperatorApplication _ _ exp1 exp2 ->
-            List.foldl refsInExpression references [ exp1, exp2 ]
+            List.foldl (refsInExpression arguments) references [ exp1, exp2 ]
 
         Elm.Syntax.Expression.FunctionOrValue name ->
-            Reference name :: references
+            addReference name arguments references
 
         Elm.Syntax.Expression.IfBlock exp1 exp2 exp3 ->
-            List.foldl refsInExpression references [ exp1, exp2, exp3 ]
+            List.foldl (refsInExpression arguments) references [ exp1, exp2, exp3 ]
 
         Elm.Syntax.Expression.Negation exp ->
-            refsInExpression exp references
+            refsInExpression arguments exp references
 
         Elm.Syntax.Expression.TupledExpression exps ->
-            List.foldl refsInExpression references exps
+            List.foldl (refsInExpression arguments) references exps
 
         Elm.Syntax.Expression.ParenthesizedExpression exp ->
-            refsInExpression exp references
+            refsInExpression arguments exp references
 
         Elm.Syntax.Expression.LetExpression letBlock ->
-            refsInExpression letBlock.expression references
+            refsInExpression arguments letBlock.expression references
 
         Elm.Syntax.Expression.CaseExpression caseBlock ->
-            List.foldl refsInExpression references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
+            List.foldl (refsInExpression arguments) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
 
         Elm.Syntax.Expression.RecordExpr recordSetters ->
-            List.foldl refsInExpression references (List.map Tuple.second recordSetters)
+            List.foldl (refsInExpression arguments) references (List.map Tuple.second recordSetters)
 
         Elm.Syntax.Expression.ListExpr exps ->
-            List.foldl refsInExpression references exps
+            List.foldl (refsInExpression arguments) references exps
 
         Elm.Syntax.Expression.QualifiedExpr moduleName name ->
-            Reference name :: references
+            addReference name arguments references
 
         Elm.Syntax.Expression.RecordAccessFunction name ->
-            Reference name :: references
+            addReference name arguments references
 
         Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ->
-            List.foldl refsInExpression references (List.map Tuple.second recordUpdate.updates)
+            List.foldl (refsInExpression arguments) references (List.map Tuple.second recordUpdate.updates)
 
         _ ->
             references
+
+
+addReference : String -> Set String -> List Reference -> List Reference
+addReference name arguments references =
+    if Set.member name arguments then
+        references
+    else
+        Reference name :: references
 
 
 refsInTypeAnnotation : TypeAnnotation -> List Reference -> List Reference
