@@ -1,7 +1,7 @@
 module Model.ProjectFileData exposing (add)
 
 import Dict
-import Json.Decode exposing (Decoder, Value, decodeValue, field, string, value)
+import Json.Decode exposing (Decoder, Value, decodeValue, field, list, string, value)
 import Types.Exposings
 import Types.ProjectFileData exposing (ProjectFileData)
 import Types.Reference
@@ -26,7 +26,8 @@ add value model =
         | projectFileData =
             Dict.insert
                 fileName
-                { topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
+                { moduleName = decode value "moduleName" (list string) []
+                , topLevelExpressions = decode value "topLevelExpressions" Types.TopLevelExpressions.decoder Types.TopLevelExpressions.default
                 , exposings = decode value "exposings" Types.Exposings.decoder Types.Exposings.default
                 , references = decode value "references" Types.Reference.listDecoder [ Types.Reference.default ]
                 }

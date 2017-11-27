@@ -13970,13 +13970,14 @@ var _user$project$Types_TopLevelExpressions$decoder = A4(
 	A2(_elm_lang$core$Json_Decode$field, 'typeAliases', _user$project$Types_TopLevelExpressions$expressionDictDecoder));
 
 var _user$project$Types_FileData$empty = {
+	moduleName: {ctor: '[]'},
 	topLevelExpressions: {functions: _elm_lang$core$Dict$empty, types: _elm_lang$core$Dict$empty, typeAliases: _elm_lang$core$Dict$empty},
 	exposings: {functions: _elm_lang$core$Set$empty, types: _elm_lang$core$Set$empty},
 	references: {ctor: '[]'}
 };
-var _user$project$Types_FileData$FileData = F3(
-	function (a, b, c) {
-		return {topLevelExpressions: a, exposings: b, references: c};
+var _user$project$Types_FileData$FileData = F4(
+	function (a, b, c, d) {
+		return {moduleName: a, topLevelExpressions: b, exposings: c, references: d};
 	});
 
 
@@ -14186,6 +14187,12 @@ var _user$project$Model_ProjectFileData$add = F2(
 					_elm_lang$core$Dict$insert,
 					fileName,
 					{
+						moduleName: A4(
+							_user$project$Model_ProjectFileData$decode,
+							value,
+							'moduleName',
+							_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string),
+							{ctor: '[]'}),
 						topLevelExpressions: A4(_user$project$Model_ProjectFileData$decode, value, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
 						exposings: A4(_user$project$Model_ProjectFileData$decode, value, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
 						references: A4(
@@ -14381,6 +14388,37 @@ var _user$project$Model_Exposings$collect = function (model) {
 		model,
 		{
 			exposings: A2(_user$project$Model_Exposings$collectExposings, model.topLevelExpressions, model.fileAST)
+		});
+};
+
+var _user$project$Model_ModuleName$toModuleName = function (module_) {
+	var _p0 = module_;
+	switch (_p0.ctor) {
+		case 'NormalModule':
+			return _p0._0.moduleName;
+		case 'PortModule':
+			return _p0._0.moduleName;
+		default:
+			return _p0._0.moduleName;
+	}
+};
+var _user$project$Model_ModuleName$recordModuleName = function (parseResult) {
+	var _p1 = parseResult;
+	if (_p1.ctor === 'Ok') {
+		return _user$project$Model_ModuleName$toModuleName(
+			function (_) {
+				return _.moduleDefinition;
+			}(
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p1._0)));
+	} else {
+		return {ctor: '[]'};
+	}
+};
+var _user$project$Model_ModuleName$record = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			moduleName: _user$project$Model_ModuleName$recordModuleName(model.fileAST)
 		});
 };
 
@@ -14658,25 +14696,34 @@ var _user$project$Model_Report$make = F2(
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
-						_0: 'topLevelExpressions',
-						_1: _user$project$Types_TopLevelExpressions$encoder(model.topLevelExpressions)
+						_0: 'moduleName',
+						_1: _elm_lang$core$Json_Encode$list(
+							A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, model.moduleName))
 					},
 					_1: {
 						ctor: '::',
 						_0: {
 							ctor: '_Tuple2',
-							_0: 'exposings',
-							_1: _user$project$Types_Exposings$encoder(model.exposings)
+							_0: 'topLevelExpressions',
+							_1: _user$project$Types_TopLevelExpressions$encoder(model.topLevelExpressions)
 						},
 						_1: {
 							ctor: '::',
 							_0: {
 								ctor: '_Tuple2',
-								_0: 'references',
-								_1: _elm_lang$core$Json_Encode$list(
-									A2(_elm_lang$core$List$map, _user$project$Types_Reference$encoder, model.references))
+								_0: 'exposings',
+								_1: _user$project$Types_Exposings$encoder(model.exposings)
 							},
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: {
+									ctor: '_Tuple2',
+									_0: 'references',
+									_1: _elm_lang$core$Json_Encode$list(
+										A2(_elm_lang$core$List$map, _user$project$Types_Reference$encoder, model.references))
+								},
+								_1: {ctor: '[]'}
+							}
 						}
 					}
 				}
@@ -14787,6 +14834,7 @@ var _user$project$Worker$init = _user$project$And$noCommand(
 	{
 		fileAST: _elm_lang$core$Result$Err(
 			{ctor: '[]'}),
+		moduleName: {ctor: '[]'},
 		topLevelExpressions: _user$project$Types_TopLevelExpressions$default,
 		exposings: _user$project$Types_Exposings$default,
 		references: {ctor: '[]'}
@@ -14813,7 +14861,8 @@ var _user$project$Worker$update = F2(
 			_user$project$Model_References$collect(
 				_user$project$Model_Exposings$collect(
 					_user$project$Model_TopLevelExpressions$collect(
-						A2(_user$project$Model_AST$buildFrom, _p0._0._1, model)))));
+						_user$project$Model_ModuleName$record(
+							A2(_user$project$Model_AST$buildFrom, _p0._0._1, model))))));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',
@@ -14829,9 +14878,9 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Worker$Model = F4(
-	function (a, b, c, d) {
-		return {fileAST: a, topLevelExpressions: b, exposings: c, references: d};
+var _user$project$Worker$Model = F5(
+	function (a, b, c, d, e) {
+		return {fileAST: a, moduleName: b, topLevelExpressions: c, exposings: d, references: e};
 	});
 var _user$project$Worker$ProcessFile = function (a) {
 	return {ctor: 'ProcessFile', _0: a};

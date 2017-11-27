@@ -28,7 +28,7 @@ collectExpressions parseResult =
                 |> .declarations
                 |> collectExpsFrom
 
-        Err stringList ->
+        Err errors ->
             Types.TopLevelExpressions.default
 
 

@@ -5,6 +5,7 @@ import Elm.RawFile exposing (RawFile)
 import Json.Decode exposing (Value)
 import Model.AST
 import Model.Exposings
+import Model.ModuleName
 import Model.References
 import Model.Report
 import Model.TopLevelExpressions
@@ -15,6 +16,7 @@ import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 type alias Model =
     { fileAST : Result (List String) RawFile
+    , moduleName : List String
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
     , references : List Reference
@@ -37,6 +39,7 @@ main =
 init : ( Model, Cmd Message )
 init =
     { fileAST = Err []
+    , moduleName = []
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
     , references = []
@@ -50,6 +53,7 @@ update message model =
         ProcessFile ( fileName, text ) ->
             model
                 |> Model.AST.buildFrom text
+                |> Model.ModuleName.record
                 |> Model.TopLevelExpressions.collect
                 |> Model.Exposings.collect
                 |> Model.References.collect

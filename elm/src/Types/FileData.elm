@@ -8,7 +8,8 @@ import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias FileData =
-    { topLevelExpressions : TopLevelExpressions
+    { moduleName : List String
+    , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
     , references : List Reference
     }
@@ -16,7 +17,8 @@ type alias FileData =
 
 empty : FileData
 empty =
-    { topLevelExpressions =
+    { moduleName = []
+    , topLevelExpressions =
         { functions = Dict.empty
         , types = Dict.empty
         , typeAliases = Dict.empty
