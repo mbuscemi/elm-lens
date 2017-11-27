@@ -14387,18 +14387,35 @@ var _user$project$Model_Exposings$collect = function (model) {
 var _user$project$Model_References$refsInTypeAnnotation = F2(
 	function (typeAnnotation, references) {
 		var _p0 = typeAnnotation;
-		if (_p0.ctor === 'Typed') {
-			return A3(
-				_elm_lang$core$List$foldl,
-				_user$project$Model_References$refsInTypeAnnotation,
-				{
-					ctor: '::',
-					_0: _user$project$Types_Reference$Reference(_p0._1),
-					_1: references
-				},
-				_p0._2);
-		} else {
-			return references;
+		switch (_p0.ctor) {
+			case 'Typed':
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_References$refsInTypeAnnotation,
+					{
+						ctor: '::',
+						_0: _user$project$Types_Reference$Reference(_p0._1),
+						_1: references
+					},
+					_p0._2);
+			case 'Tupled':
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInTypeAnnotation, references, _p0._0);
+			case 'FunctionTypeAnnotation':
+				return A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Model_References$refsInTypeAnnotation,
+					references,
+					{
+						ctor: '::',
+						_0: _p0._0,
+						_1: {
+							ctor: '::',
+							_0: _p0._1,
+							_1: {ctor: '[]'}
+						}
+					});
+			default:
+				return references;
 		}
 	});
 var _user$project$Model_References$appendSignatureReferences = F2(

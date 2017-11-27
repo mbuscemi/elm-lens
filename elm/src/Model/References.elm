@@ -101,6 +101,12 @@ refsInTypeAnnotation typeAnnotation references =
         Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations range ->
             List.foldl refsInTypeAnnotation (Reference name :: references) typeAnnotations
 
+        Elm.Syntax.TypeAnnotation.Tupled typeAnnotations range ->
+            List.foldl refsInTypeAnnotation references typeAnnotations
+
+        Elm.Syntax.TypeAnnotation.FunctionTypeAnnotation ta1 ta2 range ->
+            List.foldl refsInTypeAnnotation references [ ta1, ta2 ]
+
         _ ->
             references
 
