@@ -3,7 +3,7 @@ module Model.References exposing (collect)
 import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
-import Elm.Syntax.Expression exposing (Expression, Function)
+import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
 import Elm.Syntax.Pattern exposing (Pattern)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Set exposing (Set)
@@ -83,7 +83,11 @@ refsInExpression arguments expression references =
             refsInExpression arguments exp references
 
         Elm.Syntax.Expression.LetExpression letBlock ->
-            refsInExpression arguments letBlock.expression references
+            let
+                expressions =
+                    List.foldl letDeclarationExpressions [] letBlock.declarations
+            in
+            List.foldl (refsInExpression arguments) references (letBlock.expression :: expressions)
 
         Elm.Syntax.Expression.CaseExpression caseBlock ->
             let
@@ -153,6 +157,16 @@ appendSignatureReferences function references =
 
         Nothing ->
             references
+
+
+letDeclarationExpressions : LetDeclaration -> List Expression -> List Expression
+letDeclarationExpressions letDeclaration expressions =
+    case letDeclaration of
+        Elm.Syntax.Expression.LetFunction function ->
+            function.declaration.expression :: expressions
+
+        Elm.Syntax.Expression.LetDestructuring pattern expression ->
+            expression :: expressions
 
 
 additionalArguments : List Pattern -> Set String
