@@ -91,11 +91,8 @@ refsInExpression arguments expression references =
 
         Elm.Syntax.Expression.CaseExpression caseBlock ->
             let
-                patterns =
-                    List.map Tuple.first caseBlock.cases
-
                 allArguments =
-                    Set.union arguments (additionalArguments patterns)
+                    Set.union arguments (additionalArguments (List.map Tuple.first caseBlock.cases))
             in
             List.foldl (refsInExpression allArguments) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
 

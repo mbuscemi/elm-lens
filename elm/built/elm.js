@@ -14544,11 +14544,11 @@ var _user$project$Model_References$refsInExpression = F3(
 						{ctor: '::', _0: _p6.expression, _1: expressions});
 				case 'CaseExpression':
 					var _p7 = _p5._0;
-					var patterns = A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p7.cases);
 					var allArguments = A2(
 						_elm_lang$core$Set$union,
 						$arguments,
-						_user$project$Model_References$additionalArguments(patterns));
+						_user$project$Model_References$additionalArguments(
+							A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p7.cases)));
 					return A3(
 						_elm_lang$core$List$foldl,
 						_user$project$Model_References$refsInExpression(allArguments),
