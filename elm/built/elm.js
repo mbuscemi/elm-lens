@@ -14396,6 +14396,9 @@ var _user$project$Model_References$argumentsFromPattern = F2(
 				return $arguments;
 		}
 	});
+var _user$project$Model_References$additionalArguments = function (patterns) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, patterns);
+};
 var _user$project$Model_References$refsInTypeAnnotation = F2(
 	function (typeAnnotation, references) {
 		var _p1 = typeAnnotation;
@@ -14528,21 +14531,33 @@ var _user$project$Model_References$refsInExpression = F3(
 					continue refsInExpression;
 				case 'CaseExpression':
 					var _p5 = _p4._0;
-					var additionalArgs = A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$argumentsFromPattern,
-						_elm_lang$core$Set$empty,
-						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p5.cases));
+					var patterns = A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p5.cases);
+					var allArguments = A2(
+						_elm_lang$core$Set$union,
+						$arguments,
+						_user$project$Model_References$additionalArguments(patterns));
 					return A3(
 						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression(
-							A2(_elm_lang$core$Set$union, $arguments, additionalArgs)),
+						_user$project$Model_References$refsInExpression(allArguments),
 						references,
 						{
 							ctor: '::',
 							_0: _p5.expression,
 							_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p5.cases)
 						});
+				case 'LambdaExpression':
+					var _p6 = _p4._0;
+					var allArguments = A2(
+						_elm_lang$core$Set$union,
+						$arguments,
+						_user$project$Model_References$additionalArguments(_p6.args));
+					var _v13 = allArguments,
+						_v14 = _p6.expression,
+						_v15 = references;
+					$arguments = _v13;
+					expression = _v14;
+					references = _v15;
+					continue refsInExpression;
 				case 'RecordExpr':
 					return A3(
 						_elm_lang$core$List$foldl,
@@ -14572,19 +14587,19 @@ var _user$project$Model_References$refsInExpression = F3(
 	});
 var _user$project$Model_References$collectRefsFromDeclaration = F2(
 	function (declaration, references) {
-		var _p6 = declaration;
-		switch (_p6.ctor) {
+		var _p7 = declaration;
+		switch (_p7.ctor) {
 			case 'FuncDecl':
-				var _p7 = _p6._0;
+				var _p8 = _p7._0;
 				return A2(
 					_user$project$Model_References$appendSignatureReferences,
-					_p7,
+					_p8,
 					function (args) {
-						return A3(_user$project$Model_References$refsInExpression, args, _p7.declaration.expression, references);
+						return A3(_user$project$Model_References$refsInExpression, args, _p8.declaration.expression, references);
 					}(
-						A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p7.declaration.$arguments)));
+						A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p8.declaration.$arguments)));
 			case 'AliasDecl':
-				return A2(_user$project$Model_References$refsInTypeAnnotation, _p6._0.typeAnnotation, references);
+				return A2(_user$project$Model_References$refsInTypeAnnotation, _p7._0.typeAnnotation, references);
 			default:
 				return references;
 		}
@@ -14597,13 +14612,13 @@ var _user$project$Model_References$collectRefsFrom = function (declarations) {
 		declarations);
 };
 var _user$project$Model_References$collectReferences = function (parseResult) {
-	var _p8 = parseResult;
-	if (_p8.ctor === 'Ok') {
+	var _p9 = parseResult;
+	if (_p9.ctor === 'Ok') {
 		return _user$project$Model_References$collectRefsFrom(
 			function (_) {
 				return _.declarations;
 			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p8._0)));
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p9._0)));
 	} else {
 		return {ctor: '[]'};
 	}
