@@ -85,8 +85,14 @@ refsInExpression expression references =
         Elm.Syntax.Expression.CaseExpression caseBlock ->
             refsInExpression caseBlock.expression references
 
+        Elm.Syntax.Expression.RecordExpr recordSetters ->
+            List.foldl refsInExpression references (List.map Tuple.second recordSetters)
+
         Elm.Syntax.Expression.ListExpr exps ->
             List.foldl refsInExpression references exps
+
+        Elm.Syntax.Expression.QualifiedExpr moduleName name ->
+            Reference name :: references
 
         Elm.Syntax.Expression.RecordAccessFunction name ->
             Reference name :: references

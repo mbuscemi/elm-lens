@@ -14502,8 +14502,20 @@ var _user$project$Model_References$refsInExpression = F2(
 					expression = _v9;
 					references = _v10;
 					continue refsInExpression;
+				case 'RecordExpr':
+					return A3(
+						_elm_lang$core$List$foldl,
+						_user$project$Model_References$refsInExpression,
+						references,
+						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p3._0));
 				case 'ListExpr':
 					return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInExpression, references, _p3._0);
+				case 'QualifiedExpr':
+					return {
+						ctor: '::',
+						_0: _user$project$Types_Reference$Reference(_p3._1),
+						_1: references
+					};
 				case 'RecordAccessFunction':
 					return {
 						ctor: '::',
