@@ -14384,22 +14384,34 @@ var _user$project$Model_Exposings$collect = function (model) {
 		});
 };
 
+var _user$project$Model_References$argumentsFromPattern = F2(
+	function (pattern, $arguments) {
+		var _p0 = pattern;
+		switch (_p0.ctor) {
+			case 'VarPattern':
+				return A2(_elm_lang$core$Set$insert, _p0._0, $arguments);
+			case 'NamedPattern':
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, $arguments, _p0._1);
+			default:
+				return $arguments;
+		}
+	});
 var _user$project$Model_References$refsInTypeAnnotation = F2(
 	function (typeAnnotation, references) {
-		var _p0 = typeAnnotation;
-		switch (_p0.ctor) {
+		var _p1 = typeAnnotation;
+		switch (_p1.ctor) {
 			case 'Typed':
 				return A3(
 					_elm_lang$core$List$foldl,
 					_user$project$Model_References$refsInTypeAnnotation,
 					{
 						ctor: '::',
-						_0: _user$project$Types_Reference$Reference(_p0._1),
+						_0: _user$project$Types_Reference$Reference(_p1._1),
 						_1: references
 					},
-					_p0._2);
+					_p1._2);
 			case 'Tupled':
-				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInTypeAnnotation, references, _p0._0);
+				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInTypeAnnotation, references, _p1._0);
 			case 'FunctionTypeAnnotation':
 				return A3(
 					_elm_lang$core$List$foldl,
@@ -14407,10 +14419,10 @@ var _user$project$Model_References$refsInTypeAnnotation = F2(
 					references,
 					{
 						ctor: '::',
-						_0: _p0._0,
+						_0: _p1._0,
 						_1: {
 							ctor: '::',
-							_0: _p0._1,
+							_0: _p1._1,
 							_1: {ctor: '[]'}
 						}
 					});
@@ -14420,9 +14432,9 @@ var _user$project$Model_References$refsInTypeAnnotation = F2(
 	});
 var _user$project$Model_References$appendSignatureReferences = F2(
 	function ($function, references) {
-		var _p1 = $function.signature;
-		if (_p1.ctor === 'Just') {
-			return A2(_user$project$Model_References$refsInTypeAnnotation, _p1._0.typeAnnotation, references);
+		var _p2 = $function.signature;
+		if (_p2.ctor === 'Just') {
+			return A2(_user$project$Model_References$refsInTypeAnnotation, _p2._0.typeAnnotation, references);
 		} else {
 			return references;
 		}
@@ -14439,17 +14451,17 @@ var _user$project$Model_References$refsInExpression = F3(
 	function ($arguments, expression, references) {
 		refsInExpression:
 		while (true) {
-			var _p2 = expression;
-			var range = _p2._0;
-			var innerExpression = _p2._1;
-			var _p3 = innerExpression;
-			switch (_p3.ctor) {
+			var _p3 = expression;
+			var range = _p3._0;
+			var innerExpression = _p3._1;
+			var _p4 = innerExpression;
+			switch (_p4.ctor) {
 				case 'Application':
 					return A3(
 						_elm_lang$core$List$foldl,
 						_user$project$Model_References$refsInExpression($arguments),
 						references,
-						_p3._0);
+						_p4._0);
 				case 'OperatorApplication':
 					return A3(
 						_elm_lang$core$List$foldl,
@@ -14457,15 +14469,15 @@ var _user$project$Model_References$refsInExpression = F3(
 						references,
 						{
 							ctor: '::',
-							_0: _p3._2,
+							_0: _p4._2,
 							_1: {
 								ctor: '::',
-								_0: _p3._3,
+								_0: _p4._3,
 								_1: {ctor: '[]'}
 							}
 						});
 				case 'FunctionOrValue':
-					return A3(_user$project$Model_References$addReference, _p3._0, $arguments, references);
+					return A3(_user$project$Model_References$addReference, _p4._0, $arguments, references);
 				case 'IfBlock':
 					return A3(
 						_elm_lang$core$List$foldl,
@@ -14473,92 +14485,89 @@ var _user$project$Model_References$refsInExpression = F3(
 						references,
 						{
 							ctor: '::',
-							_0: _p3._0,
+							_0: _p4._0,
 							_1: {
 								ctor: '::',
-								_0: _p3._1,
+								_0: _p4._1,
 								_1: {
 									ctor: '::',
-									_0: _p3._2,
+									_0: _p4._2,
 									_1: {ctor: '[]'}
 								}
 							}
 						});
 				case 'Negation':
-					var _v3 = $arguments,
-						_v4 = _p3._0,
-						_v5 = references;
-					$arguments = _v3;
-					expression = _v4;
-					references = _v5;
+					var _v4 = $arguments,
+						_v5 = _p4._0,
+						_v6 = references;
+					$arguments = _v4;
+					expression = _v5;
+					references = _v6;
 					continue refsInExpression;
 				case 'TupledExpression':
 					return A3(
 						_elm_lang$core$List$foldl,
 						_user$project$Model_References$refsInExpression($arguments),
 						references,
-						_p3._0);
+						_p4._0);
 				case 'ParenthesizedExpression':
-					var _v6 = $arguments,
-						_v7 = _p3._0,
-						_v8 = references;
-					$arguments = _v6;
-					expression = _v7;
-					references = _v8;
+					var _v7 = $arguments,
+						_v8 = _p4._0,
+						_v9 = references;
+					$arguments = _v7;
+					expression = _v8;
+					references = _v9;
 					continue refsInExpression;
 				case 'LetExpression':
-					var _v9 = $arguments,
-						_v10 = _p3._0.expression,
-						_v11 = references;
-					$arguments = _v9;
-					expression = _v10;
-					references = _v11;
+					var _v10 = $arguments,
+						_v11 = _p4._0.expression,
+						_v12 = references;
+					$arguments = _v10;
+					expression = _v11;
+					references = _v12;
 					continue refsInExpression;
 				case 'CaseExpression':
-					var _p4 = _p3._0;
+					var _p5 = _p4._0;
+					var additionalArgs = A3(
+						_elm_lang$core$List$foldl,
+						_user$project$Model_References$argumentsFromPattern,
+						_elm_lang$core$Set$empty,
+						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p5.cases));
 					return A3(
 						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
+						_user$project$Model_References$refsInExpression(
+							A2(_elm_lang$core$Set$union, $arguments, additionalArgs)),
 						references,
 						{
 							ctor: '::',
-							_0: _p4.expression,
-							_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4.cases)
+							_0: _p5.expression,
+							_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p5.cases)
 						});
 				case 'RecordExpr':
 					return A3(
 						_elm_lang$core$List$foldl,
 						_user$project$Model_References$refsInExpression($arguments),
 						references,
-						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p3._0));
+						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._0));
 				case 'ListExpr':
 					return A3(
 						_elm_lang$core$List$foldl,
 						_user$project$Model_References$refsInExpression($arguments),
 						references,
-						_p3._0);
+						_p4._0);
 				case 'QualifiedExpr':
-					return A3(_user$project$Model_References$addReference, _p3._1, $arguments, references);
+					return A3(_user$project$Model_References$addReference, _p4._1, $arguments, references);
 				case 'RecordAccessFunction':
-					return A3(_user$project$Model_References$addReference, _p3._0, $arguments, references);
+					return A3(_user$project$Model_References$addReference, _p4._0, $arguments, references);
 				case 'RecordUpdateExpression':
 					return A3(
 						_elm_lang$core$List$foldl,
 						_user$project$Model_References$refsInExpression($arguments),
 						references,
-						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p3._0.updates));
+						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._0.updates));
 				default:
 					return references;
 			}
-		}
-	});
-var _user$project$Model_References$argumentsFromPattern = F2(
-	function (pattern, $arguments) {
-		var _p5 = pattern;
-		if (_p5.ctor === 'VarPattern') {
-			return A2(_elm_lang$core$Set$insert, _p5._0, $arguments);
-		} else {
-			return $arguments;
 		}
 	});
 var _user$project$Model_References$collectRefsFromDeclaration = F2(

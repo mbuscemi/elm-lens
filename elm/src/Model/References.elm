@@ -54,16 +54,6 @@ collectRefsFromDeclaration declaration references =
             references
 
 
-argumentsFromPattern : Pattern -> Set String -> Set String
-argumentsFromPattern pattern arguments =
-    case pattern of
-        Elm.Syntax.Pattern.VarPattern name range ->
-            Set.insert name arguments
-
-        _ ->
-            arguments
-
-
 refsInExpression : Set String -> Expression -> List Reference -> List Reference
 refsInExpression arguments expression references =
     let
@@ -96,7 +86,21 @@ refsInExpression arguments expression references =
             refsInExpression arguments letBlock.expression references
 
         Elm.Syntax.Expression.CaseExpression caseBlock ->
-            List.foldl (refsInExpression arguments) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
+            let
+                patterns =
+                    List.map Tuple.first caseBlock.cases
+
+                allArguments =
+                    Set.union arguments (additionalArguments patterns)
+            in
+            List.foldl (refsInExpression allArguments) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
+
+        Elm.Syntax.Expression.LambdaExpression lambda ->
+            let
+                allArguments =
+                    Set.union arguments (additionalArguments lambda.args)
+            in
+            refsInExpression allArguments lambda.expression references
 
         Elm.Syntax.Expression.RecordExpr recordSetters ->
             List.foldl (refsInExpression arguments) references (List.map Tuple.second recordSetters)
@@ -149,3 +153,21 @@ appendSignatureReferences function references =
 
         Nothing ->
             references
+
+
+additionalArguments : List Pattern -> Set String
+additionalArguments patterns =
+    List.foldl argumentsFromPattern Set.empty patterns
+
+
+argumentsFromPattern : Pattern -> Set String -> Set String
+argumentsFromPattern pattern arguments =
+    case pattern of
+        Elm.Syntax.Pattern.VarPattern name range ->
+            Set.insert name arguments
+
+        Elm.Syntax.Pattern.NamedPattern qualifiedNameRef patterns range ->
+            List.foldl argumentsFromPattern arguments patterns
+
+        _ ->
+            arguments
