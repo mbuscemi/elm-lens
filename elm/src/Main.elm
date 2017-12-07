@@ -45,7 +45,7 @@ init =
     , fileBeingReprocessed = Nothing
     , batchUpdateSent = False
     }
-        |> And.noCommand
+        |> And.doNothing
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -53,15 +53,15 @@ update message model =
     case message of
         RegisterProjectFiles filePaths ->
             { model | projectFileRegistry = Set.fromList filePaths }
-                |> And.noCommand
+                |> And.doNothing
 
         RegisterTextEditor filePath ->
             { model | activeTextEditors = Set.insert filePath model.activeTextEditors }
-                |> And.noCommand
+                |> And.doNothing
 
         UnregisterTextEditor filePath ->
             { model | activeTextEditors = Set.remove filePath model.activeTextEditors }
-                |> And.noCommand
+                |> And.doNothing
 
         AddFileData value ->
             model

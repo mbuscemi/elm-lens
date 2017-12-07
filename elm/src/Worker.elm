@@ -44,7 +44,7 @@ init =
     , exposings = Types.Exposings.default
     , references = []
     }
-        |> And.noCommand
+        |> And.doNothing
 
 
 update : Message -> Model -> ( Model, Cmd Message )
@@ -68,7 +68,7 @@ subscriptions model =
 
 andSendReport : String -> Model -> ( Model, Cmd Message )
 andSendReport fileName model =
-    And.execute (report <| Model.Report.make fileName model) model
+    And.execute model (report <| Model.Report.make fileName model)
 
 
 port report : Value -> Cmd message

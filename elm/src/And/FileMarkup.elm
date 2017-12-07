@@ -27,7 +27,7 @@ transmit model =
 
 transmitTo : String -> Model model -> ( Model model, Cmd message )
 transmitTo filePath model =
-    And.execute (transmitFileMarkup model filePath) model
+    And.execute model (transmitFileMarkup model filePath)
 
 
 lifecycleBasedtransmission : Model model -> ( Model model, List (Cmd message) )

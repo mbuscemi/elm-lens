@@ -1,11 +1,11 @@
-module And exposing (execute, noCommand)
+module And exposing (doNothing, execute)
 
 
-noCommand : model -> ( model, Cmd message )
-noCommand model =
+doNothing : model -> ( model, Cmd message )
+doNothing model =
     ( model, Cmd.none )
 
 
-execute : Cmd message -> model -> ( model, Cmd message )
-execute command model =
+execute : model -> Cmd message -> ( model, Cmd message )
+execute model command =
     ( model, command )
