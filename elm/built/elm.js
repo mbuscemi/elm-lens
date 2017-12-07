@@ -14561,6 +14561,16 @@ var _user$project$Types_FileData$FileData = F4(
 	function (a, b, c, d) {
 		return {moduleName: a, topLevelExpressions: b, exposings: c, references: d};
 	});
+var _user$project$Types_FileData$decoder = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Types_FileData$FileData,
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'moduleName',
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
+	A2(_elm_lang$core$Json_Decode$field, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder),
+	A2(_elm_lang$core$Json_Decode$field, 'exposings', _user$project$Types_Exposings$decoder),
+	A2(_elm_lang$core$Json_Decode$field, 'references', _user$project$Types_Reference$listDecoder));
 
 
 var _user$project$Model_BatchProcess$isComplete = function (model) {
@@ -14768,26 +14778,10 @@ var _user$project$Model_ProjectFileData$add = F2(
 				projectFileData: A3(
 					_elm_lang$core$Dict$insert,
 					fileName,
-					{
-						moduleName: A4(
-							_user$project$Model_ProjectFileData$decode,
-							value,
-							'moduleName',
-							_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string),
-							{ctor: '[]'}),
-						topLevelExpressions: A4(_user$project$Model_ProjectFileData$decode, value, 'topLevelExpressions', _user$project$Types_TopLevelExpressions$decoder, _user$project$Types_TopLevelExpressions$default),
-						exposings: A4(_user$project$Model_ProjectFileData$decode, value, 'exposings', _user$project$Types_Exposings$decoder, _user$project$Types_Exposings$default),
-						references: A4(
-							_user$project$Model_ProjectFileData$decode,
-							value,
-							'references',
-							_user$project$Types_Reference$listDecoder,
-							{
-								ctor: '::',
-								_0: _user$project$Types_Reference$default,
-								_1: {ctor: '[]'}
-							})
-					},
+					A2(
+						_elm_lang$core$Result$withDefault,
+						_user$project$Types_FileData$empty,
+						A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_FileData$decoder, value)),
 					model.projectFileData),
 				lastUpdatedFile: _elm_lang$core$Maybe$Just(fileName),
 				fileBeingReprocessed: A2(_user$project$Model_ProjectFileData$markReprocessedFileComplete, fileName, model)

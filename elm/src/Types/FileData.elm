@@ -1,6 +1,7 @@
-module Types.FileData exposing (FileData, empty)
+module Types.FileData exposing (FileData, decoder, empty)
 
 import Dict
+import Json.Decode exposing (Decoder, field, list, map4, string)
 import Set
 import Types.Exposings exposing (Exposings)
 import Types.Reference exposing (Reference)
@@ -29,3 +30,12 @@ empty =
         }
     , references = []
     }
+
+
+decoder : Decoder FileData
+decoder =
+    map4 FileData
+        (field "moduleName" (list string))
+        (field "topLevelExpressions" Types.TopLevelExpressions.decoder)
+        (field "exposings" Types.Exposings.decoder)
+        (field "references" Types.Reference.listDecoder)
