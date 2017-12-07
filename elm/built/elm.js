@@ -14572,6 +14572,17 @@ var _user$project$Types_FileData$decoder = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'exposings', _user$project$Types_Exposings$decoder),
 	A2(_elm_lang$core$Json_Decode$field, 'references', _user$project$Types_Reference$listDecoder));
 
+var _user$project$Types_ProjectFileData$insert = F3(
+	function (fileName, newEntry, projectFileData) {
+		return A3(
+			_elm_lang$core$Dict$insert,
+			fileName,
+			A2(
+				_elm_lang$core$Result$withDefault,
+				_user$project$Types_FileData$empty,
+				A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_FileData$decoder, newEntry)),
+			projectFileData);
+	});
 
 var _user$project$Model_BatchProcess$isComplete = function (model) {
 	return _elm_lang$core$Native_Utils.cmp(
@@ -14775,14 +14786,7 @@ var _user$project$Model_ProjectFileData$add = F2(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				projectFileData: A3(
-					_elm_lang$core$Dict$insert,
-					fileName,
-					A2(
-						_elm_lang$core$Result$withDefault,
-						_user$project$Types_FileData$empty,
-						A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_FileData$decoder, value)),
-					model.projectFileData),
+				projectFileData: A3(_user$project$Types_ProjectFileData$insert, fileName, value, model.projectFileData),
 				lastUpdatedFile: _elm_lang$core$Maybe$Just(fileName),
 				fileBeingReprocessed: A2(_user$project$Model_ProjectFileData$markReprocessedFileComplete, fileName, model)
 			});

@@ -1,8 +1,6 @@
 module Model.ProjectFileData exposing (add)
 
-import Dict
 import Json.Decode exposing (Decoder, Value, decodeValue, field, list, string, value)
-import Types.FileData
 import Types.ProjectFileData exposing (ProjectFileData)
 
 
@@ -21,11 +19,7 @@ add value model =
             decode value "fileName" string ""
     in
     { model
-        | projectFileData =
-            Dict.insert
-                fileName
-                (decodeValue Types.FileData.decoder value |> Result.withDefault Types.FileData.empty)
-                model.projectFileData
+        | projectFileData = Types.ProjectFileData.insert fileName value model.projectFileData
         , lastUpdatedFile = Just fileName
         , fileBeingReprocessed = markReprocessedFileComplete fileName model
     }
