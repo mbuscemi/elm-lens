@@ -14898,32 +14898,8 @@ var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
 									topLevelExpressions.typeAliases)
 							});
 					case 'TypeDecl':
-						var _p4 = _p0._1._0;
-						var lineNumber = A3(
-							_elm_lang$core$Basics$flip,
-							F2(
-								function (x, y) {
-									return x - y;
-								}),
-							1,
-							A2(
-								_elm_lang$core$Maybe$withDefault,
-								0,
-								A2(
-									_elm_lang$core$Maybe$map,
-									function (_p3) {
-										return function (_) {
-											return _.row;
-										}(
-											function (_) {
-												return _.start;
-											}(
-												function (_) {
-													return _.range;
-												}(_p3)));
-									},
-									_elm_lang$core$List$head(_p4.constructors))));
-						var name = _p4.name;
+						var lineNumber = _p0._0.start.row;
+						var name = _p0._1._0.name;
 						return _elm_lang$core$Native_Utils.update(
 							topLevelExpressions,
 							{
@@ -14946,13 +14922,13 @@ var _user$project$Model_TopLevelExpressions$collectExpsFrom = function (declarat
 	return A3(_elm_lang$core$List$foldl, _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration, _user$project$Types_TopLevelExpressions$default, declarations);
 };
 var _user$project$Model_TopLevelExpressions$collectExpressions = function (parseResult) {
-	var _p5 = parseResult;
-	if (_p5.ctor === 'Ok') {
+	var _p3 = parseResult;
+	if (_p3.ctor === 'Ok') {
 		return _user$project$Model_TopLevelExpressions$collectExpsFrom(
 			function (_) {
 				return _.declarations;
 			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p5._0)));
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p3._0)));
 	} else {
 		return _user$project$Types_TopLevelExpressions$default;
 	}

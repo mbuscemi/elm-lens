@@ -72,11 +72,7 @@ collectExpsFromDeclaration declaration topLevelExpressions =
                     type_.name
 
                 lineNumber =
-                    type_.constructors
-                        |> List.head
-                        |> Maybe.map (.range >> .start >> .row)
-                        |> Maybe.withDefault 0
-                        |> flip (-) 1
+                    range.start.row
             in
             { topLevelExpressions | types = Dict.insert name (Expression lineNumber) topLevelExpressions.types }
 
