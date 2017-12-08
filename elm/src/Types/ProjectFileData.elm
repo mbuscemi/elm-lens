@@ -1,17 +1,22 @@
 module Types.ProjectFileData exposing (ProjectFileData, insert)
 
 import Dict exposing (Dict)
-import Json.Decode exposing (Value, decodeValue)
 import Types.FileData exposing (FileData)
+import Types.Report exposing (Report)
 
 
 type alias ProjectFileData =
     Dict String FileData
 
 
-insert : String -> Value -> ProjectFileData -> ProjectFileData
-insert fileName newEntry projectFileData =
+insert : Report -> ProjectFileData -> ProjectFileData
+insert report projectFileData =
     Dict.insert
-        fileName
-        (decodeValue Types.FileData.decoder newEntry |> Result.withDefault Types.FileData.empty)
+        report.fileName
+        (FileData
+            report.moduleName
+            report.topLevelExpressions
+            report.exposings
+            report.references
+        )
         projectFileData

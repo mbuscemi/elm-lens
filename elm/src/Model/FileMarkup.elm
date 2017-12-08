@@ -21,7 +21,7 @@ type alias Model model =
 make : String -> Model model -> FileMarkup
 make fileName model =
     Dict.get fileName model.projectFileData
-        |> Maybe.withDefault Types.FileData.empty
+        |> Maybe.withDefault Types.FileData.default
         |> toFileMarkup fileName model
 
 

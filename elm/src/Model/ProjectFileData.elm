@@ -2,6 +2,7 @@ module Model.ProjectFileData exposing (add)
 
 import Json.Decode exposing (Decoder, Value, decodeValue, field, list, string, value)
 import Types.ProjectFileData exposing (ProjectFileData)
+import Types.Report exposing (Report)
 
 
 type alias Model model =
@@ -14,28 +15,23 @@ type alias Model model =
 
 add : Value -> Model model -> Model model
 add value model =
-    let
-        fileName =
-            decode value "fileName" string ""
-    in
+    addFromReport (Types.Report.fromValue value) model
+
+
+addFromReport : Report -> Model model -> Model model
+addFromReport report model =
     { model
-        | projectFileData = Types.ProjectFileData.insert fileName value model.projectFileData
-        , lastUpdatedFile = Just fileName
-        , fileBeingReprocessed = markReprocessedFileComplete fileName model
+        | projectFileData = Types.ProjectFileData.insert report model.projectFileData
+        , lastUpdatedFile = Just report.fileName
+        , fileBeingReprocessed = markReprocessedFileComplete report model
     }
 
 
-decode : Value -> String -> Decoder a -> a -> a
-decode value fieldName decoder default =
-    decodeValue (field fieldName decoder) value
-        |> Result.withDefault default
-
-
-markReprocessedFileComplete : String -> Model model -> Maybe String
-markReprocessedFileComplete fileName model =
+markReprocessedFileComplete : Report -> Model model -> Maybe String
+markReprocessedFileComplete report model =
     case model.fileBeingReprocessed of
         Just reprocessingFile ->
-            if reprocessingFile == fileName then
+            if reprocessingFile == report.fileName then
                 Nothing
             else
                 model.fileBeingReprocessed

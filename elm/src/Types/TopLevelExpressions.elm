@@ -57,19 +57,19 @@ encoder expressions =
         ]
 
 
-expressionValue : Dict String Expression -> Value
-expressionValue dict =
-    Dict.toList dict
-        |> List.map (\( name, exp ) -> ( name, object [ ( "lineNumber", JE.int exp.lineNumber ) ] ))
-        |> object
-
-
 decoder : Decoder TopLevelExpressions
 decoder =
     map3 TopLevelExpressions
         (field "functions" expressionDictDecoder)
         (field "types" expressionDictDecoder)
         (field "typeAliases" expressionDictDecoder)
+
+
+expressionValue : Dict String Expression -> Value
+expressionValue dict =
+    Dict.toList dict
+        |> List.map (\( name, exp ) -> ( name, object [ ( "lineNumber", JE.int exp.lineNumber ) ] ))
+        |> object
 
 
 expressionDictDecoder : Decoder (Dict String Expression)
@@ -79,5 +79,4 @@ expressionDictDecoder =
 
 expressionDecoder : Decoder Expression
 expressionDecoder =
-    map Expression
-        (field "lineNumber" JD.int)
+    map Expression (field "lineNumber" JD.int)
