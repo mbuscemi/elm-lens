@@ -5,6 +5,7 @@ import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
 import Elm.Syntax.Pattern exposing (Pattern)
+import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Set exposing (Set)
 import Types.Reference exposing (Reference)
@@ -34,88 +35,84 @@ collectReferences parseResult =
             []
 
 
-collectRefsFrom : List Declaration -> List Reference
+collectRefsFrom : List (Ranged Declaration) -> List Reference
 collectRefsFrom declarations =
     List.foldl collectRefsFromDeclaration [] declarations
 
 
-collectRefsFromDeclaration : Declaration -> List Reference -> List Reference
+collectRefsFromDeclaration : Ranged Declaration -> List Reference -> List Reference
 collectRefsFromDeclaration declaration references =
     case declaration of
-        Elm.Syntax.Declaration.FuncDecl function ->
+        ( range, Elm.Syntax.Declaration.FuncDecl function ) ->
             List.foldl argumentsFromPattern Set.empty function.declaration.arguments
                 |> (\args -> refsInExpression args function.declaration.expression references)
                 |> appendSignatureReferences function
 
-        Elm.Syntax.Declaration.AliasDecl typeAlias ->
+        ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
             refsInTypeAnnotation typeAlias.typeAnnotation references
 
         _ ->
             references
 
 
-refsInExpression : Set String -> Expression -> List Reference -> List Reference
+refsInExpression : Set String -> Ranged Expression -> List Reference -> List Reference
 refsInExpression arguments expression references =
-    let
-        ( range, innerExpression ) =
-            expression
-    in
-    case innerExpression of
-        Elm.Syntax.Expression.Application exps ->
+    case expression of
+        ( range, Elm.Syntax.Expression.Application exps ) ->
             List.foldl (refsInExpression arguments) references exps
 
-        Elm.Syntax.Expression.OperatorApplication _ _ exp1 exp2 ->
+        ( range, Elm.Syntax.Expression.OperatorApplication _ _ exp1 exp2 ) ->
             List.foldl (refsInExpression arguments) references [ exp1, exp2 ]
 
-        Elm.Syntax.Expression.FunctionOrValue name ->
+        ( range, Elm.Syntax.Expression.FunctionOrValue name ) ->
             addReference name arguments references
 
-        Elm.Syntax.Expression.IfBlock exp1 exp2 exp3 ->
+        ( range, Elm.Syntax.Expression.IfBlock exp1 exp2 exp3 ) ->
             List.foldl (refsInExpression arguments) references [ exp1, exp2, exp3 ]
 
-        Elm.Syntax.Expression.Negation exp ->
+        ( range, Elm.Syntax.Expression.Negation exp ) ->
             refsInExpression arguments exp references
 
-        Elm.Syntax.Expression.TupledExpression exps ->
+        ( range, Elm.Syntax.Expression.TupledExpression exps ) ->
             List.foldl (refsInExpression arguments) references exps
 
-        Elm.Syntax.Expression.ParenthesizedExpression exp ->
+        ( range, Elm.Syntax.Expression.ParenthesizedExpression exp ) ->
             refsInExpression arguments exp references
 
-        Elm.Syntax.Expression.LetExpression letBlock ->
+        ( range, Elm.Syntax.Expression.LetExpression letBlock ) ->
             let
                 expressions =
                     List.foldl letDeclarationExpressions [] letBlock.declarations
             in
             List.foldl (refsInExpression arguments) references (letBlock.expression :: expressions)
 
-        Elm.Syntax.Expression.CaseExpression caseBlock ->
+        ( range, Elm.Syntax.Expression.CaseExpression caseBlock ) ->
             let
                 allArguments =
                     Set.union arguments (additionalArguments (List.map Tuple.first caseBlock.cases))
             in
             List.foldl (refsInExpression allArguments) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
 
-        Elm.Syntax.Expression.LambdaExpression lambda ->
+        ( range, Elm.Syntax.Expression.LambdaExpression lambda ) ->
             let
                 allArguments =
                     Set.union arguments (additionalArguments lambda.args)
             in
             refsInExpression allArguments lambda.expression references
 
-        Elm.Syntax.Expression.RecordExpr recordSetters ->
+        ( range, Elm.Syntax.Expression.RecordExpr recordSetters ) ->
             List.foldl (refsInExpression arguments) references (List.map Tuple.second recordSetters)
 
-        Elm.Syntax.Expression.ListExpr exps ->
+        ( range, Elm.Syntax.Expression.ListExpr exps ) ->
             List.foldl (refsInExpression arguments) references exps
 
-        Elm.Syntax.Expression.QualifiedExpr moduleName name ->
+        ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
             addReference name arguments references
 
-        Elm.Syntax.Expression.RecordAccessFunction name ->
+        ( range, Elm.Syntax.Expression.RecordAccessFunction name ) ->
             addReference name arguments references
 
-        Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ->
+        ( range, Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ) ->
             List.foldl (refsInExpression arguments) references (List.map Tuple.second recordUpdate.updates)
 
         _ ->
@@ -130,16 +127,16 @@ addReference name arguments references =
         Reference name :: references
 
 
-refsInTypeAnnotation : TypeAnnotation -> List Reference -> List Reference
+refsInTypeAnnotation : Ranged TypeAnnotation -> List Reference -> List Reference
 refsInTypeAnnotation typeAnnotation references =
     case typeAnnotation of
-        Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations range ->
+        ( range, Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations ) ->
             List.foldl refsInTypeAnnotation (Reference name :: references) typeAnnotations
 
-        Elm.Syntax.TypeAnnotation.Tupled typeAnnotations range ->
+        ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
             List.foldl refsInTypeAnnotation references typeAnnotations
 
-        Elm.Syntax.TypeAnnotation.FunctionTypeAnnotation ta1 ta2 range ->
+        ( range, Elm.Syntax.TypeAnnotation.FunctionTypeAnnotation ta1 ta2 ) ->
             List.foldl refsInTypeAnnotation references [ ta1, ta2 ]
 
         _ ->
@@ -149,35 +146,35 @@ refsInTypeAnnotation typeAnnotation references =
 appendSignatureReferences : Function -> List Reference -> List Reference
 appendSignatureReferences function references =
     case function.signature of
-        Just signature ->
+        Just ( range, signature ) ->
             refsInTypeAnnotation signature.typeAnnotation references
 
         Nothing ->
             references
 
 
-letDeclarationExpressions : LetDeclaration -> List Expression -> List Expression
+letDeclarationExpressions : Ranged LetDeclaration -> List (Ranged Expression) -> List (Ranged Expression)
 letDeclarationExpressions letDeclaration expressions =
     case letDeclaration of
-        Elm.Syntax.Expression.LetFunction function ->
+        ( range, Elm.Syntax.Expression.LetFunction function ) ->
             function.declaration.expression :: expressions
 
-        Elm.Syntax.Expression.LetDestructuring pattern expression ->
+        ( range, Elm.Syntax.Expression.LetDestructuring pattern expression ) ->
             expression :: expressions
 
 
-additionalArguments : List Pattern -> Set String
+additionalArguments : List (Ranged Pattern) -> Set String
 additionalArguments patterns =
     List.foldl argumentsFromPattern Set.empty patterns
 
 
-argumentsFromPattern : Pattern -> Set String -> Set String
+argumentsFromPattern : Ranged Pattern -> Set String -> Set String
 argumentsFromPattern pattern arguments =
     case pattern of
-        Elm.Syntax.Pattern.VarPattern name range ->
+        ( range, Elm.Syntax.Pattern.VarPattern name ) ->
             Set.insert name arguments
 
-        Elm.Syntax.Pattern.NamedPattern qualifiedNameRef patterns range ->
+        ( range, Elm.Syntax.Pattern.NamedPattern qualifiedNameRef patterns ) ->
             List.foldl argumentsFromPattern arguments patterns
 
         _ ->

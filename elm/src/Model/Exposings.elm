@@ -5,6 +5,7 @@ import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
 import Elm.Syntax.Module exposing (Module(EffectModule, NormalModule, PortModule))
+import Elm.Syntax.Ranged exposing (Ranged)
 import Set exposing (Set)
 import Types.Exposings exposing (Exposings)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
@@ -36,7 +37,7 @@ collectExposings topLevelExpressions parseResult =
             Types.Exposings.default
 
 
-exposingListFromModule : Module -> Exposing TopLevelExpose
+exposingListFromModule : Module -> Exposing (Ranged TopLevelExpose)
 exposingListFromModule module_ =
     case module_ of
         NormalModule data ->
@@ -49,7 +50,7 @@ exposingListFromModule module_ =
             data.exposingList
 
 
-gatherExposings : TopLevelExpressions -> Exposing TopLevelExpose -> Exposings
+gatherExposings : TopLevelExpressions -> Exposing (Ranged TopLevelExpose) -> Exposings
 gatherExposings topLevelExpressions topLevelExposeExposing =
     case topLevelExposeExposing of
         Elm.Syntax.Exposing.All range ->
@@ -72,17 +73,17 @@ useAllTopLevelExpressions topLevelExpressions =
     }
 
 
-processExposing : TopLevelExpose -> Exposings -> Exposings
+processExposing : Ranged TopLevelExpose -> Exposings -> Exposings
 processExposing topLevelExpose exposings =
     case topLevelExpose of
-        Elm.Syntax.Exposing.InfixExpose name range ->
+        ( range, Elm.Syntax.Exposing.InfixExpose name ) ->
             exposings
 
-        Elm.Syntax.Exposing.FunctionExpose name range ->
+        ( range, Elm.Syntax.Exposing.FunctionExpose name ) ->
             { exposings | functions = Set.insert name exposings.functions }
 
-        Elm.Syntax.Exposing.TypeOrAliasExpose name range ->
+        ( range, Elm.Syntax.Exposing.TypeOrAliasExpose name ) ->
             { exposings | types = Set.insert name exposings.types }
 
-        Elm.Syntax.Exposing.TypeExpose exposedType ->
+        ( range, Elm.Syntax.Exposing.TypeExpose exposedType ) ->
             exposings

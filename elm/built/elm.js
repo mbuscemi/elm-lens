@@ -8052,15 +8052,16 @@ var _elm_community$parser_combinators$Combine$currentLocation = function (stream
 			while (true) {
 				var _p2 = lines;
 				if (_p2.ctor === '[]') {
-					return A3(_elm_community$parser_combinators$Combine$ParseLocation, '', 1, position);
+					return A3(_elm_community$parser_combinators$Combine$ParseLocation, '', currentLine, position);
 				} else {
-					if (_p2._1.ctor === '[]') {
-						return A3(_elm_community$parser_combinators$Combine$ParseLocation, _p2._0, currentLine + 1, position);
+					var _p3 = _p2._0;
+					var length = _elm_lang$core$String$length(_p3);
+					var lengthPlusNL = length + 1;
+					if (_elm_lang$core$Native_Utils.eq(position, length)) {
+						return A3(_elm_community$parser_combinators$Combine$ParseLocation, _p3, currentLine, position);
 					} else {
-						var _p3 = _p2._0;
-						var length = _elm_lang$core$String$length(_p3);
-						if (_elm_lang$core$Native_Utils.cmp(position, length) > -1) {
-							var _v3 = (position - length) - 1,
+						if (_elm_lang$core$Native_Utils.cmp(position, length) > 0) {
+							var _v3 = position - lengthPlusNL,
 								_v4 = currentLine + 1,
 								_v5 = _p2._1;
 							position = _v3;
@@ -8068,11 +8069,7 @@ var _elm_community$parser_combinators$Combine$currentLocation = function (stream
 							lines = _v5;
 							continue find;
 						} else {
-							if (_elm_lang$core$Native_Utils.eq(currentLine, 0)) {
-								return A3(_elm_community$parser_combinators$Combine$ParseLocation, _p3, 1, position);
-							} else {
-								return A3(_elm_community$parser_combinators$Combine$ParseLocation, _p3, currentLine, position - 1);
-							}
+							return A3(_elm_community$parser_combinators$Combine$ParseLocation, _p3, currentLine, position);
 						}
 					}
 				}
@@ -9357,6 +9354,7 @@ var _stil4m$elm_syntax$Elm_Syntax_Range$combine = function (ranges) {
 			_elm_lang$core$List$head(ends)));
 };
 
+
 var _stil4m$elm_syntax$Elm_Syntax_Exposing$operator = function (t) {
 	var _p0 = t;
 	if (_p0.ctor === 'InfixExpose') {
@@ -9387,22 +9385,13 @@ var _stil4m$elm_syntax$Elm_Syntax_Exposing$exposesFunction = F2(
 				_p1._0);
 		}
 	});
-var _stil4m$elm_syntax$Elm_Syntax_Exposing$topLevelExposeRange = function (e) {
-	var _p3 = e;
-	switch (_p3.ctor) {
-		case 'InfixExpose':
-			return _p3._1;
-		case 'FunctionExpose':
-			return _p3._1;
-		case 'TypeOrAliasExpose':
-			return _p3._1;
-		default:
-			return _p3._0.range;
-	}
+var _stil4m$elm_syntax$Elm_Syntax_Exposing$topLevelExposeRange = function (_p3) {
+	var _p4 = _p3;
+	return _p4._0;
 };
-var _stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType = F3(
-	function (a, b, c) {
-		return {name: a, constructors: b, range: c};
+var _stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType = F2(
+	function (a, b) {
+		return {name: a, constructors: b};
 	});
 var _stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit = function (a) {
 	return {ctor: 'Explicit', _0: a};
@@ -9413,18 +9402,15 @@ var _stil4m$elm_syntax$Elm_Syntax_Exposing$All = function (a) {
 var _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose = function (a) {
 	return {ctor: 'TypeExpose', _0: a};
 };
-var _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeOrAliasExpose = F2(
-	function (a, b) {
-		return {ctor: 'TypeOrAliasExpose', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Exposing$FunctionExpose = F2(
-	function (a, b) {
-		return {ctor: 'FunctionExpose', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose = F2(
-	function (a, b) {
-		return {ctor: 'InfixExpose', _0: a, _1: b};
-	});
+var _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeOrAliasExpose = function (a) {
+	return {ctor: 'TypeOrAliasExpose', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Exposing$FunctionExpose = function (a) {
+	return {ctor: 'FunctionExpose', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose = function (a) {
+	return {ctor: 'InfixExpose', _0: a};
+};
 
 var _stil4m$elm_syntax$Elm_Syntax_Base$VariablePointer = F2(
 	function (a, b) {
@@ -9500,11 +9486,19 @@ var _stil4m$elm_syntax$Elm_DefaultImports$defaults = {
 				_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
 					{
 						ctor: '::',
-						_0: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
-							A3(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'List', _elm_lang$core$Maybe$Nothing, _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange)),
+						_0: {
+							ctor: '_Tuple2',
+							_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+							_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
+								A2(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'List', _elm_lang$core$Maybe$Nothing))
+						},
 						_1: {
 							ctor: '::',
-							_0: A2(_stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose, '::', _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange),
+							_0: {
+								ctor: '_Tuple2',
+								_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+								_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose('::')
+							},
 							_1: {ctor: '[]'}
 						}
 					})),
@@ -9523,22 +9517,25 @@ var _stil4m$elm_syntax$Elm_DefaultImports$defaults = {
 					_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
 						{
 							ctor: '::',
-							_0: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
-								A3(
-									_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType,
-									'Maybe',
-									_elm_lang$core$Maybe$Just(
-										_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
-											{
-												ctor: '::',
-												_0: {ctor: '_Tuple2', _0: 'Just', _1: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange},
-												_1: {
+							_0: {
+								ctor: '_Tuple2',
+								_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+								_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
+									A2(
+										_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType,
+										'Maybe',
+										_elm_lang$core$Maybe$Just(
+											_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
+												{
 													ctor: '::',
-													_0: {ctor: '_Tuple2', _0: 'Nothing', _1: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange},
-													_1: {ctor: '[]'}
-												}
-											})),
-									_stil4m$elm_syntax$Elm_Syntax_Range$emptyRange)),
+													_0: {ctor: '_Tuple2', _0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange, _1: 'Just'},
+													_1: {
+														ctor: '::',
+														_0: {ctor: '_Tuple2', _0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange, _1: 'Nothing'},
+														_1: {ctor: '[]'}
+													}
+												}))))
+							},
 							_1: {ctor: '[]'}
 						})),
 				moduleAlias: _elm_lang$core$Maybe$Nothing,
@@ -9556,22 +9553,25 @@ var _stil4m$elm_syntax$Elm_DefaultImports$defaults = {
 						_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
 							{
 								ctor: '::',
-								_0: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
-									A3(
-										_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType,
-										'Result',
-										_elm_lang$core$Maybe$Just(
-											_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
-												{
-													ctor: '::',
-													_0: {ctor: '_Tuple2', _0: 'Ok', _1: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange},
-													_1: {
+								_0: {
+									ctor: '_Tuple2',
+									_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+									_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
+										A2(
+											_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType,
+											'Result',
+											_elm_lang$core$Maybe$Just(
+												_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
+													{
 														ctor: '::',
-														_0: {ctor: '_Tuple2', _0: 'Err', _1: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange},
-														_1: {ctor: '[]'}
-													}
-												})),
-										_stil4m$elm_syntax$Elm_Syntax_Range$emptyRange)),
+														_0: {ctor: '_Tuple2', _0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange, _1: 'Ok'},
+														_1: {
+															ctor: '::',
+															_0: {ctor: '_Tuple2', _0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange, _1: 'Err'},
+															_1: {ctor: '[]'}
+														}
+													}))))
+								},
 								_1: {ctor: '[]'}
 							})),
 					moduleAlias: _elm_lang$core$Maybe$Nothing,
@@ -9625,8 +9625,12 @@ var _stil4m$elm_syntax$Elm_DefaultImports$defaults = {
 										_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
 											{
 												ctor: '::',
-												_0: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
-													A3(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'Program', _elm_lang$core$Maybe$Nothing, _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange)),
+												_0: {
+													ctor: '_Tuple2',
+													_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+													_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
+														A2(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'Program', _elm_lang$core$Maybe$Nothing))
+												},
 												_1: {ctor: '[]'}
 											})),
 									moduleAlias: _elm_lang$core$Maybe$Nothing,
@@ -9648,11 +9652,19 @@ var _stil4m$elm_syntax$Elm_DefaultImports$defaults = {
 											_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
 												{
 													ctor: '::',
-													_0: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
-														A3(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'Cmd', _elm_lang$core$Maybe$Nothing, _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange)),
+													_0: {
+														ctor: '_Tuple2',
+														_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+														_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
+															A2(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'Cmd', _elm_lang$core$Maybe$Nothing))
+													},
 													_1: {
 														ctor: '::',
-														_0: A2(_stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose, '!', _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange),
+														_0: {
+															ctor: '_Tuple2',
+															_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+															_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose('!')
+														},
 														_1: {ctor: '[]'}
 													}
 												})),
@@ -9675,8 +9687,12 @@ var _stil4m$elm_syntax$Elm_DefaultImports$defaults = {
 												_stil4m$elm_syntax$Elm_Syntax_Exposing$Explicit(
 													{
 														ctor: '::',
-														_0: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
-															A3(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'Sub', _elm_lang$core$Maybe$Nothing, _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange)),
+														_0: {
+															ctor: '_Tuple2',
+															_0: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange,
+															_1: _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose(
+																A2(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType, 'Sub', _elm_lang$core$Maybe$Nothing))
+														},
 														_1: {ctor: '[]'}
 													})),
 											moduleAlias: _elm_lang$core$Maybe$Nothing,
@@ -9770,92 +9786,73 @@ var _stil4m$elm_syntax$Elm_Syntax_Pattern$QualifiedNameRef = F2(
 	function (a, b) {
 		return {moduleName: a, name: b};
 	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$ParenthesizedPattern = F2(
-	function (a, b) {
-		return {ctor: 'ParenthesizedPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$AsPattern = F3(
-	function (a, b, c) {
-		return {ctor: 'AsPattern', _0: a, _1: b, _2: c};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$QualifiedNamePattern = F2(
-	function (a, b) {
-		return {ctor: 'QualifiedNamePattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$NamedPattern = F3(
-	function (a, b, c) {
-		return {ctor: 'NamedPattern', _0: a, _1: b, _2: c};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$VarPattern = F2(
-	function (a, b) {
-		return {ctor: 'VarPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$ListPattern = F2(
-	function (a, b) {
-		return {ctor: 'ListPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$UnConsPattern = F3(
-	function (a, b, c) {
-		return {ctor: 'UnConsPattern', _0: a, _1: b, _2: c};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$RecordPattern = F2(
-	function (a, b) {
-		return {ctor: 'RecordPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$TuplePattern = F2(
-	function (a, b) {
-		return {ctor: 'TuplePattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$FloatPattern = F2(
-	function (a, b) {
-		return {ctor: 'FloatPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$IntPattern = F2(
-	function (a, b) {
-		return {ctor: 'IntPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$StringPattern = F2(
-	function (a, b) {
-		return {ctor: 'StringPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$CharPattern = F2(
-	function (a, b) {
-		return {ctor: 'CharPattern', _0: a, _1: b};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$UnitPattern = function (a) {
-	return {ctor: 'UnitPattern', _0: a};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$ParenthesizedPattern = function (a) {
+	return {ctor: 'ParenthesizedPattern', _0: a};
 };
-var _stil4m$elm_syntax$Elm_Syntax_Pattern$AllPattern = function (a) {
-	return {ctor: 'AllPattern', _0: a};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$AsPattern = F2(
+	function (a, b) {
+		return {ctor: 'AsPattern', _0: a, _1: b};
+	});
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$QualifiedNamePattern = function (a) {
+	return {ctor: 'QualifiedNamePattern', _0: a};
 };
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$NamedPattern = F2(
+	function (a, b) {
+		return {ctor: 'NamedPattern', _0: a, _1: b};
+	});
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$VarPattern = function (a) {
+	return {ctor: 'VarPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$ListPattern = function (a) {
+	return {ctor: 'ListPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$UnConsPattern = F2(
+	function (a, b) {
+		return {ctor: 'UnConsPattern', _0: a, _1: b};
+	});
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$RecordPattern = function (a) {
+	return {ctor: 'RecordPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$TuplePattern = function (a) {
+	return {ctor: 'TuplePattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$FloatPattern = function (a) {
+	return {ctor: 'FloatPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$IntPattern = function (a) {
+	return {ctor: 'IntPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$StringPattern = function (a) {
+	return {ctor: 'StringPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$CharPattern = function (a) {
+	return {ctor: 'CharPattern', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$UnitPattern = {ctor: 'UnitPattern'};
+var _stil4m$elm_syntax$Elm_Syntax_Pattern$AllPattern = {ctor: 'AllPattern'};
 
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$FunctionTypeAnnotation = F3(
-	function (a, b, c) {
-		return {ctor: 'FunctionTypeAnnotation', _0: a, _1: b, _2: c};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$GenericRecord = F3(
-	function (a, b, c) {
-		return {ctor: 'GenericRecord', _0: a, _1: b, _2: c};
-	});
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Record = F2(
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$FunctionTypeAnnotation = F2(
 	function (a, b) {
-		return {ctor: 'Record', _0: a, _1: b};
+		return {ctor: 'FunctionTypeAnnotation', _0: a, _1: b};
 	});
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Tupled = F2(
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$GenericRecord = F2(
 	function (a, b) {
-		return {ctor: 'Tupled', _0: a, _1: b};
+		return {ctor: 'GenericRecord', _0: a, _1: b};
 	});
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Unit = function (a) {
-	return {ctor: 'Unit', _0: a};
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Record = function (a) {
+	return {ctor: 'Record', _0: a};
 };
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Typed = F4(
-	function (a, b, c, d) {
-		return {ctor: 'Typed', _0: a, _1: b, _2: c, _3: d};
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Tupled = function (a) {
+	return {ctor: 'Tupled', _0: a};
+};
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Unit = {ctor: 'Unit'};
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Typed = F3(
+	function (a, b, c) {
+		return {ctor: 'Typed', _0: a, _1: b, _2: c};
 	});
-var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$GenericType = F2(
-	function (a, b) {
-		return {ctor: 'GenericType', _0: a, _1: b};
-	});
+var _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$GenericType = function (a) {
+	return {ctor: 'GenericType', _0: a};
+};
 
 var _stil4m$elm_syntax$Elm_Syntax_Expression$Function = F3(
 	function (a, b, c) {
@@ -9865,9 +9862,9 @@ var _stil4m$elm_syntax$Elm_Syntax_Expression$FunctionDeclaration = F4(
 	function (a, b, c, d) {
 		return {operatorDefinition: a, name: b, $arguments: c, expression: d};
 	});
-var _stil4m$elm_syntax$Elm_Syntax_Expression$FunctionSignature = F4(
-	function (a, b, c, d) {
-		return {operatorDefinition: a, name: b, typeAnnotation: c, range: d};
+var _stil4m$elm_syntax$Elm_Syntax_Expression$FunctionSignature = F3(
+	function (a, b, c) {
+		return {operatorDefinition: a, name: b, typeAnnotation: c};
 	});
 var _stil4m$elm_syntax$Elm_Syntax_Expression$RecordUpdate = F2(
 	function (a, b) {
@@ -9976,9 +9973,9 @@ var _stil4m$elm_syntax$Elm_Syntax_Type$ValueConstructor = F3(
 		return {name: a, $arguments: b, range: c};
 	});
 
-var _stil4m$elm_syntax$Elm_Syntax_TypeAlias$TypeAlias = F5(
-	function (a, b, c, d, e) {
-		return {documentation: a, name: b, generics: c, typeAnnotation: d, range: e};
+var _stil4m$elm_syntax$Elm_Syntax_TypeAlias$TypeAlias = F4(
+	function (a, b, c, d) {
+		return {documentation: a, name: b, generics: c, typeAnnotation: d};
 	});
 
 var _stil4m$elm_syntax$Elm_Syntax_Declaration$Destructuring = F2(
@@ -10098,49 +10095,50 @@ var _stil4m$elm_syntax$Elm_Interface$buildInterfaceFromExplicit = F2(
 	function (x, fileDefinitionList) {
 		return A2(
 			_elm_lang$core$List$filterMap,
-			function (expose) {
-				var _p6 = expose;
-				switch (_p6.ctor) {
+			function (_p6) {
+				var _p7 = _p6;
+				var _p8 = _p7._1;
+				switch (_p8.ctor) {
 					case 'InfixExpose':
-						return A2(_stil4m$elm_syntax$Elm_Interface$lookupForDefinition, _p6._0, fileDefinitionList);
+						return A2(_stil4m$elm_syntax$Elm_Interface$lookupForDefinition, _p8._0, fileDefinitionList);
 					case 'TypeOrAliasExpose':
 						return A2(
 							_elm_lang$core$Maybe$map,
 							_stil4m$elm_syntax$Elm_Interface$ifType(
-								function (_p7) {
-									var _p8 = _p7;
+								function (_p9) {
+									var _p10 = _p9;
 									return _stil4m$elm_syntax$Elm_Interface$Type(
 										{
 											ctor: '_Tuple2',
-											_0: _p8._0,
+											_0: _p10._0,
 											_1: {ctor: '[]'}
 										});
 								}),
-							A2(_stil4m$elm_syntax$Elm_Interface$lookupForDefinition, _p6._0, fileDefinitionList));
+							A2(_stil4m$elm_syntax$Elm_Interface$lookupForDefinition, _p8._0, fileDefinitionList));
 					case 'FunctionExpose':
 						return _elm_lang$core$Maybe$Just(
-							_stil4m$elm_syntax$Elm_Interface$Function(_p6._0));
+							_stil4m$elm_syntax$Elm_Interface$Function(_p8._0));
 					default:
-						var _p10 = _p6._0;
-						var _p9 = _p10.constructors;
-						if (_p9.ctor === 'Nothing') {
+						var _p12 = _p8._0;
+						var _p11 = _p12.constructors;
+						if (_p11.ctor === 'Nothing') {
 							return _elm_lang$core$Maybe$Just(
 								_stil4m$elm_syntax$Elm_Interface$Type(
 									{
 										ctor: '_Tuple2',
-										_0: _p10.name,
+										_0: _p12.name,
 										_1: {ctor: '[]'}
 									}));
 						} else {
-							if (_p9._0.ctor === 'All') {
-								return A2(_stil4m$elm_syntax$Elm_Interface$lookupForDefinition, _p10.name, fileDefinitionList);
+							if (_p11._0.ctor === 'All') {
+								return A2(_stil4m$elm_syntax$Elm_Interface$lookupForDefinition, _p12.name, fileDefinitionList);
 							} else {
 								return _elm_lang$core$Maybe$Just(
 									_stil4m$elm_syntax$Elm_Interface$Type(
 										{
 											ctor: '_Tuple2',
-											_0: _p10.name,
-											_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p9._0._0)
+											_0: _p12.name,
+											_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p11._0._0)
 										}));
 							}
 						}
@@ -10151,32 +10149,32 @@ var _stil4m$elm_syntax$Elm_Interface$buildInterfaceFromExplicit = F2(
 var _stil4m$elm_syntax$Elm_Interface$fileToDefinitions = function (file) {
 	var getValidOperatorInterface = F2(
 		function (t1, t2) {
-			var _p11 = {ctor: '_Tuple2', _0: t1, _1: t2};
-			if (((_p11.ctor === '_Tuple2') && (_p11._0.ctor === 'Operator')) && (_p11._1.ctor === 'Operator')) {
-				var _p12 = _p11._0._0;
-				return (_elm_lang$core$Native_Utils.eq(_p12.precedence, 5) && _elm_lang$core$Native_Utils.eq(_p12.direction, _stil4m$elm_syntax$Elm_Syntax_Infix$Left)) ? _elm_lang$core$Maybe$Just(
-					_stil4m$elm_syntax$Elm_Interface$Operator(_p11._1._0)) : _elm_lang$core$Maybe$Just(
-					_stil4m$elm_syntax$Elm_Interface$Operator(_p12));
+			var _p13 = {ctor: '_Tuple2', _0: t1, _1: t2};
+			if (((_p13.ctor === '_Tuple2') && (_p13._0.ctor === 'Operator')) && (_p13._1.ctor === 'Operator')) {
+				var _p14 = _p13._0._0;
+				return (_elm_lang$core$Native_Utils.eq(_p14.precedence, 5) && _elm_lang$core$Native_Utils.eq(_p14.direction, _stil4m$elm_syntax$Elm_Syntax_Infix$Left)) ? _elm_lang$core$Maybe$Just(
+					_stil4m$elm_syntax$Elm_Interface$Operator(_p13._1._0)) : _elm_lang$core$Maybe$Just(
+					_stil4m$elm_syntax$Elm_Interface$Operator(_p14));
 			} else {
 				return _elm_lang$core$Maybe$Nothing;
 			}
 		});
 	var resolveGroup = function (g) {
-		var _p13 = g;
-		if (_p13.ctor === '[]') {
+		var _p15 = g;
+		if (_p15.ctor === '[]') {
 			return _elm_lang$core$Maybe$Nothing;
 		} else {
-			if (_p13._1.ctor === '[]') {
-				return _elm_lang$core$Maybe$Just(_p13._0);
+			if (_p15._1.ctor === '[]') {
+				return _elm_lang$core$Maybe$Just(_p15._0);
 			} else {
-				if (((_p13._0.ctor === '_Tuple2') && (_p13._1._0.ctor === '_Tuple2')) && (_p13._1._1.ctor === '[]')) {
+				if (((_p15._0.ctor === '_Tuple2') && (_p15._1._0.ctor === '_Tuple2')) && (_p15._1._1.ctor === '[]')) {
 					return A2(
 						_elm_lang$core$Maybe$map,
 						F2(
 							function (v0, v1) {
 								return {ctor: '_Tuple2', _0: v0, _1: v1};
-							})(_p13._0._0),
-						A2(getValidOperatorInterface, _p13._0._1, _p13._1._0._1));
+							})(_p15._0._0),
+						A2(getValidOperatorInterface, _p15._0._1, _p15._1._0._1));
 				} else {
 					return _elm_lang$core$Maybe$Nothing;
 				}
@@ -10185,64 +10183,65 @@ var _stil4m$elm_syntax$Elm_Interface$fileToDefinitions = function (file) {
 	};
 	var allDeclarations = A2(
 		_elm_lang$core$List$filterMap,
-		function (decl) {
-			var _p14 = decl;
-			switch (_p14.ctor) {
+		function (_p16) {
+			var _p17 = _p16;
+			var _p18 = _p17._1;
+			switch (_p18.ctor) {
 				case 'TypeDecl':
-					var _p15 = _p14._0;
+					var _p19 = _p18._0;
 					return _elm_lang$core$Maybe$Just(
 						{
 							ctor: '_Tuple2',
-							_0: _p15.name,
+							_0: _p19.name,
 							_1: _stil4m$elm_syntax$Elm_Interface$Type(
 								{
 									ctor: '_Tuple2',
-									_0: _p15.name,
+									_0: _p19.name,
 									_1: A2(
 										_elm_lang$core$List$map,
 										function (_) {
 											return _.name;
 										},
-										_p15.constructors)
+										_p19.constructors)
 								})
 						});
 				case 'AliasDecl':
-					var _p16 = _p14._0;
+					var _p20 = _p18._0;
 					return _elm_lang$core$Maybe$Just(
 						{
 							ctor: '_Tuple2',
-							_0: _p16.name,
-							_1: _stil4m$elm_syntax$Elm_Interface$Alias(_p16.name)
+							_0: _p20.name,
+							_1: _stil4m$elm_syntax$Elm_Interface$Alias(_p20.name)
 						});
 				case 'PortDeclaration':
-					var _p17 = _p14._0;
+					var _p21 = _p18._0;
 					return _elm_lang$core$Maybe$Just(
 						{
 							ctor: '_Tuple2',
-							_0: _p17.name,
-							_1: _stil4m$elm_syntax$Elm_Interface$Function(_p17.name)
+							_0: _p21.name,
+							_1: _stil4m$elm_syntax$Elm_Interface$Function(_p21.name)
 						});
 				case 'FuncDecl':
-					var _p18 = _p14._0;
-					return _p18.declaration.operatorDefinition ? _elm_lang$core$Maybe$Just(
+					var _p22 = _p18._0;
+					return _p22.declaration.operatorDefinition ? _elm_lang$core$Maybe$Just(
 						{
 							ctor: '_Tuple2',
-							_0: _p18.declaration.name.value,
+							_0: _p22.declaration.name.value,
 							_1: _stil4m$elm_syntax$Elm_Interface$Operator(
-								{operator: _p18.declaration.name.value, precedence: 5, direction: _stil4m$elm_syntax$Elm_Syntax_Infix$Left})
+								{operator: _p22.declaration.name.value, precedence: 5, direction: _stil4m$elm_syntax$Elm_Syntax_Infix$Left})
 						}) : _elm_lang$core$Maybe$Just(
 						{
 							ctor: '_Tuple2',
-							_0: _p18.declaration.name.value,
-							_1: _stil4m$elm_syntax$Elm_Interface$Function(_p18.declaration.name.value)
+							_0: _p22.declaration.name.value,
+							_1: _stil4m$elm_syntax$Elm_Interface$Function(_p22.declaration.name.value)
 						});
 				case 'InfixDeclaration':
-					var _p19 = _p14._0;
+					var _p23 = _p18._0;
 					return _elm_lang$core$Maybe$Just(
 						{
 							ctor: '_Tuple2',
-							_0: _p19.operator,
-							_1: _stil4m$elm_syntax$Elm_Interface$Operator(_p19)
+							_0: _p23.operator,
+							_1: _stil4m$elm_syntax$Elm_Interface$Operator(_p23)
 						});
 				default:
 					return _elm_lang$core$Maybe$Nothing;
@@ -10251,9 +10250,9 @@ var _stil4m$elm_syntax$Elm_Interface$fileToDefinitions = function (file) {
 		file.declarations);
 	return A2(
 		_elm_lang$core$List$filterMap,
-		function (_p20) {
+		function (_p24) {
 			return resolveGroup(
-				_elm_lang$core$Tuple$second(_p20));
+				_elm_lang$core$Tuple$second(_p24));
 		},
 		A2(
 			_elm_lang$core$List$map,
@@ -10263,14 +10262,14 @@ var _stil4m$elm_syntax$Elm_Interface$fileToDefinitions = function (file) {
 					_0: x,
 					_1: A2(
 						_elm_lang$core$List$filter,
-						function (_p21) {
+						function (_p25) {
 							return A2(
 								F2(
 									function (x, y) {
 										return _elm_lang$core$Native_Utils.eq(x, y);
 									}),
 								x,
-								_elm_lang$core$Tuple$first(_p21));
+								_elm_lang$core$Tuple$first(_p25));
 						},
 						allDeclarations)
 				};
@@ -10278,14 +10277,14 @@ var _stil4m$elm_syntax$Elm_Interface$fileToDefinitions = function (file) {
 			_elm_community$list_extra$List_Extra$unique(
 				A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, allDeclarations))));
 };
-var _stil4m$elm_syntax$Elm_Interface$build = function (_p22) {
-	var _p23 = _p22;
-	var _p25 = _p23._0;
-	var moduleExposing = _stil4m$elm_syntax$Elm_Syntax_Module$exposingList(_p25.moduleDefinition);
-	var fileDefinitionList = _stil4m$elm_syntax$Elm_Interface$fileToDefinitions(_p25);
-	var _p24 = moduleExposing;
-	if (_p24.ctor === 'Explicit') {
-		return A2(_stil4m$elm_syntax$Elm_Interface$buildInterfaceFromExplicit, _p24._0, fileDefinitionList);
+var _stil4m$elm_syntax$Elm_Interface$build = function (_p26) {
+	var _p27 = _p26;
+	var _p29 = _p27._0;
+	var moduleExposing = _stil4m$elm_syntax$Elm_Syntax_Module$exposingList(_p29.moduleDefinition);
+	var fileDefinitionList = _stil4m$elm_syntax$Elm_Interface$fileToDefinitions(_p29);
+	var _p28 = moduleExposing;
+	if (_p28.ctor === 'Explicit') {
+		return A2(_stil4m$elm_syntax$Elm_Interface$buildInterfaceFromExplicit, _p28._0, fileDefinitionList);
 	} else {
 		return A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, fileDefinitionList);
 	}
@@ -10352,33 +10351,34 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation = F3(
 			context);
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotationInner = F3(
-	function (config, typeRefence, context) {
-		var _p4 = typeRefence;
-		switch (_p4.ctor) {
+	function (config, _p4, context) {
+		var _p5 = _p4;
+		var _p6 = _p5._1;
+		switch (_p6.ctor) {
 			case 'Typed':
 				return A3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation(config),
 					context,
-					_p4._2);
+					_p6._2);
 			case 'Tupled':
 				return A3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation(config),
 					context,
-					_p4._0);
+					_p6._0);
 			case 'Record':
 				return A3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation(config),
 					context,
-					A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._0));
+					A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p6._0));
 			case 'GenericRecord':
 				return A3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation(config),
 					context,
-					A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._1));
+					A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p6._1));
 			case 'FunctionTypeAnnotation':
 				return A3(
 					_elm_lang$core$List$foldl,
@@ -10386,10 +10386,10 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotationInner = F3(
 					context,
 					{
 						ctor: '::',
-						_0: _p4._0,
+						_0: _p6._0,
 						_1: {
 							ctor: '::',
-							_0: _p4._1,
+							_0: _p6._1,
 							_1: {ctor: '[]'}
 						}
 					});
@@ -10416,12 +10416,13 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectType = F3(
 			typeDecl.constructors);
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectTypeAlias = F3(
-	function (config, typeAlias, context) {
+	function (config, _p7, context) {
+		var _p8 = _p7;
 		return A4(
 			_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 			config.onTypeAlias,
-			A2(_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation, config, typeAlias.typeAnnotation),
-			typeAlias,
+			A2(_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation, config, _p8._1.typeAnnotation),
+			_p8,
 			context);
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectSignature = F3(
@@ -10429,7 +10430,10 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectSignature = F3(
 		return A4(
 			_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 			config.onFunctionSignature,
-			A2(_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation, config, signature.typeAnnotation),
+			A2(
+				_stil4m$elm_syntax$Elm_Inspector$inspectTypeAnnotation,
+				config,
+				_elm_lang$core$Tuple$second(signature).typeAnnotation),
 			signature,
 			context);
 	});
@@ -10468,12 +10472,12 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectExpression = F3(
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 	function (config, expression, context) {
-		var _p5 = expression;
-		switch (_p5.ctor) {
+		var _p9 = expression;
+		switch (_p9.ctor) {
 			case 'UnitExpr':
 				return context;
 			case 'FunctionOrValue':
-				return A4(_stil4m$elm_syntax$Elm_Inspector$actionLambda, config.onFunctionOrValue, _elm_lang$core$Basics$identity, _p5._0, context);
+				return A4(_stil4m$elm_syntax$Elm_Inspector$actionLambda, config.onFunctionOrValue, _elm_lang$core$Basics$identity, _p9._0, context);
 			case 'PrefixOperator':
 				return context;
 			case 'Operator':
@@ -10483,7 +10487,7 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 			case 'Floatable':
 				return context;
 			case 'Negation':
-				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p5._0, context);
+				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p9._0, context);
 			case 'Literal':
 				return context;
 			case 'CharLiteral':
@@ -10491,12 +10495,12 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 			case 'QualifiedExpr':
 				return context;
 			case 'RecordAccess':
-				var _p6 = _p5._0;
+				var _p10 = _p9._0;
 				return A4(
 					_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 					config.onRecordAccess,
-					A2(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p6),
-					{ctor: '_Tuple2', _0: _p6, _1: _p5._1},
+					A2(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p10),
+					{ctor: '_Tuple2', _0: _p10, _1: _p9._1},
 					context);
 			case 'RecordAccessFunction':
 				return context;
@@ -10507,10 +10511,10 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectExpression(config),
 					context,
-					_p5._0);
+					_p9._0);
 			case 'OperatorApplication':
-				var _p8 = _p5._3;
-				var _p7 = _p5._2;
+				var _p12 = _p9._3;
+				var _p11 = _p9._2;
 				return A4(
 					_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 					config.onOperatorApplication,
@@ -10520,14 +10524,14 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 							_stil4m$elm_syntax$Elm_Inspector$inspectExpression(config)),
 						{
 							ctor: '::',
-							_0: _p7,
+							_0: _p11,
 							_1: {
 								ctor: '::',
-								_0: _p8,
+								_0: _p12,
 								_1: {ctor: '[]'}
 							}
 						}),
-					{ctor: '_Tuple4', _0: _p5._0, _1: _p5._1, _2: _p7, _3: _p8},
+					{ctor: '_Tuple4', _0: _p9._0, _1: _p9._1, _2: _p11, _3: _p12},
 					context);
 			case 'IfBlock':
 				return A3(
@@ -10536,13 +10540,13 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 					context,
 					{
 						ctor: '::',
-						_0: _p5._0,
+						_0: _p9._0,
 						_1: {
 							ctor: '::',
-							_0: _p5._1,
+							_0: _p9._1,
 							_1: {
 								ctor: '::',
-								_0: _p5._2,
+								_0: _p9._2,
 								_1: {ctor: '[]'}
 							}
 						}
@@ -10552,22 +10556,22 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectExpression(config),
 					context,
-					_p5._0);
+					_p9._0);
 			case 'ParenthesizedExpression':
-				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p5._0, context);
+				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p9._0, context);
 			case 'LetExpression':
-				var _p10 = _p5._0;
-				var next = function (_p9) {
+				var _p14 = _p9._0;
+				var next = function (_p13) {
 					return A3(
 						_stil4m$elm_syntax$Elm_Inspector$inspectExpression,
 						config,
-						_p10.expression,
-						A3(_stil4m$elm_syntax$Elm_Inspector$inspectLetDeclarations, config, _p10.declarations, _p9));
+						_p14.expression,
+						A3(_stil4m$elm_syntax$Elm_Inspector$inspectLetDeclarations, config, _p14.declarations, _p13));
 				};
-				return A4(_stil4m$elm_syntax$Elm_Inspector$actionLambda, config.onLetBlock, next, _p10, context);
+				return A4(_stil4m$elm_syntax$Elm_Inspector$actionLambda, config.onLetBlock, next, _p14, context);
 			case 'CaseExpression':
-				var _p11 = _p5._0;
-				var context2 = A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p11.expression, context);
+				var _p15 = _p9._0;
+				var context2 = A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p15.expression, context);
 				var context3 = A3(
 					_elm_lang$core$List$foldl,
 					F2(
@@ -10575,22 +10579,22 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 							return A3(_stil4m$elm_syntax$Elm_Inspector$inspectCase, config, a, b);
 						}),
 					context2,
-					_p11.cases);
+					_p15.cases);
 				return context3;
 			case 'LambdaExpression':
-				var _p12 = _p5._0;
+				var _p16 = _p9._0;
 				return A4(
 					_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 					config.onLambda,
-					A2(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p12.expression),
-					_p12,
+					A2(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p16.expression),
+					_p16,
 					context);
 			case 'ListExpr':
 				return A3(
 					_elm_lang$core$List$foldl,
 					_stil4m$elm_syntax$Elm_Inspector$inspectExpression(config),
 					context,
-					_p5._0);
+					_p9._0);
 			case 'RecordExpr':
 				return A3(
 					_elm_lang$core$List$foldl,
@@ -10603,9 +10607,9 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 								b);
 						}),
 					context,
-					_p5._0);
+					_p9._0);
 			default:
-				var _p13 = _p5._0;
+				var _p17 = _p9._0;
 				return A4(
 					_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 					config.onRecordUpdate,
@@ -10621,9 +10625,9 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectInnerExpression = F3(
 										b);
 								}),
 							c,
-							_p13.updates);
+							_p17.updates);
 					},
-					_p13,
+					_p17,
 					context);
 		}
 	});
@@ -10636,15 +10640,20 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectLetDeclarations = F3(
 			declarations);
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectLetDeclaration = F3(
-	function (config, declaration, context) {
-		var _p14 = declaration;
-		if (_p14.ctor === 'LetFunction') {
-			return A3(_stil4m$elm_syntax$Elm_Inspector$inspectFunction, config, _p14._0, context);
+	function (config, _p18, context) {
+		var _p19 = _p18;
+		var _p20 = _p19._1;
+		if (_p20.ctor === 'LetFunction') {
+			return A3(
+				_stil4m$elm_syntax$Elm_Inspector$inspectFunction,
+				config,
+				{ctor: '_Tuple2', _0: _p19._0, _1: _p20._0},
+				context);
 		} else {
 			return A3(
 				_stil4m$elm_syntax$Elm_Inspector$inspectDestructuring,
 				config,
-				{ctor: '_Tuple2', _0: _p14._0, _1: _p14._1},
+				{ctor: '_Tuple2', _0: _p20._0, _1: _p20._1},
 				context);
 		}
 	});
@@ -10661,42 +10670,58 @@ var _stil4m$elm_syntax$Elm_Inspector$inspectDestructuring = F3(
 			context);
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectFunction = F3(
-	function (config, $function, context) {
+	function (config, _p21, context) {
+		var _p22 = _p21;
+		var _p24 = _p22._1;
 		return A4(
 			_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 			config.onFunction,
-			function (_p15) {
+			function (_p23) {
 				return A2(
 					_elm_lang$core$Maybe$withDefault,
 					_elm_lang$core$Basics$identity,
 					A2(
 						_elm_lang$core$Maybe$map,
 						_stil4m$elm_syntax$Elm_Inspector$inspectSignature(config),
-						$function.signature))(
-					A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, $function.declaration.expression, _p15));
+						_p24.signature))(
+					A3(_stil4m$elm_syntax$Elm_Inspector$inspectExpression, config, _p24.declaration.expression, _p23));
 			},
-			$function,
+			_p22,
 			context);
 	});
 var _stil4m$elm_syntax$Elm_Inspector$inspectDeclaration = F3(
-	function (config, declaration, context) {
-		var _p16 = declaration;
-		switch (_p16.ctor) {
+	function (config, _p25, context) {
+		var _p26 = _p25;
+		var _p28 = _p26._0;
+		var _p27 = _p26._1;
+		switch (_p27.ctor) {
 			case 'FuncDecl':
-				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectFunction, config, _p16._0, context);
+				return A3(
+					_stil4m$elm_syntax$Elm_Inspector$inspectFunction,
+					config,
+					{ctor: '_Tuple2', _0: _p28, _1: _p27._0},
+					context);
 			case 'AliasDecl':
-				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectTypeAlias, config, _p16._0, context);
+				return A3(
+					_stil4m$elm_syntax$Elm_Inspector$inspectTypeAlias,
+					config,
+					{ctor: '_Tuple2', _0: _p28, _1: _p27._0},
+					context);
 			case 'TypeDecl':
-				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectType, config, _p16._0, context);
+				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectType, config, _p27._0, context);
 			case 'PortDeclaration':
-				return A3(_stil4m$elm_syntax$Elm_Inspector$inspectPortDeclaration, config, _p16._0, context);
+				return A3(
+					_stil4m$elm_syntax$Elm_Inspector$inspectPortDeclaration,
+					config,
+					{ctor: '_Tuple2', _0: _p28, _1: _p27._0},
+					context);
 			case 'InfixDeclaration':
 				return context;
 			default:
 				return A3(
 					_stil4m$elm_syntax$Elm_Inspector$inspectDestructuring,
 					config,
-					{ctor: '_Tuple2', _0: _p16._0, _1: _p16._1},
+					{ctor: '_Tuple2', _0: _p27._0, _1: _p27._1},
 					context);
 		}
 	});
@@ -10713,12 +10738,12 @@ var _stil4m$elm_syntax$Elm_Inspector$inspect = F3(
 		return A4(
 			_stil4m$elm_syntax$Elm_Inspector$actionLambda,
 			config.onFile,
-			function (_p17) {
+			function (_p29) {
 				return A3(
 					_stil4m$elm_syntax$Elm_Inspector$inspectDeclarations,
 					config,
 					file.declarations,
-					A3(_stil4m$elm_syntax$Elm_Inspector$inspectImports, config, file.imports, _p17));
+					A3(_stil4m$elm_syntax$Elm_Inspector$inspectImports, config, file.imports, _p29));
 			},
 			file,
 			context);
@@ -11281,6 +11306,51 @@ var _stil4m$elm_syntax$Elm_Parser_Ranges$withRangeTuple = function (p) {
 					})),
 			p));
 };
+var _stil4m$elm_syntax$Elm_Parser_Ranges$ranged = function (p) {
+	return _elm_community$parser_combinators$Combine$withLocation(
+		function (start) {
+			return A2(
+				_elm_community$parser_combinators$Combine_ops['<*>'],
+				A2(
+					_elm_community$parser_combinators$Combine_ops['<$>'],
+					_elm_lang$core$Basics$flip(
+						F2(
+							function (v0, v1) {
+								return {ctor: '_Tuple2', _0: v0, _1: v1};
+							})),
+					p),
+				_elm_community$parser_combinators$Combine$withLocation(
+					function (end) {
+						return _elm_community$parser_combinators$Combine$succeed(
+							{
+								start: _stil4m$elm_syntax$Elm_Parser_Ranges$asPointerLocation(start),
+								end: _stil4m$elm_syntax$Elm_Parser_Ranges$asPointerLocation(end)
+							});
+					}));
+		});
+};
+var _stil4m$elm_syntax$Elm_Parser_Ranges$rangedWithCustomStart = F2(
+	function (_p4, p) {
+		var _p5 = _p4;
+		return A2(
+			_elm_community$parser_combinators$Combine_ops['<*>'],
+			A2(
+				_elm_community$parser_combinators$Combine_ops['<$>'],
+				_elm_lang$core$Basics$flip(
+					F2(
+						function (v0, v1) {
+							return {ctor: '_Tuple2', _0: v0, _1: v1};
+						})),
+				p),
+			_elm_community$parser_combinators$Combine$withLocation(
+				function (end) {
+					return _elm_community$parser_combinators$Combine$succeed(
+						{
+							start: _p5.start,
+							end: _stil4m$elm_syntax$Elm_Parser_Ranges$asPointerLocation(end)
+						});
+				}));
+	});
 
 var _stil4m$elm_syntax$Elm_Parser_Whitespace$untilNewlineToken = _elm_community$parser_combinators$Combine$regex('[^\r\n]*');
 var _stil4m$elm_syntax$Elm_Parser_Whitespace$realNewLine = _elm_community$parser_combinators$Combine$regex('\r?\n');
@@ -11358,10 +11428,11 @@ var _stil4m$elm_syntax$Elm_Parser_Comments$parseComment = function (commentParse
 		_stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
 			A2(
 				_elm_community$parser_combinators$Combine_ops['<$>'],
-				F2(
-					function (v0, v1) {
-						return {ctor: '_Tuple2', _0: v0, _1: v1};
-					}),
+				_elm_lang$core$Basics$flip(
+					F2(
+						function (v0, v1) {
+							return {ctor: '_Tuple2', _0: v0, _1: v1};
+						})),
 				commentParser)));
 };
 var _stil4m$elm_syntax$Elm_Parser_Comments$singleLineComment = _stil4m$elm_syntax$Elm_Parser_Comments$parseComment(
@@ -11654,7 +11725,7 @@ var _stil4m$elm_syntax$Elm_Parser_Patterns$pattern = _elm_community$parser_combi
 		var _p19 = _p18;
 		return A2(
 			_elm_community$parser_combinators$Combine_ops['>>='],
-			_stil4m$elm_syntax$Elm_Parser_Ranges$withRangeTuple(
+			_stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
 				_elm_community$parser_combinators$Combine$choice(
 					{
 						ctor: '::',
@@ -11714,7 +11785,7 @@ var _stil4m$elm_syntax$Elm_Parser_Patterns$namedPattern = _elm_community$parser_
 				A2(
 					_elm_community$parser_combinators$Combine_ops['*>'],
 					_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace,
-					_stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+					_stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
 						A2(_elm_community$parser_combinators$Combine$or, _stil4m$elm_syntax$Elm_Parser_Patterns$qualifiedNamePattern, _stil4m$elm_syntax$Elm_Parser_Patterns$nonNamedPattern)))));
 	});
 var _stil4m$elm_syntax$Elm_Parser_Patterns$nonNamedPattern = _elm_community$parser_combinators$Combine$lazy(
@@ -11746,7 +11817,7 @@ var _stil4m$elm_syntax$Elm_Parser_Patterns$asPattern = _elm_community$parser_com
 				A2(
 					_elm_community$parser_combinators$Combine_ops['*>'],
 					_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace),
-					_stil4m$elm_syntax$Elm_Parser_Ranges$withRange(_stil4m$elm_syntax$Elm_Parser_Patterns$nonAsPattern))),
+					_stil4m$elm_syntax$Elm_Parser_Ranges$ranged(_stil4m$elm_syntax$Elm_Parser_Patterns$nonAsPattern))),
 			A2(
 				_elm_community$parser_combinators$Combine_ops['*>'],
 				A2(
@@ -11828,11 +11899,11 @@ var _stil4m$elm_syntax$Elm_Parser_Patterns$listPattern = _elm_community$parser_c
 	});
 var _stil4m$elm_syntax$Elm_Parser_Patterns$promoteToCompositePattern = function (_p36) {
 	var _p37 = _p36;
-	var _p38 = _p37._1;
+	var _p38 = _p37;
 	return A2(
 		_elm_community$parser_combinators$Combine$or,
 		A2(
-			_stil4m$elm_syntax$Elm_Parser_Ranges$withRangeCustomStart,
+			_stil4m$elm_syntax$Elm_Parser_Ranges$rangedWithCustomStart,
 			_p37._0,
 			_elm_community$parser_combinators$Combine$choice(
 				{
@@ -11863,7 +11934,7 @@ var _stil4m$elm_syntax$Elm_Parser_Patterns$unConsPattern2 = function (p) {
 var _stil4m$elm_syntax$Elm_Parser_Patterns$declarablePattern = _elm_community$parser_combinators$Combine$lazy(
 	function (_p41) {
 		var _p42 = _p41;
-		return _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(_stil4m$elm_syntax$Elm_Parser_Patterns$declarablePatternRangeless);
+		return _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(_stil4m$elm_syntax$Elm_Parser_Patterns$declarablePatternRangeless);
 	});
 
 var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$genericTypeAnnotation = _elm_community$parser_combinators$Combine$lazy(
@@ -11876,8 +11947,8 @@ var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$asTypeAnnotation = function (x)
 	if (_p2.ctor === '[]') {
 		return _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Unit;
 	} else {
-		if (_p2._1.ctor === '[]') {
-			return _elm_lang$core$Basics$always(_p2._0);
+		if ((_p2._0.ctor === '_Tuple2') && (_p2._1.ctor === '[]')) {
+			return _p2._0._1;
 		} else {
 			return _stil4m$elm_syntax$Elm_Syntax_TypeAnnotation$Tupled(_p2);
 		}
@@ -11886,7 +11957,7 @@ var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$asTypeAnnotation = function (x)
 var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotationNoFn = _elm_community$parser_combinators$Combine$lazy(
 	function (_p3) {
 		var _p4 = _p3;
-		return _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+		return _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
 			_elm_community$parser_combinators$Combine$choice(
 				{
 					ctor: '::',
@@ -11978,7 +12049,7 @@ var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$recordFieldDefinition = _elm_co
 var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation = _elm_community$parser_combinators$Combine$lazy(
 	function (_p11) {
 		var _p12 = _p11;
-		return _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+		return _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
 			A2(
 				_elm_community$parser_combinators$Combine_ops['>>='],
 				_stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotationNoFn,
@@ -11994,7 +12065,7 @@ var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation = _elm_community
 									_elm_community$parser_combinators$Combine$string('->')),
 								_stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation)),
 						_elm_community$parser_combinators$Combine$succeed(
-							_elm_lang$core$Basics$always(typeRef)));
+							_elm_lang$core$Tuple$second(typeRef)));
 				}));
 	});
 var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$parensTypeAnnotation = _elm_community$parser_combinators$Combine$lazy(
@@ -12064,22 +12135,21 @@ var _stil4m$elm_syntax$Elm_Parser_Typings$typeAliasPrefix = A2(
 	_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace);
 var _stil4m$elm_syntax$Elm_Parser_Typings$genericList = _elm_community$parser_combinators$Combine$many(
 	A2(_elm_community$parser_combinators$Combine_ops['*>'], _stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace, _stil4m$elm_syntax$Elm_Parser_Tokens$functionName));
-var _stil4m$elm_syntax$Elm_Parser_Typings$typeAlias = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+var _stil4m$elm_syntax$Elm_Parser_Typings$typeAlias = A2(
+	_elm_community$parser_combinators$Combine_ops['<*>'],
 	A2(
 		_elm_community$parser_combinators$Combine_ops['<*>'],
 		A2(
 			_elm_community$parser_combinators$Combine_ops['<*>'],
-			A2(
-				_elm_community$parser_combinators$Combine_ops['<*>'],
-				_elm_community$parser_combinators$Combine$succeed(
-					_stil4m$elm_syntax$Elm_Syntax_TypeAlias$TypeAlias(_elm_lang$core$Maybe$Nothing)),
-				A2(_elm_community$parser_combinators$Combine_ops['*>'], _stil4m$elm_syntax$Elm_Parser_Typings$typeAliasPrefix, _stil4m$elm_syntax$Elm_Parser_Tokens$typeName)),
-			_stil4m$elm_syntax$Elm_Parser_Typings$genericList),
-		A2(
-			_elm_community$parser_combinators$Combine_ops['*>'],
-			_stil4m$elm_syntax$Elm_Parser_Util$trimmed(
-				_elm_community$parser_combinators$Combine$string('=')),
-			_stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation)));
+			_elm_community$parser_combinators$Combine$succeed(
+				_stil4m$elm_syntax$Elm_Syntax_TypeAlias$TypeAlias(_elm_lang$core$Maybe$Nothing)),
+			A2(_elm_community$parser_combinators$Combine_ops['*>'], _stil4m$elm_syntax$Elm_Parser_Typings$typeAliasPrefix, _stil4m$elm_syntax$Elm_Parser_Tokens$typeName)),
+		_stil4m$elm_syntax$Elm_Parser_Typings$genericList),
+	A2(
+		_elm_community$parser_combinators$Combine_ops['*>'],
+		_stil4m$elm_syntax$Elm_Parser_Util$trimmed(
+			_elm_community$parser_combinators$Combine$string('=')),
+		_stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation));
 var _stil4m$elm_syntax$Elm_Parser_Typings$valueConstructor = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
 	A2(
 		_elm_community$parser_combinators$Combine_ops['<*>'],
@@ -12248,7 +12318,7 @@ var _stil4m$elm_syntax$Elm_Parser_Declarations$withIndentedState = function (p) 
 				A2(
 					_elm_community$parser_combinators$Combine_ops['*>'],
 					_elm_community$parser_combinators$Combine$modifyState(
-						_stil4m$elm_syntax$Elm_Parser_State$pushIndent(location.column + 1)),
+						_stil4m$elm_syntax$Elm_Parser_State$pushIndent(location.column)),
 					p),
 				_elm_community$parser_combinators$Combine$modifyState(_stil4m$elm_syntax$Elm_Parser_State$popIndent));
 		});
@@ -12295,35 +12365,34 @@ var _stil4m$elm_syntax$Elm_Parser_Declarations$liftRecordAccess = function (e) {
 		_elm_community$parser_combinators$Combine$succeed(e));
 };
 var _stil4m$elm_syntax$Elm_Parser_Declarations$functionArgument = _stil4m$elm_syntax$Elm_Parser_Patterns$pattern;
-var _stil4m$elm_syntax$Elm_Parser_Declarations$signature = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+var _stil4m$elm_syntax$Elm_Parser_Declarations$signature = A2(
+	_elm_community$parser_combinators$Combine_ops['<*>'],
 	A2(
 		_elm_community$parser_combinators$Combine_ops['<*>'],
 		A2(
 			_elm_community$parser_combinators$Combine_ops['<*>'],
+			_elm_community$parser_combinators$Combine$succeed(_stil4m$elm_syntax$Elm_Syntax_Expression$FunctionSignature),
 			A2(
-				_elm_community$parser_combinators$Combine_ops['<*>'],
-				_elm_community$parser_combinators$Combine$succeed(_stil4m$elm_syntax$Elm_Syntax_Expression$FunctionSignature),
-				A2(
-					_elm_community$parser_combinators$Combine_ops['>>='],
-					_elm_community$parser_combinators$Combine$lookAhead(_elm_community$parser_combinators$Combine_Char$anyChar),
-					function (c) {
-						return _elm_community$parser_combinators$Combine$succeed(
-							_elm_lang$core$Native_Utils.eq(
-								c,
-								_elm_lang$core$Native_Utils.chr('(')));
-					})),
-			A2(
-				_elm_community$parser_combinators$Combine$or,
-				_stil4m$elm_syntax$Elm_Parser_Tokens$functionName,
-				_elm_community$parser_combinators$Combine$parens(_stil4m$elm_syntax$Elm_Parser_Tokens$prefixOperatorToken))),
+				_elm_community$parser_combinators$Combine_ops['>>='],
+				_elm_community$parser_combinators$Combine$lookAhead(_elm_community$parser_combinators$Combine_Char$anyChar),
+				function (c) {
+					return _elm_community$parser_combinators$Combine$succeed(
+						_elm_lang$core$Native_Utils.eq(
+							c,
+							_elm_lang$core$Native_Utils.chr('(')));
+				})),
+		A2(
+			_elm_community$parser_combinators$Combine$or,
+			_stil4m$elm_syntax$Elm_Parser_Tokens$functionName,
+			_elm_community$parser_combinators$Combine$parens(_stil4m$elm_syntax$Elm_Parser_Tokens$prefixOperatorToken))),
+	A2(
+		_elm_community$parser_combinators$Combine_ops['*>'],
 		A2(
 			_elm_community$parser_combinators$Combine_ops['*>'],
-			A2(
-				_elm_community$parser_combinators$Combine_ops['*>'],
-				_stil4m$elm_syntax$Elm_Parser_Util$trimmed(
-					_elm_community$parser_combinators$Combine$string(':')),
-				_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace)),
-			_stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation)));
+			_stil4m$elm_syntax$Elm_Parser_Util$trimmed(
+				_elm_community$parser_combinators$Combine$string(':')),
+			_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace)),
+		_stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotation));
 var _stil4m$elm_syntax$Elm_Parser_Declarations$portDeclaration = A2(
 	_elm_community$parser_combinators$Combine_ops['*>'],
 	_stil4m$elm_syntax$Elm_Parser_Tokens$portToken,
@@ -12352,7 +12421,10 @@ var _stil4m$elm_syntax$Elm_Parser_Declarations$function = _elm_community$parser_
 					_elm_community$parser_combinators$Combine$succeed(_stil4m$elm_syntax$Elm_Syntax_Expression$Function),
 					_elm_community$parser_combinators$Combine$succeed(_elm_lang$core$Maybe$Nothing)),
 				_elm_community$parser_combinators$Combine$maybe(
-					A2(_elm_community$parser_combinators$Combine_ops['<*'], _stil4m$elm_syntax$Elm_Parser_Declarations$signature, _stil4m$elm_syntax$Elm_Parser_Util$exactIndentWhitespace))),
+					A2(
+						_elm_community$parser_combinators$Combine_ops['<*'],
+						_stil4m$elm_syntax$Elm_Parser_Ranges$ranged(_stil4m$elm_syntax$Elm_Parser_Declarations$signature),
+						_stil4m$elm_syntax$Elm_Parser_Util$exactIndentWhitespace))),
 			_stil4m$elm_syntax$Elm_Parser_Declarations$functionDeclaration);
 	});
 var _stil4m$elm_syntax$Elm_Parser_Declarations$functionDeclaration = _elm_community$parser_combinators$Combine$lazy(
@@ -12656,10 +12728,11 @@ var _stil4m$elm_syntax$Elm_Parser_Declarations$letBody = _elm_community$parser_c
 		return A2(
 			_elm_community$parser_combinators$Combine$sepBy1,
 			_stil4m$elm_syntax$Elm_Parser_Util$exactIndentWhitespace,
-			A2(
-				_elm_community$parser_combinators$Combine$or,
-				_stil4m$elm_syntax$Elm_Parser_Declarations$letDestructuringDeclaration,
-				A2(_elm_community$parser_combinators$Combine_ops['<$>'], _stil4m$elm_syntax$Elm_Syntax_Expression$LetFunction, _stil4m$elm_syntax$Elm_Parser_Declarations$function)));
+			_stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
+				A2(
+					_elm_community$parser_combinators$Combine$or,
+					_stil4m$elm_syntax$Elm_Parser_Declarations$letDestructuringDeclaration,
+					A2(_elm_community$parser_combinators$Combine_ops['<$>'], _stil4m$elm_syntax$Elm_Syntax_Expression$LetFunction, _stil4m$elm_syntax$Elm_Parser_Declarations$function))));
 	});
 var _stil4m$elm_syntax$Elm_Parser_Declarations$letDestructuringDeclaration = _elm_community$parser_combinators$Combine$lazy(
 	function (_p37) {
@@ -12894,7 +12967,7 @@ var _stil4m$elm_syntax$Elm_Parser_Declarations$declaration = _elm_community$pars
 			});
 	});
 
-var _stil4m$elm_syntax$Elm_Parser_Expose$definitionExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+var _stil4m$elm_syntax$Elm_Parser_Expose$definitionExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
 	A2(
 		_elm_community$parser_combinators$Combine$or,
 		A2(_elm_community$parser_combinators$Combine_ops['<$>'], _stil4m$elm_syntax$Elm_Syntax_Exposing$FunctionExpose, _stil4m$elm_syntax$Elm_Parser_Tokens$functionName),
@@ -12921,30 +12994,23 @@ var _stil4m$elm_syntax$Elm_Parser_Expose$exposeListWith = function (p) {
 	return _elm_community$parser_combinators$Combine$parens(
 		_stil4m$elm_syntax$Elm_Parser_Expose$exposingListInner(p));
 };
-var _stil4m$elm_syntax$Elm_Parser_Expose$valueConstructorExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
-	A2(
-		_elm_community$parser_combinators$Combine_ops['<$>'],
-		F2(
-			function (v0, v1) {
-				return {ctor: '_Tuple2', _0: v0, _1: v1};
-			}),
-		_stil4m$elm_syntax$Elm_Parser_Tokens$typeName));
-var _stil4m$elm_syntax$Elm_Parser_Expose$exposedType = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+var _stil4m$elm_syntax$Elm_Parser_Expose$valueConstructorExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(_stil4m$elm_syntax$Elm_Parser_Tokens$typeName);
+var _stil4m$elm_syntax$Elm_Parser_Expose$exposedType = A2(
+	_elm_community$parser_combinators$Combine_ops['<*>'],
 	A2(
 		_elm_community$parser_combinators$Combine_ops['<*>'],
+		_elm_community$parser_combinators$Combine$succeed(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType),
+		_stil4m$elm_syntax$Elm_Parser_Tokens$typeName),
+	A2(
+		_elm_community$parser_combinators$Combine_ops['*>'],
+		_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace),
 		A2(
-			_elm_community$parser_combinators$Combine_ops['<*>'],
-			_elm_community$parser_combinators$Combine$succeed(_stil4m$elm_syntax$Elm_Syntax_Exposing$ExposedType),
-			_stil4m$elm_syntax$Elm_Parser_Tokens$typeName),
-		A2(
-			_elm_community$parser_combinators$Combine_ops['*>'],
-			_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace),
-			A2(
-				_elm_community$parser_combinators$Combine_ops['<$>'],
-				_elm_lang$core$Maybe$Just,
-				_stil4m$elm_syntax$Elm_Parser_Expose$exposeListWith(_stil4m$elm_syntax$Elm_Parser_Expose$valueConstructorExpose)))));
-var _stil4m$elm_syntax$Elm_Parser_Expose$typeExpose = A2(_elm_community$parser_combinators$Combine_ops['<$>'], _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose, _stil4m$elm_syntax$Elm_Parser_Expose$exposedType);
-var _stil4m$elm_syntax$Elm_Parser_Expose$infixExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$withRange(
+			_elm_community$parser_combinators$Combine_ops['<$>'],
+			_elm_lang$core$Maybe$Just,
+			_stil4m$elm_syntax$Elm_Parser_Expose$exposeListWith(_stil4m$elm_syntax$Elm_Parser_Expose$valueConstructorExpose))));
+var _stil4m$elm_syntax$Elm_Parser_Expose$typeExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
+	A2(_elm_community$parser_combinators$Combine_ops['<$>'], _stil4m$elm_syntax$Elm_Syntax_Exposing$TypeExpose, _stil4m$elm_syntax$Elm_Parser_Expose$exposedType));
+var _stil4m$elm_syntax$Elm_Parser_Expose$infixExpose = _stil4m$elm_syntax$Elm_Parser_Ranges$ranged(
 	A2(
 		_elm_community$parser_combinators$Combine_ops['<$>'],
 		_stil4m$elm_syntax$Elm_Syntax_Exposing$InfixExpose,
@@ -13165,7 +13231,10 @@ var _stil4m$elm_syntax$Elm_Parser_File$fileDeclarations = A2(
 	_elm_community$parser_combinators$Combine_ops['<*'],
 	A2(
 		_elm_community$parser_combinators$Combine_ops['<*'],
-		A2(_elm_community$parser_combinators$Combine$sepBy, _stil4m$elm_syntax$Elm_Parser_Util$exactIndentWhitespace, _stil4m$elm_syntax$Elm_Parser_Declarations$declaration),
+		A2(
+			_elm_community$parser_combinators$Combine$sepBy,
+			_stil4m$elm_syntax$Elm_Parser_Util$exactIndentWhitespace,
+			_stil4m$elm_syntax$Elm_Parser_Ranges$ranged(_stil4m$elm_syntax$Elm_Parser_Declarations$declaration)),
 		_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$exactIndentWhitespace)),
 	_stil4m$elm_syntax$Elm_Parser_Whitespace$manySpaces);
 var _stil4m$elm_syntax$Elm_Parser_File$collectComments = _elm_community$parser_combinators$Combine$withState(
@@ -13235,49 +13304,34 @@ var _stil4m$elm_syntax$Elm_Parser$parse = function (input) {
 var _stil4m$elm_syntax$Elm_Processing_Documentation$isDocumentationForRange = F2(
 	function (range, _p0) {
 		var _p1 = _p0;
-		var _p2 = _p1._1;
-		if (A2(_elm_lang$core$String$startsWith, '{-|', _p1._0)) {
+		if (A2(_elm_lang$core$String$startsWith, '{-|', _p1._1)) {
 			var functionStartRow = range.start.row;
-			return _elm_lang$core$Native_Utils.eq(_p2.end.row, functionStartRow) && _elm_lang$core$Native_Utils.eq(_p2.end.column, -2);
+			return _elm_lang$core$Native_Utils.eq(_p1._0.end.row + 1, functionStartRow);
 		} else {
 			return false;
 		}
 	});
-var _stil4m$elm_syntax$Elm_Processing_Documentation$replaceFunction = F2(
-	function (f1, decl) {
-		var _p3 = decl;
-		if (_p3.ctor === 'FuncDecl') {
-			return _elm_lang$core$Native_Utils.eq(f1.declaration.name.range, _p3._0.declaration.name.range) ? _stil4m$elm_syntax$Elm_Syntax_Declaration$FuncDecl(f1) : decl;
-		} else {
-			return decl;
-		}
-	});
-var _stil4m$elm_syntax$Elm_Processing_Documentation$replaceTypeAlias = F2(
-	function (f1, decl) {
-		var _p4 = decl;
-		if (_p4.ctor === 'AliasDecl') {
-			return _elm_lang$core$Native_Utils.eq(f1.range, _p4._0.range) ? _stil4m$elm_syntax$Elm_Syntax_Declaration$AliasDecl(f1) : decl;
-		} else {
-			return decl;
-		}
+var _stil4m$elm_syntax$Elm_Processing_Documentation$replaceDeclaration = F2(
+	function (_p3, _p2) {
+		var _p4 = _p3;
+		var _p5 = _p2;
+		var _p6 = _p5._0;
+		return {
+			ctor: '_Tuple2',
+			_0: _p6,
+			_1: _elm_lang$core$Native_Utils.eq(_p4._0, _p6) ? _p4._1 : _p5._1
+		};
 	});
 var _stil4m$elm_syntax$Elm_Processing_Documentation$onFunction = F2(
-	function ($function, file) {
-		var functionRange = A2(
-			_elm_lang$core$Maybe$withDefault,
-			$function.declaration.name.range,
-			A2(
-				_elm_lang$core$Maybe$map,
-				function (_) {
-					return _.range;
-				},
-				$function.signature));
+	function (_p7, file) {
+		var _p8 = _p7;
+		var _p10 = _p8._0;
 		var docs = A2(
 			_elm_lang$core$List$filter,
-			_stil4m$elm_syntax$Elm_Processing_Documentation$isDocumentationForRange(functionRange),
+			_stil4m$elm_syntax$Elm_Processing_Documentation$isDocumentationForRange(_p10),
 			file.comments);
-		var _p5 = _elm_lang$core$List$head(docs);
-		if (_p5.ctor === 'Just') {
+		var _p9 = _elm_lang$core$List$head(docs);
+		if (_p9.ctor === 'Just') {
 			return _elm_lang$core$Native_Utils.update(
 				file,
 				{
@@ -13286,17 +13340,22 @@ var _stil4m$elm_syntax$Elm_Processing_Documentation$onFunction = F2(
 						F2(
 							function (x, y) {
 								return !_elm_lang$core$Native_Utils.eq(x, y);
-							})(_p5._0),
+							})(_p9._0),
 						file.comments),
 					declarations: A2(
 						_elm_lang$core$List$map,
-						_stil4m$elm_syntax$Elm_Processing_Documentation$replaceFunction(
-							_elm_lang$core$Native_Utils.update(
-								$function,
-								{
-									documentation: _elm_lang$core$Maybe$Just(
-										A2(_stil4m$elm_syntax$Elm_Syntax_Documentation$Documentation, _p5._0._0, _p5._0._1))
-								})),
+						_stil4m$elm_syntax$Elm_Processing_Documentation$replaceDeclaration(
+							{
+								ctor: '_Tuple2',
+								_0: _p10,
+								_1: _stil4m$elm_syntax$Elm_Syntax_Declaration$FuncDecl(
+									_elm_lang$core$Native_Utils.update(
+										_p8._1,
+										{
+											documentation: _elm_lang$core$Maybe$Just(
+												A2(_stil4m$elm_syntax$Elm_Syntax_Documentation$Documentation, _p9._0._1, _p9._0._0))
+										}))
+							}),
 						file.declarations)
 				});
 		} else {
@@ -13304,13 +13363,15 @@ var _stil4m$elm_syntax$Elm_Processing_Documentation$onFunction = F2(
 		}
 	});
 var _stil4m$elm_syntax$Elm_Processing_Documentation$onTypeAlias = F2(
-	function (typeAlias, file) {
+	function (_p11, file) {
+		var _p12 = _p11;
+		var _p14 = _p12._0;
 		var docs = A2(
 			_elm_lang$core$List$filter,
-			_stil4m$elm_syntax$Elm_Processing_Documentation$isDocumentationForRange(typeAlias.range),
+			_stil4m$elm_syntax$Elm_Processing_Documentation$isDocumentationForRange(_p14),
 			file.comments);
-		var _p6 = _elm_lang$core$List$head(docs);
-		if (_p6.ctor === 'Just') {
+		var _p13 = _elm_lang$core$List$head(docs);
+		if (_p13.ctor === 'Just') {
 			return _elm_lang$core$Native_Utils.update(
 				file,
 				{
@@ -13319,17 +13380,22 @@ var _stil4m$elm_syntax$Elm_Processing_Documentation$onTypeAlias = F2(
 						F2(
 							function (x, y) {
 								return !_elm_lang$core$Native_Utils.eq(x, y);
-							})(_p6._0),
+							})(_p13._0),
 						file.comments),
 					declarations: A2(
 						_elm_lang$core$List$map,
-						_stil4m$elm_syntax$Elm_Processing_Documentation$replaceTypeAlias(
-							_elm_lang$core$Native_Utils.update(
-								typeAlias,
-								{
-									documentation: _elm_lang$core$Maybe$Just(
-										A2(_stil4m$elm_syntax$Elm_Syntax_Documentation$Documentation, _p6._0._0, _p6._0._1))
-								})),
+						_stil4m$elm_syntax$Elm_Processing_Documentation$replaceDeclaration(
+							{
+								ctor: '_Tuple2',
+								_0: _p14,
+								_1: _stil4m$elm_syntax$Elm_Syntax_Declaration$AliasDecl(
+									_elm_lang$core$Native_Utils.update(
+										_p12._1,
+										{
+											documentation: _elm_lang$core$Maybe$Just(
+												A2(_stil4m$elm_syntax$Elm_Syntax_Documentation$Documentation, _p13._0._1, _p13._0._0))
+										}))
+							}),
 						file.declarations)
 				});
 		} else {
@@ -13366,17 +13432,24 @@ var _stil4m$elm_syntax$Elm_Processing$visitLetDeclarations = F3(
 			declarations);
 	});
 var _stil4m$elm_syntax$Elm_Processing$visitLetDeclaration = F3(
-	function (visitor, context, declaration) {
-		var _p0 = declaration;
-		if (_p0.ctor === 'LetFunction') {
-			return _stil4m$elm_syntax$Elm_Syntax_Expression$LetFunction(
-				A3(_stil4m$elm_syntax$Elm_Processing$visitFunctionDecl, visitor, context, _p0._0));
-		} else {
-			return A2(
-				_stil4m$elm_syntax$Elm_Syntax_Expression$LetDestructuring,
-				_p0._0,
-				A3(_stil4m$elm_syntax$Elm_Processing$visitExpression, visitor, context, _p0._1));
-		}
+	function (visitor, context, _p0) {
+		var _p1 = _p0;
+		return {
+			ctor: '_Tuple2',
+			_0: _p1._0,
+			_1: function () {
+				var _p2 = _p1._1;
+				if (_p2.ctor === 'LetFunction') {
+					return _stil4m$elm_syntax$Elm_Syntax_Expression$LetFunction(
+						A3(_stil4m$elm_syntax$Elm_Processing$visitFunctionDecl, visitor, context, _p2._0));
+				} else {
+					return A2(
+						_stil4m$elm_syntax$Elm_Syntax_Expression$LetDestructuring,
+						_p2._0,
+						A3(_stil4m$elm_syntax$Elm_Processing$visitExpression, visitor, context, _p2._1));
+				}
+			}()
+		};
 	});
 var _stil4m$elm_syntax$Elm_Processing$visitExpression = F3(
 	function (visitor, context, expression) {
@@ -13385,7 +13458,7 @@ var _stil4m$elm_syntax$Elm_Processing$visitExpression = F3(
 			A2(
 				_elm_lang$core$Maybe$withDefault,
 				F3(
-					function (_p1, inner, expr) {
+					function (_p3, inner, expr) {
 						return inner(expr);
 					}),
 				visitor),
@@ -13394,87 +13467,87 @@ var _stil4m$elm_syntax$Elm_Processing$visitExpression = F3(
 			expression);
 	});
 var _stil4m$elm_syntax$Elm_Processing$visitExpressionInner = F3(
-	function (visitor, context, _p2) {
-		var _p3 = _p2;
-		var _p10 = _p3._1;
+	function (visitor, context, _p4) {
+		var _p5 = _p4;
+		var _p12 = _p5._1;
 		var subVisit = A2(_stil4m$elm_syntax$Elm_Processing$visitExpression, visitor, context);
 		return A2(
 			F2(
 				function (v0, v1) {
 					return {ctor: '_Tuple2', _0: v0, _1: v1};
 				}),
-			_p3._0,
+			_p5._0,
 			function () {
-				var _p4 = _p10;
-				switch (_p4.ctor) {
+				var _p6 = _p12;
+				switch (_p6.ctor) {
 					case 'Application':
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$Application(
-							A2(_elm_lang$core$List$map, subVisit, _p4._0));
+							A2(_elm_lang$core$List$map, subVisit, _p6._0));
 					case 'OperatorApplication':
 						return A4(
 							_stil4m$elm_syntax$Elm_Syntax_Expression$OperatorApplication,
-							_p4._0,
-							_p4._1,
-							subVisit(_p4._2),
-							subVisit(_p4._3));
+							_p6._0,
+							_p6._1,
+							subVisit(_p6._2),
+							subVisit(_p6._3));
 					case 'IfBlock':
 						return A3(
 							_stil4m$elm_syntax$Elm_Syntax_Expression$IfBlock,
-							subVisit(_p4._0),
-							subVisit(_p4._1),
-							subVisit(_p4._2));
+							subVisit(_p6._0),
+							subVisit(_p6._1),
+							subVisit(_p6._2));
 					case 'TupledExpression':
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$TupledExpression(
-							A2(_elm_lang$core$List$map, subVisit, _p4._0));
+							A2(_elm_lang$core$List$map, subVisit, _p6._0));
 					case 'ParenthesizedExpression':
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$ParenthesizedExpression(
-							subVisit(_p4._0));
+							subVisit(_p6._0));
 					case 'LetExpression':
-						var _p5 = _p4._0;
+						var _p7 = _p6._0;
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$LetExpression(
 							{
-								declarations: A3(_stil4m$elm_syntax$Elm_Processing$visitLetDeclarations, visitor, context, _p5.declarations),
-								expression: subVisit(_p5.expression)
+								declarations: A3(_stil4m$elm_syntax$Elm_Processing$visitLetDeclarations, visitor, context, _p7.declarations),
+								expression: subVisit(_p7.expression)
 							});
 					case 'CaseExpression':
-						var _p6 = _p4._0;
+						var _p8 = _p6._0;
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$CaseExpression(
 							{
-								expression: subVisit(_p6.expression),
+								expression: subVisit(_p8.expression),
 								cases: A2(
 									_elm_lang$core$List$map,
 									_elm_lang$core$Tuple$mapSecond(subVisit),
-									_p6.cases)
+									_p8.cases)
 							});
 					case 'LambdaExpression':
-						var _p7 = _p4._0;
+						var _p9 = _p6._0;
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$LambdaExpression(
 							_elm_lang$core$Native_Utils.update(
-								_p7,
+								_p9,
 								{
-									expression: subVisit(_p7.expression)
+									expression: subVisit(_p9.expression)
 								}));
 					case 'RecordExpr':
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$RecordExpr(
 							A2(
 								_elm_lang$core$List$map,
 								_elm_lang$core$Tuple$mapSecond(subVisit),
-								_p4._0));
+								_p6._0));
 					case 'ListExpr':
 						return _stil4m$elm_syntax$Elm_Syntax_Expression$ListExpr(
-							A2(_elm_lang$core$List$map, subVisit, _p4._0));
+							A2(_elm_lang$core$List$map, subVisit, _p6._0));
 					case 'RecordUpdateExpression':
-						var _p9 = _p4._0;
-						return function (_p8) {
+						var _p11 = _p6._0;
+						return function (_p10) {
 							return _stil4m$elm_syntax$Elm_Syntax_Expression$RecordUpdateExpression(
-								A2(_stil4m$elm_syntax$Elm_Syntax_Expression$RecordUpdate, _p9.name, _p8));
+								A2(_stil4m$elm_syntax$Elm_Syntax_Expression$RecordUpdate, _p11.name, _p10));
 						}(
 							A2(
 								_elm_lang$core$List$map,
 								_elm_lang$core$Tuple$mapSecond(subVisit),
-								_p9.updates));
+								_p11.updates));
 					default:
-						return _p10;
+						return _p12;
 				}
 			}());
 	});
@@ -13493,14 +13566,22 @@ var _stil4m$elm_syntax$Elm_Processing$visitFunctionDeclaration = F3(
 			{expression: newExpression});
 	});
 var _stil4m$elm_syntax$Elm_Processing$visitDeclaration = F3(
-	function (visitor, context, declaration) {
-		var _p11 = declaration;
-		if (_p11.ctor === 'FuncDecl') {
-			return _stil4m$elm_syntax$Elm_Syntax_Declaration$FuncDecl(
-				A3(_stil4m$elm_syntax$Elm_Processing$visitFunctionDecl, visitor, context, _p11._0));
-		} else {
-			return declaration;
-		}
+	function (visitor, context, _p13) {
+		var _p14 = _p13;
+		var _p16 = _p14._1;
+		return {
+			ctor: '_Tuple2',
+			_0: _p14._0,
+			_1: function () {
+				var _p15 = _p16;
+				if (_p15.ctor === 'FuncDecl') {
+					return _stil4m$elm_syntax$Elm_Syntax_Declaration$FuncDecl(
+						A3(_stil4m$elm_syntax$Elm_Processing$visitFunctionDecl, visitor, context, _p15._0));
+				} else {
+					return _p16;
+				}
+			}()
+		};
 	});
 var _stil4m$elm_syntax$Elm_Processing$visitDeclarations = F3(
 	function (visitor, context, declarations) {
@@ -13516,11 +13597,11 @@ var _stil4m$elm_syntax$Elm_Processing$visit = F3(
 			file,
 			{declarations: newDeclarations});
 	});
-var _stil4m$elm_syntax$Elm_Processing$expressionOperators = function (_p12) {
-	var _p13 = _p12;
-	var _p14 = _p13._1;
-	if (_p14.ctor === 'Operator') {
-		return _elm_lang$core$Maybe$Just(_p14._0);
+var _stil4m$elm_syntax$Elm_Processing$expressionOperators = function (_p17) {
+	var _p18 = _p17;
+	var _p19 = _p18._1;
+	if (_p19.ctor === 'Operator') {
+		return _elm_lang$core$Maybe$Just(_p19._0);
 	} else {
 		return _elm_lang$core$Maybe$Nothing;
 	}
@@ -13529,11 +13610,11 @@ var _stil4m$elm_syntax$Elm_Processing$highestPrecedence = function (input) {
 	var maxi = _elm_lang$core$List$maximum(
 		A2(
 			_elm_lang$core$List$map,
-			function (_p15) {
+			function (_p20) {
 				return function (_) {
 					return _.precedence;
 				}(
-					_elm_lang$core$Tuple$second(_p15));
+					_elm_lang$core$Tuple$second(_p20));
 			},
 			input));
 	return _elm_lang$core$Dict$fromList(
@@ -13545,7 +13626,7 @@ var _stil4m$elm_syntax$Elm_Processing$highestPrecedence = function (input) {
 				function (m) {
 					return A2(
 						_elm_lang$core$List$filter,
-						function (_p16) {
+						function (_p21) {
 							return A2(
 								F2(
 									function (x, y) {
@@ -13555,7 +13636,7 @@ var _stil4m$elm_syntax$Elm_Processing$highestPrecedence = function (input) {
 								function (_) {
 									return _.precedence;
 								}(
-									_elm_lang$core$Tuple$second(_p16)));
+									_elm_lang$core$Tuple$second(_p21)));
 						},
 						input);
 				},
@@ -13604,9 +13685,9 @@ var _stil4m$elm_syntax$Elm_Processing$findNextSplit = F2(
 var _stil4m$elm_syntax$Elm_Processing$fixApplication = F2(
 	function (operators, expressions) {
 		var fixExprs = function (exps) {
-			var _p17 = exps;
-			if ((_p17.ctor === '::') && (_p17._1.ctor === '[]')) {
-				return _elm_lang$core$Tuple$second(_p17._0);
+			var _p22 = exps;
+			if ((_p22.ctor === '::') && (_p22._1.ctor === '[]')) {
+				return _elm_lang$core$Tuple$second(_p22._0);
 			} else {
 				return _stil4m$elm_syntax$Elm_Syntax_Expression$Application(exps);
 			}
@@ -13631,26 +13712,26 @@ var _stil4m$elm_syntax$Elm_Processing$fixApplication = F2(
 				fixExprs(exps),
 				A2(
 					_elm_lang$core$Maybe$map,
-					function (_p18) {
-						var _p19 = _p18;
-						var _p22 = _p19._2;
-						var _p21 = _p19._0;
-						var _p20 = _p19._1;
+					function (_p23) {
+						var _p24 = _p23;
+						var _p27 = _p24._2;
+						var _p26 = _p24._0;
+						var _p25 = _p24._1;
 						return A4(
 							_stil4m$elm_syntax$Elm_Syntax_Expression$OperatorApplication,
-							_p20.operator,
-							_p20.direction,
+							_p25.operator,
+							_p25.direction,
 							{
 								ctor: '_Tuple2',
 								_0: _stil4m$elm_syntax$Elm_Syntax_Range$combine(
-									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p21)),
-								_1: divideAndConquer(_p21)
+									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p26)),
+								_1: divideAndConquer(_p26)
 							},
 							{
 								ctor: '_Tuple2',
 								_0: _stil4m$elm_syntax$Elm_Syntax_Range$combine(
-									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p22)),
-								_1: divideAndConquer(_p22)
+									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p27)),
+								_1: divideAndConquer(_p27)
 							});
 					},
 					A2(_stil4m$elm_syntax$Elm_Processing$findNextSplit, ops, exps)));
@@ -13659,11 +13740,11 @@ var _stil4m$elm_syntax$Elm_Processing$fixApplication = F2(
 	});
 var _stil4m$elm_syntax$Elm_Processing$buildSingle = F2(
 	function (imp, moduleIndex) {
-		var _p23 = imp.exposingList;
-		if (_p23.ctor === 'Nothing') {
+		var _p28 = imp.exposingList;
+		if (_p28.ctor === 'Nothing') {
 			return {ctor: '[]'};
 		} else {
-			if (_p23._0.ctor === 'All') {
+			if (_p28._0.ctor === 'All') {
 				return A2(
 					_elm_lang$core$List$map,
 					function (x) {
@@ -13675,15 +13756,16 @@ var _stil4m$elm_syntax$Elm_Processing$buildSingle = F2(
 							{ctor: '[]'},
 							A2(_elm_lang$core$Dict$get, imp.moduleName, moduleIndex))));
 			} else {
-				var selectedOperators = _stil4m$elm_syntax$Elm_Syntax_Exposing$operators(_p23._0._0);
+				var selectedOperators = _stil4m$elm_syntax$Elm_Syntax_Exposing$operators(
+					A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p28._0._0));
 				return A2(
 					_elm_lang$core$List$filter,
-					function (_p24) {
+					function (_p29) {
 						return A3(
 							_elm_lang$core$Basics$flip,
 							_elm_lang$core$List$member,
 							selectedOperators,
-							_elm_lang$core$Tuple$first(_p24));
+							_elm_lang$core$Tuple$first(_p29));
 					},
 					A2(
 						_elm_lang$core$List$map,
@@ -13699,21 +13781,21 @@ var _stil4m$elm_syntax$Elm_Processing$buildSingle = F2(
 		}
 	});
 var _stil4m$elm_syntax$Elm_Processing$tableForFile = F2(
-	function (rawFile, _p25) {
-		var _p26 = _p25;
+	function (rawFile, _p30) {
+		var _p31 = _p30;
 		return _elm_lang$core$Dict$fromList(
 			A2(
 				_elm_lang$core$List$concatMap,
-				A2(_elm_lang$core$Basics$flip, _stil4m$elm_syntax$Elm_Processing$buildSingle, _p26._0),
+				A2(_elm_lang$core$Basics$flip, _stil4m$elm_syntax$Elm_Processing$buildSingle, _p31._0),
 				A2(
 					_elm_lang$core$Basics_ops['++'],
 					_stil4m$elm_syntax$Elm_DefaultImports$defaults,
 					_stil4m$elm_syntax$Elm_RawFile$imports(rawFile))));
 	});
 var _stil4m$elm_syntax$Elm_Processing$process = F2(
-	function (processContext, _p27) {
-		var _p28 = _p27;
-		var table = A2(_stil4m$elm_syntax$Elm_Processing$tableForFile, _p28, processContext);
+	function (processContext, _p32) {
+		var _p33 = _p32;
+		var table = A2(_stil4m$elm_syntax$Elm_Processing$tableForFile, _p33, processContext);
 		var operatorFixed = A3(
 			_stil4m$elm_syntax$Elm_Processing$visit,
 			_elm_lang$core$Maybe$Just(
@@ -13721,12 +13803,12 @@ var _stil4m$elm_syntax$Elm_Processing$process = F2(
 					function (context, inner, expression) {
 						return inner(
 							function () {
-								var _p29 = expression;
-								if ((_p29.ctor === '_Tuple2') && (_p29._1.ctor === 'Application')) {
+								var _p34 = expression;
+								if ((_p34.ctor === '_Tuple2') && (_p34._1.ctor === 'Application')) {
 									return {
 										ctor: '_Tuple2',
-										_0: _p29._0,
-										_1: A2(_stil4m$elm_syntax$Elm_Processing$fixApplication, context, _p29._1._0)
+										_0: _p34._0,
+										_1: A2(_stil4m$elm_syntax$Elm_Processing$fixApplication, context, _p34._1._0)
 									};
 								} else {
 									return expression;
@@ -13734,20 +13816,20 @@ var _stil4m$elm_syntax$Elm_Processing$process = F2(
 							}());
 					})),
 			table,
-			_p28._0);
+			_p33._0);
 		var documentationFixed = _stil4m$elm_syntax$Elm_Processing_Documentation$postProcess(operatorFixed);
 		return documentationFixed;
 	});
-var _stil4m$elm_syntax$Elm_Processing$entryFromRawFile = function (_p30) {
-	var _p31 = _p30;
-	var _p33 = _p31;
-	var _p32 = _stil4m$elm_syntax$Elm_RawFile$moduleName(_p33);
-	if (_p32.ctor === 'Just') {
+var _stil4m$elm_syntax$Elm_Processing$entryFromRawFile = function (_p35) {
+	var _p36 = _p35;
+	var _p38 = _p36;
+	var _p37 = _stil4m$elm_syntax$Elm_RawFile$moduleName(_p38);
+	if (_p37.ctor === 'Just') {
 		return _elm_lang$core$Maybe$Just(
 			{
 				ctor: '_Tuple2',
-				_0: _p32._0,
-				_1: _stil4m$elm_syntax$Elm_Interface$build(_p33)
+				_0: _p37._0,
+				_1: _stil4m$elm_syntax$Elm_Interface$build(_p38)
 			});
 	} else {
 		return _elm_lang$core$Maybe$Nothing;
@@ -13758,19 +13840,19 @@ var _stil4m$elm_syntax$Elm_Processing$ProcessContext = function (a) {
 };
 var _stil4m$elm_syntax$Elm_Processing$init = _stil4m$elm_syntax$Elm_Processing$ProcessContext(_elm_lang$core$Dict$empty);
 var _stil4m$elm_syntax$Elm_Processing$addFile = F2(
-	function (file, _p34) {
-		var _p35 = _p34;
-		var _p36 = _stil4m$elm_syntax$Elm_Processing$entryFromRawFile(file);
-		if (_p36.ctor === 'Just') {
+	function (file, _p39) {
+		var _p40 = _p39;
+		var _p41 = _stil4m$elm_syntax$Elm_Processing$entryFromRawFile(file);
+		if (_p41.ctor === 'Just') {
 			return _stil4m$elm_syntax$Elm_Processing$ProcessContext(
-				A3(_elm_lang$core$Dict$insert, _p36._0._0, _p36._0._1, _p35._0));
+				A3(_elm_lang$core$Dict$insert, _p41._0._0, _p41._0._1, _p40._0));
 		} else {
-			return _p35;
+			return _p40;
 		}
 	});
 var _stil4m$elm_syntax$Elm_Processing$addDependency = F2(
-	function (dep, _p37) {
-		var _p38 = _p37;
+	function (dep, _p42) {
+		var _p43 = _p42;
 		return _stil4m$elm_syntax$Elm_Processing$ProcessContext(
 			A3(
 				_elm_lang$core$Dict$foldl,
@@ -13778,7 +13860,7 @@ var _stil4m$elm_syntax$Elm_Processing$addDependency = F2(
 					function (k, v, d) {
 						return A3(_elm_lang$core$Dict$insert, k, v, d);
 					}),
-				_p38._0,
+				_p43._0,
 				dep.interfaces));
 	});
 
@@ -14378,20 +14460,20 @@ var _user$project$Model_AST$buildFrom = F2(
 var _user$project$Model_Exposings$processExposing = F2(
 	function (topLevelExpose, exposings) {
 		var _p0 = topLevelExpose;
-		switch (_p0.ctor) {
+		switch (_p0._1.ctor) {
 			case 'InfixExpose':
 				return exposings;
 			case 'FunctionExpose':
 				return _elm_lang$core$Native_Utils.update(
 					exposings,
 					{
-						functions: A2(_elm_lang$core$Set$insert, _p0._0, exposings.functions)
+						functions: A2(_elm_lang$core$Set$insert, _p0._1._0, exposings.functions)
 					});
 			case 'TypeOrAliasExpose':
 				return _elm_lang$core$Native_Utils.update(
 					exposings,
 					{
-						types: A2(_elm_lang$core$Set$insert, _p0._0, exposings.types)
+						types: A2(_elm_lang$core$Set$insert, _p0._1._0, exposings.types)
 					});
 			default:
 				return exposings;
@@ -14484,14 +14566,22 @@ var _user$project$Model_ModuleName$record = function (model) {
 var _user$project$Model_References$argumentsFromPattern = F2(
 	function (pattern, $arguments) {
 		var _p0 = pattern;
-		switch (_p0.ctor) {
-			case 'VarPattern':
-				return A2(_elm_lang$core$Set$insert, _p0._0, $arguments);
-			case 'NamedPattern':
-				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, $arguments, _p0._1);
-			default:
-				return $arguments;
-		}
+		_v0_2:
+		do {
+			if (_p0.ctor === '_Tuple2') {
+				switch (_p0._1.ctor) {
+					case 'VarPattern':
+						return A2(_elm_lang$core$Set$insert, _p0._1._0, $arguments);
+					case 'NamedPattern':
+						return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, $arguments, _p0._1._1);
+					default:
+						break _v0_2;
+				}
+			} else {
+				break _v0_2;
+			}
+		} while(false);
+		return $arguments;
 	});
 var _user$project$Model_References$additionalArguments = function (patterns) {
 	return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, patterns);
@@ -14499,51 +14589,59 @@ var _user$project$Model_References$additionalArguments = function (patterns) {
 var _user$project$Model_References$letDeclarationExpressions = F2(
 	function (letDeclaration, expressions) {
 		var _p1 = letDeclaration;
-		if (_p1.ctor === 'LetFunction') {
-			return {ctor: '::', _0: _p1._0.declaration.expression, _1: expressions};
+		if (_p1._1.ctor === 'LetFunction') {
+			return {ctor: '::', _0: _p1._1._0.declaration.expression, _1: expressions};
 		} else {
-			return {ctor: '::', _0: _p1._1, _1: expressions};
+			return {ctor: '::', _0: _p1._1._1, _1: expressions};
 		}
 	});
 var _user$project$Model_References$refsInTypeAnnotation = F2(
 	function (typeAnnotation, references) {
 		var _p2 = typeAnnotation;
-		switch (_p2.ctor) {
-			case 'Typed':
-				return A3(
-					_elm_lang$core$List$foldl,
-					_user$project$Model_References$refsInTypeAnnotation,
-					{
-						ctor: '::',
-						_0: _user$project$Types_Reference$Reference(_p2._1),
-						_1: references
-					},
-					_p2._2);
-			case 'Tupled':
-				return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInTypeAnnotation, references, _p2._0);
-			case 'FunctionTypeAnnotation':
-				return A3(
-					_elm_lang$core$List$foldl,
-					_user$project$Model_References$refsInTypeAnnotation,
-					references,
-					{
-						ctor: '::',
-						_0: _p2._0,
-						_1: {
-							ctor: '::',
-							_0: _p2._1,
-							_1: {ctor: '[]'}
-						}
-					});
-			default:
-				return references;
-		}
+		_v2_3:
+		do {
+			if (_p2.ctor === '_Tuple2') {
+				switch (_p2._1.ctor) {
+					case 'Typed':
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$Model_References$refsInTypeAnnotation,
+							{
+								ctor: '::',
+								_0: _user$project$Types_Reference$Reference(_p2._1._1),
+								_1: references
+							},
+							_p2._1._2);
+					case 'Tupled':
+						return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInTypeAnnotation, references, _p2._1._0);
+					case 'FunctionTypeAnnotation':
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$Model_References$refsInTypeAnnotation,
+							references,
+							{
+								ctor: '::',
+								_0: _p2._1._0,
+								_1: {
+									ctor: '::',
+									_0: _p2._1._1,
+									_1: {ctor: '[]'}
+								}
+							});
+					default:
+						break _v2_3;
+				}
+			} else {
+				break _v2_3;
+			}
+		} while(false);
+		return references;
 	});
 var _user$project$Model_References$appendSignatureReferences = F2(
 	function ($function, references) {
 		var _p3 = $function.signature;
 		if (_p3.ctor === 'Just') {
-			return A2(_user$project$Model_References$refsInTypeAnnotation, _p3._0.typeAnnotation, references);
+			return A2(_user$project$Model_References$refsInTypeAnnotation, _p3._0._1.typeAnnotation, references);
 		} else {
 			return references;
 		}
@@ -14561,158 +14659,171 @@ var _user$project$Model_References$refsInExpression = F3(
 		refsInExpression:
 		while (true) {
 			var _p4 = expression;
-			var range = _p4._0;
-			var innerExpression = _p4._1;
-			var _p5 = innerExpression;
-			switch (_p5.ctor) {
-				case 'Application':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						_p5._0);
-				case 'OperatorApplication':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						{
-							ctor: '::',
-							_0: _p5._2,
-							_1: {
-								ctor: '::',
-								_0: _p5._3,
-								_1: {ctor: '[]'}
-							}
-						});
-				case 'FunctionOrValue':
-					return A3(_user$project$Model_References$addReference, _p5._0, $arguments, references);
-				case 'IfBlock':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						{
-							ctor: '::',
-							_0: _p5._0,
-							_1: {
-								ctor: '::',
-								_0: _p5._1,
-								_1: {
+			_v4_15:
+			do {
+				if (_p4.ctor === '_Tuple2') {
+					switch (_p4._1.ctor) {
+						case 'Application':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								_p4._1._0);
+						case 'OperatorApplication':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								{
 									ctor: '::',
-									_0: _p5._2,
-									_1: {ctor: '[]'}
-								}
-							}
-						});
-				case 'Negation':
-					var _v5 = $arguments,
-						_v6 = _p5._0,
-						_v7 = references;
-					$arguments = _v5;
-					expression = _v6;
-					references = _v7;
-					continue refsInExpression;
-				case 'TupledExpression':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						_p5._0);
-				case 'ParenthesizedExpression':
-					var _v8 = $arguments,
-						_v9 = _p5._0,
-						_v10 = references;
-					$arguments = _v8;
-					expression = _v9;
-					references = _v10;
-					continue refsInExpression;
-				case 'LetExpression':
-					var _p6 = _p5._0;
-					var expressions = A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$letDeclarationExpressions,
-						{ctor: '[]'},
-						_p6.declarations);
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						{ctor: '::', _0: _p6.expression, _1: expressions});
-				case 'CaseExpression':
-					var _p7 = _p5._0;
-					var allArguments = A2(
-						_elm_lang$core$Set$union,
-						$arguments,
-						_user$project$Model_References$additionalArguments(
-							A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p7.cases)));
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression(allArguments),
-						references,
-						{
-							ctor: '::',
-							_0: _p7.expression,
-							_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p7.cases)
-						});
-				case 'LambdaExpression':
-					var _p8 = _p5._0;
-					var allArguments = A2(
-						_elm_lang$core$Set$union,
-						$arguments,
-						_user$project$Model_References$additionalArguments(_p8.args));
-					var _v11 = allArguments,
-						_v12 = _p8.expression,
-						_v13 = references;
-					$arguments = _v11;
-					expression = _v12;
-					references = _v13;
-					continue refsInExpression;
-				case 'RecordExpr':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p5._0));
-				case 'ListExpr':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						_p5._0);
-				case 'QualifiedExpr':
-					return A3(_user$project$Model_References$addReference, _p5._1, $arguments, references);
-				case 'RecordAccessFunction':
-					return A3(_user$project$Model_References$addReference, _p5._0, $arguments, references);
-				case 'RecordUpdateExpression':
-					return A3(
-						_elm_lang$core$List$foldl,
-						_user$project$Model_References$refsInExpression($arguments),
-						references,
-						A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p5._0.updates));
-				default:
-					return references;
-			}
+									_0: _p4._1._2,
+									_1: {
+										ctor: '::',
+										_0: _p4._1._3,
+										_1: {ctor: '[]'}
+									}
+								});
+						case 'FunctionOrValue':
+							return A3(_user$project$Model_References$addReference, _p4._1._0, $arguments, references);
+						case 'IfBlock':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								{
+									ctor: '::',
+									_0: _p4._1._0,
+									_1: {
+										ctor: '::',
+										_0: _p4._1._1,
+										_1: {
+											ctor: '::',
+											_0: _p4._1._2,
+											_1: {ctor: '[]'}
+										}
+									}
+								});
+						case 'Negation':
+							var _v5 = $arguments,
+								_v6 = _p4._1._0,
+								_v7 = references;
+							$arguments = _v5;
+							expression = _v6;
+							references = _v7;
+							continue refsInExpression;
+						case 'TupledExpression':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								_p4._1._0);
+						case 'ParenthesizedExpression':
+							var _v8 = $arguments,
+								_v9 = _p4._1._0,
+								_v10 = references;
+							$arguments = _v8;
+							expression = _v9;
+							references = _v10;
+							continue refsInExpression;
+						case 'LetExpression':
+							var _p5 = _p4._1._0;
+							var expressions = A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$letDeclarationExpressions,
+								{ctor: '[]'},
+								_p5.declarations);
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								{ctor: '::', _0: _p5.expression, _1: expressions});
+						case 'CaseExpression':
+							var _p6 = _p4._1._0;
+							var allArguments = A2(
+								_elm_lang$core$Set$union,
+								$arguments,
+								_user$project$Model_References$additionalArguments(
+									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p6.cases)));
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression(allArguments),
+								references,
+								{
+									ctor: '::',
+									_0: _p6.expression,
+									_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p6.cases)
+								});
+						case 'LambdaExpression':
+							var _p7 = _p4._1._0;
+							var allArguments = A2(
+								_elm_lang$core$Set$union,
+								$arguments,
+								_user$project$Model_References$additionalArguments(_p7.args));
+							var _v11 = allArguments,
+								_v12 = _p7.expression,
+								_v13 = references;
+							$arguments = _v11;
+							expression = _v12;
+							references = _v13;
+							continue refsInExpression;
+						case 'RecordExpr':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._1._0));
+						case 'ListExpr':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								_p4._1._0);
+						case 'QualifiedExpr':
+							return A3(_user$project$Model_References$addReference, _p4._1._1, $arguments, references);
+						case 'RecordAccessFunction':
+							return A3(_user$project$Model_References$addReference, _p4._1._0, $arguments, references);
+						case 'RecordUpdateExpression':
+							return A3(
+								_elm_lang$core$List$foldl,
+								_user$project$Model_References$refsInExpression($arguments),
+								references,
+								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._1._0.updates));
+						default:
+							break _v4_15;
+					}
+				} else {
+					break _v4_15;
+				}
+			} while(false);
+			return references;
 		}
 	});
 var _user$project$Model_References$collectRefsFromDeclaration = F2(
 	function (declaration, references) {
-		var _p9 = declaration;
-		switch (_p9.ctor) {
-			case 'FuncDecl':
-				var _p10 = _p9._0;
-				return A2(
-					_user$project$Model_References$appendSignatureReferences,
-					_p10,
-					function (args) {
-						return A3(_user$project$Model_References$refsInExpression, args, _p10.declaration.expression, references);
-					}(
-						A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p10.declaration.$arguments)));
-			case 'AliasDecl':
-				return A2(_user$project$Model_References$refsInTypeAnnotation, _p9._0.typeAnnotation, references);
-			default:
-				return references;
-		}
+		var _p8 = declaration;
+		_v14_2:
+		do {
+			if (_p8.ctor === '_Tuple2') {
+				switch (_p8._1.ctor) {
+					case 'FuncDecl':
+						var _p9 = _p8._1._0;
+						return A2(
+							_user$project$Model_References$appendSignatureReferences,
+							_p9,
+							function (args) {
+								return A3(_user$project$Model_References$refsInExpression, args, _p9.declaration.expression, references);
+							}(
+								A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p9.declaration.$arguments)));
+					case 'AliasDecl':
+						return A2(_user$project$Model_References$refsInTypeAnnotation, _p8._1._0.typeAnnotation, references);
+					default:
+						break _v14_2;
+				}
+			} else {
+				break _v14_2;
+			}
+		} while(false);
+		return references;
 	});
 var _user$project$Model_References$collectRefsFrom = function (declarations) {
 	return A3(
@@ -14722,13 +14833,13 @@ var _user$project$Model_References$collectRefsFrom = function (declarations) {
 		declarations);
 };
 var _user$project$Model_References$collectReferences = function (parseResult) {
-	var _p11 = parseResult;
-	if (_p11.ctor === 'Ok') {
+	var _p10 = parseResult;
+	if (_p10.ctor === 'Ok') {
 		return _user$project$Model_References$collectRefsFrom(
 			function (_) {
 				return _.declarations;
 			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p11._0)));
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p10._0)));
 	} else {
 		return {ctor: '[]'};
 	}
@@ -14750,91 +14861,98 @@ var _user$project$Model_Report$make = F2(
 var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
 	function (declaration, topLevelExpressions) {
 		var _p0 = declaration;
-		switch (_p0.ctor) {
-			case 'FuncDecl':
-				var _p2 = _p0._0;
-				var lineNumber = function () {
-					var _p1 = _p2.signature;
-					if (_p1.ctor === 'Just') {
-						return _p1._0.range.start.row;
-					} else {
-						return _p2.declaration.name.range.start.row;
-					}
-				}();
-				var name = _p2.declaration.name.value;
-				return _elm_lang$core$Native_Utils.update(
-					topLevelExpressions,
-					{
-						functions: A3(
-							_elm_lang$core$Dict$insert,
-							name,
-							_user$project$Types_Expression$Expression(lineNumber),
-							topLevelExpressions.functions)
-					});
-			case 'AliasDecl':
-				var _p3 = _p0._0;
-				var lineNumber = _p3.range.start.row;
-				var name = _p3.name;
-				return _elm_lang$core$Native_Utils.update(
-					topLevelExpressions,
-					{
-						typeAliases: A3(
-							_elm_lang$core$Dict$insert,
-							name,
-							_user$project$Types_Expression$Expression(lineNumber),
-							topLevelExpressions.typeAliases)
-					});
-			case 'TypeDecl':
-				var _p5 = _p0._0;
-				var lineNumber = A3(
-					_elm_lang$core$Basics$flip,
-					F2(
-						function (x, y) {
-							return x - y;
-						}),
-					1,
-					A2(
-						_elm_lang$core$Maybe$withDefault,
-						0,
-						A2(
-							_elm_lang$core$Maybe$map,
-							function (_p4) {
-								return function (_) {
-									return _.row;
-								}(
-									function (_) {
-										return _.start;
-									}(
-										function (_) {
-											return _.range;
-										}(_p4)));
-							},
-							_elm_lang$core$List$head(_p5.constructors))));
-				var name = _p5.name;
-				return _elm_lang$core$Native_Utils.update(
-					topLevelExpressions,
-					{
-						types: A3(
-							_elm_lang$core$Dict$insert,
-							name,
-							_user$project$Types_Expression$Expression(lineNumber),
-							topLevelExpressions.types)
-					});
-			default:
-				return topLevelExpressions;
-		}
+		_v0_3:
+		do {
+			if (_p0.ctor === '_Tuple2') {
+				switch (_p0._1.ctor) {
+					case 'FuncDecl':
+						var _p2 = _p0._1._0;
+						var lineNumber = function () {
+							var _p1 = _p2.signature;
+							if (_p1.ctor === 'Just') {
+								return _p1._0._0.start.row;
+							} else {
+								return _p2.declaration.name.range.start.row;
+							}
+						}();
+						var name = _p2.declaration.name.value;
+						return _elm_lang$core$Native_Utils.update(
+							topLevelExpressions,
+							{
+								functions: A3(
+									_elm_lang$core$Dict$insert,
+									name,
+									_user$project$Types_Expression$Expression(lineNumber),
+									topLevelExpressions.functions)
+							});
+					case 'AliasDecl':
+						var lineNumber = _p0._0.start.row;
+						var name = _p0._1._0.name;
+						return _elm_lang$core$Native_Utils.update(
+							topLevelExpressions,
+							{
+								typeAliases: A3(
+									_elm_lang$core$Dict$insert,
+									name,
+									_user$project$Types_Expression$Expression(lineNumber),
+									topLevelExpressions.typeAliases)
+							});
+					case 'TypeDecl':
+						var _p4 = _p0._1._0;
+						var lineNumber = A3(
+							_elm_lang$core$Basics$flip,
+							F2(
+								function (x, y) {
+									return x - y;
+								}),
+							1,
+							A2(
+								_elm_lang$core$Maybe$withDefault,
+								0,
+								A2(
+									_elm_lang$core$Maybe$map,
+									function (_p3) {
+										return function (_) {
+											return _.row;
+										}(
+											function (_) {
+												return _.start;
+											}(
+												function (_) {
+													return _.range;
+												}(_p3)));
+									},
+									_elm_lang$core$List$head(_p4.constructors))));
+						var name = _p4.name;
+						return _elm_lang$core$Native_Utils.update(
+							topLevelExpressions,
+							{
+								types: A3(
+									_elm_lang$core$Dict$insert,
+									name,
+									_user$project$Types_Expression$Expression(lineNumber),
+									topLevelExpressions.types)
+							});
+					default:
+						break _v0_3;
+				}
+			} else {
+				break _v0_3;
+			}
+		} while(false);
+		return topLevelExpressions;
 	});
 var _user$project$Model_TopLevelExpressions$collectExpsFrom = function (declarations) {
 	return A3(_elm_lang$core$List$foldl, _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration, _user$project$Types_TopLevelExpressions$default, declarations);
 };
 var _user$project$Model_TopLevelExpressions$collectExpressions = function (parseResult) {
-	var _p6 = parseResult;
-	if (_p6.ctor === 'Ok') {
+	var _p5 = parseResult;
+	if (_p5.ctor === 'Ok') {
 		return _user$project$Model_TopLevelExpressions$collectExpsFrom(
 			function (_) {
 				return _.declarations;
 			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p6._0)));
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p5._0)));
 	} else {
 		return _user$project$Types_TopLevelExpressions$default;
 	}

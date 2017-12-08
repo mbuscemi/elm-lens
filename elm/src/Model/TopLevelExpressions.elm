@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
+import Elm.Syntax.Ranged exposing (Ranged)
 import Types.Expression exposing (Expression)
 import Types.TopLevelExpressions exposing (TopLevelExpressions, Updater)
 
@@ -32,40 +33,40 @@ collectExpressions parseResult =
             Types.TopLevelExpressions.default
 
 
-collectExpsFrom : List Declaration -> TopLevelExpressions
+collectExpsFrom : List (Ranged Declaration) -> TopLevelExpressions
 collectExpsFrom declarations =
     List.foldl collectExpsFromDeclaration Types.TopLevelExpressions.default declarations
 
 
-collectExpsFromDeclaration : Declaration -> TopLevelExpressions -> TopLevelExpressions
+collectExpsFromDeclaration : Ranged Declaration -> TopLevelExpressions -> TopLevelExpressions
 collectExpsFromDeclaration declaration topLevelExpressions =
     case declaration of
-        Elm.Syntax.Declaration.FuncDecl function ->
+        ( range, Elm.Syntax.Declaration.FuncDecl function ) ->
             let
                 name =
                     function.declaration.name.value
 
                 lineNumber =
                     case function.signature of
-                        Just signature ->
-                            signature.range.start.row
+                        Just ( range, signature ) ->
+                            range.start.row
 
                         Nothing ->
                             function.declaration.name.range.start.row
             in
             { topLevelExpressions | functions = Dict.insert name (Expression lineNumber) topLevelExpressions.functions }
 
-        Elm.Syntax.Declaration.AliasDecl typeAlias ->
+        ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
             let
                 name =
                     typeAlias.name
 
                 lineNumber =
-                    typeAlias.range.start.row
+                    range.start.row
             in
             { topLevelExpressions | typeAliases = Dict.insert name (Expression lineNumber) topLevelExpressions.typeAliases }
 
-        Elm.Syntax.Declaration.TypeDecl type_ ->
+        ( range, Elm.Syntax.Declaration.TypeDecl type_ ) ->
             let
                 name =
                     type_.name
