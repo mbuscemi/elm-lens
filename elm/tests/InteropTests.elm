@@ -1,4 +1,4 @@
-module InteropTests exposing (exposings, imports)
+module InteropTests exposing (exposings, imports, reference)
 
 import Dict
 import Expect exposing (Expectation)
@@ -7,6 +7,7 @@ import Set
 import Test exposing (Test, describe, only, test)
 import Types.Exposings exposing (Exposings)
 import Types.Imports exposing (Imports)
+import Types.Reference exposing (Reference)
 
 
 exposings : Test
@@ -48,6 +49,43 @@ imports =
                     decoded =
                         decodeValue Types.Imports.decoder encoded
                             |> Result.withDefault Types.Imports.default
+                in
+                Expect.equal decoded orig
+        ]
+
+
+reference : Test
+reference =
+    describe "Reference" <|
+        [ test "can encode and decode single" <|
+            \_ ->
+                let
+                    orig =
+                        Reference "blarg"
+
+                    encoded =
+                        Types.Reference.encoder orig
+
+                    decoded =
+                        decodeValue Types.Reference.decoder encoded
+                            |> Result.withDefault Types.Reference.default
+                in
+                Expect.equal decoded orig
+        , test "can encode and decode list" <|
+            \_ ->
+                let
+                    orig =
+                        [ Reference "blarg"
+                        , Reference "frangle"
+                        , Reference "blargargle"
+                        ]
+
+                    encoded =
+                        Types.Reference.listEncoder orig
+
+                    decoded =
+                        decodeValue Types.Reference.listDecoder encoded
+                            |> Result.withDefault [ Types.Reference.default ]
                 in
                 Expect.equal decoded orig
         ]
