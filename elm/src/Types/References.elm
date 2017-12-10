@@ -1,9 +1,10 @@
 module Types.References exposing (References, addExternal, addInternal, decoder, default, encoder)
 
 import Dict exposing (Dict)
+import Dict.Extra as Dict
 import Elm.Syntax.Base exposing (ModuleName)
-import Json.Decode as JD exposing (Decoder, field, map2)
-import Json.Encode as JE exposing (Value, object)
+import Json.Decode as JD exposing (Decoder)
+import Json.Encode as JE exposing (Value)
 import Types.Reference exposing (Reference)
 
 
@@ -20,9 +21,9 @@ default =
 
 encoder : References -> Value
 encoder references =
-    object
+    JE.object
         [ ( "internal", JE.list (List.map Types.Reference.encoder references.internal) )
-        , ( "external", object (encodeExternalsDict references.external) )
+        , ( "external", JE.object (encodeExternalsDict references.external) )
         ]
 
 
@@ -40,9 +41,9 @@ encodeModuleName moduleName =
 
 decoder : Decoder References
 decoder =
-    map2 References
-        (field "internal" <| JD.list Types.Reference.decoder)
-        (field "external" decodeExternalsDict)
+    JD.map2 References
+        (JD.field "internal" <| JD.list Types.Reference.decoder)
+        (JD.field "external" decodeExternalsDict)
 
 
 decodeExternalsDict : Decoder (Dict ModuleName (List Reference))
@@ -72,14 +73,18 @@ addInternal reference references =
 
 addExternal : ModuleName -> Reference -> References -> References
 addExternal moduleName reference references =
-    { references | external = Dict.update moduleName (externalReferenceUpdate reference) references.external }
+    { references | external = Dict.insertDedupe externalReferenceUpdate moduleName [ reference ] references.external }
 
 
-externalReferenceUpdate : Reference -> Maybe (List Reference) -> Maybe (List Reference)
-externalReferenceUpdate reference maybeReferences =
-    case maybeReferences of
-        Just references ->
-            Just (reference :: references)
+externalReferenceUpdate : List Reference -> List Reference -> List Reference
+externalReferenceUpdate referencesA referencesB =
+    let
+        newReference =
+            List.head referencesB
+    in
+    case newReference of
+        Just reference ->
+            reference :: referencesB
 
         Nothing ->
-            Nothing
+            referencesB

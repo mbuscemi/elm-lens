@@ -108,7 +108,7 @@ refsInExpression arguments expression references =
             List.foldl (refsInExpression arguments) references exps
 
         ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
-            addReference name arguments references
+            Types.References.addExternal moduleName (Reference name) references
 
         ( range, Elm.Syntax.Expression.RecordAccessFunction name ) ->
             addReference name arguments references
