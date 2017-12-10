@@ -1,9 +1,10 @@
-module Model.FileMarkup exposing (make)
+module Model.FileMarkup exposing (fromFileData, make)
 
 import Dict
 import Elm.Syntax.Base exposing (ModuleName)
 import Model.BatchProcess
 import Set exposing (Set)
+import String.Extra as String
 import Types.Expression exposing (Expression)
 import Types.FileData exposing (FileData)
 import Types.FileMarkup exposing (ExpressionData, FileMarkup)
@@ -17,6 +18,11 @@ type alias Model model =
         , projectFileRegistry : Set String
         , fileBeingReprocessed : Maybe String
     }
+
+
+fromFileData : Model model -> ( String, FileData ) -> FileMarkup
+fromFileData model ( fileName, fileData ) =
+    toFileMarkup fileName model fileData
 
 
 make : String -> Model model -> FileMarkup
@@ -64,11 +70,22 @@ makeExpression fileName projectFileData fileData funcName funcData list =
     in
     ExpressionData
         funcName
+        (elementId fileName funcName)
         funcData.lineNumber
         fileIsExposed
         (numOccurencesInOwnReferences funcName fileData)
         (numOccurencesInOtherReferences fileIsExposed fileData.moduleName funcName fileName projectFileData)
         :: list
+
+
+elementId : String -> String -> String
+elementId fileName funcName =
+    escapeSpecialChars fileName ++ "-" ++ funcName
+
+
+escapeSpecialChars : String -> String
+escapeSpecialChars string =
+    List.foldl (\specialChar subject -> String.replace specialChar "_" subject) string [ ".", "/" ]
 
 
 isExposed : String -> FileData -> Bool

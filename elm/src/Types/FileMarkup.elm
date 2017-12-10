@@ -11,6 +11,7 @@ type alias FileMarkup =
 
 type alias ExpressionData =
     { name : String
+    , elementId : String
     , lineNumber : Int
     , isExposed : Bool
     , numInternalRefs : Int
