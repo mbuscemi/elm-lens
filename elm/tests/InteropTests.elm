@@ -1,4 +1,4 @@
-module InteropTests exposing (exposings, imports, reference)
+module InteropTests exposing (exposings, imports, reference, references)
 
 import Dict
 import Expect exposing (Expectation)
@@ -8,6 +8,7 @@ import Test exposing (Test, describe, only, test)
 import Types.Exposings exposing (Exposings)
 import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
+import Types.References exposing (References)
 
 
 exposings : Test
@@ -86,6 +87,31 @@ reference =
                     decoded =
                         decodeValue Types.Reference.listDecoder encoded
                             |> Result.withDefault [ Types.Reference.default ]
+                in
+                Expect.equal decoded orig
+        ]
+
+
+references : Test
+references =
+    describe "References" <|
+        [ test "can encode and decode " <|
+            \_ ->
+                let
+                    orig =
+                        References
+                            [ Reference "abc", Reference "def" ]
+                            (Dict.empty
+                                |> Dict.insert [ "ab", "cd", "de" ] [ Reference "ghi", Reference "klm" ]
+                                |> Dict.insert [ "ed", "fg" ] [ Reference "no", Reference "pq" ]
+                            )
+
+                    encoded =
+                        Types.References.encoder orig
+
+                    decoded =
+                        decodeValue Types.References.decoder encoded
+                            |> Result.withDefault Types.References.default
                 in
                 Expect.equal decoded orig
         ]
