@@ -14871,6 +14871,104 @@ var _user$project$Model_Exposings$collect = function (model) {
 		});
 };
 
+var _user$project$Types_Imports$addEntry = F2(
+	function (_p0, imports) {
+		var _p1 = _p0;
+		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, imports);
+	});
+var _user$project$Types_Imports$toDictionary = function (pairs) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addEntry, _elm_lang$core$Dict$empty, pairs);
+};
+var _user$project$Types_Imports$decoder = A2(
+	_elm_lang$core$Json_Decode$map,
+	_user$project$Types_Imports$toDictionary,
+	_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder));
+var _user$project$Types_Imports$encoder = function (imports) {
+	return _elm_lang$core$Json_Encode$object(
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$mapSecond(_user$project$Util_ModuleName$encoder),
+			_elm_lang$core$Dict$toList(imports)));
+};
+var _user$project$Types_Imports$default = _elm_lang$core$Dict$empty;
+
+var _user$project$Model_Imports$fromExposing = F3(
+	function (moduleName, _p0, imports) {
+		var _p1 = _p0;
+		var _p2 = _p1._1;
+		switch (_p2.ctor) {
+			case 'FunctionExpose':
+				return A2(
+					_user$project$Types_Imports$addEntry,
+					{ctor: '_Tuple2', _0: _p2._0, _1: moduleName},
+					imports);
+			case 'TypeOrAliasExpose':
+				return A2(
+					_user$project$Types_Imports$addEntry,
+					{ctor: '_Tuple2', _0: _p2._0, _1: moduleName},
+					imports);
+			case 'TypeExpose':
+				return A2(
+					_user$project$Types_Imports$addEntry,
+					{ctor: '_Tuple2', _0: _p2._0.name, _1: moduleName},
+					imports);
+			default:
+				return imports;
+		}
+	});
+var _user$project$Model_Imports$collectFromExposing = F3(
+	function (moduleName, exposing_, imports) {
+		var _p3 = exposing_;
+		if (_p3.ctor === 'All') {
+			return imports;
+		} else {
+			return A3(
+				_elm_lang$core$List$foldl,
+				_user$project$Model_Imports$fromExposing(moduleName),
+				imports,
+				_p3._0);
+		}
+	});
+var _user$project$Model_Imports$collectFromDeclaration = F3(
+	function (moduleName, import_, imports) {
+		var _p4 = import_.exposingList;
+		if (_p4.ctor === 'Just') {
+			return A3(_user$project$Model_Imports$collectFromExposing, moduleName, _p4._0, imports);
+		} else {
+			return imports;
+		}
+	});
+var _user$project$Model_Imports$collectFrom = F2(
+	function (moduleName, importList) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$Model_Imports$collectFromDeclaration(moduleName),
+			_elm_lang$core$Dict$empty,
+			importList);
+	});
+var _user$project$Model_Imports$collectImports = F2(
+	function (moduleName, parseResult) {
+		var _p5 = parseResult;
+		if (_p5.ctor === 'Ok') {
+			return A2(
+				_user$project$Model_Imports$collectFrom,
+				moduleName,
+				function (_) {
+					return _.imports;
+				}(
+					A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p5._0)));
+		} else {
+			return _user$project$Types_Imports$default;
+		}
+	});
+var _user$project$Model_Imports$collect = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			imports: A2(_user$project$Model_Imports$collectImports, model.moduleName, model.fileAST)
+		});
+};
+
 var _user$project$Model_ModuleName$toModuleName = function (module_) {
 	var _p0 = module_;
 	switch (_p0.ctor) {
@@ -15278,27 +15376,6 @@ var _user$project$Model_TopLevelExpressions$collect = function (model) {
 		});
 };
 
-var _user$project$Types_Imports$addEntry = F2(
-	function (_p0, imports) {
-		var _p1 = _p0;
-		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, imports);
-	});
-var _user$project$Types_Imports$toDictionary = function (pairs) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addEntry, _elm_lang$core$Dict$empty, pairs);
-};
-var _user$project$Types_Imports$decoder = A2(
-	_elm_lang$core$Json_Decode$map,
-	_user$project$Types_Imports$toDictionary,
-	_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder));
-var _user$project$Types_Imports$encoder = function (imports) {
-	return _elm_lang$core$Json_Encode$object(
-		A2(
-			_elm_lang$core$List$map,
-			_elm_lang$core$Tuple$mapSecond(_user$project$Util_ModuleName$encoder),
-			_elm_lang$core$Dict$toList(imports)));
-};
-var _user$project$Types_Imports$default = _elm_lang$core$Dict$empty;
-
 var _user$project$Worker$init = _user$project$And$doNothing(
 	{
 		fileAST: _elm_lang$core$Result$Err(
@@ -15331,8 +15408,9 @@ var _user$project$Worker$update = F2(
 			_user$project$Model_References$collect(
 				_user$project$Model_Exposings$collect(
 					_user$project$Model_TopLevelExpressions$collect(
-						_user$project$Model_ModuleName$record(
-							A2(_user$project$Model_AST$buildFrom, _p0._0._1, model))))));
+						_user$project$Model_Imports$collect(
+							_user$project$Model_ModuleName$record(
+								A2(_user$project$Model_AST$buildFrom, _p0._0._1, model)))))));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',

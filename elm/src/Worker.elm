@@ -6,6 +6,7 @@ import Elm.Syntax.Base exposing (ModuleName)
 import Json.Decode exposing (Value)
 import Model.AST
 import Model.Exposings
+import Model.Imports
 import Model.ModuleName
 import Model.References
 import Model.Report
@@ -58,6 +59,7 @@ update message model =
             model
                 |> Model.AST.buildFrom text
                 |> Model.ModuleName.record
+                |> Model.Imports.collect
                 |> Model.TopLevelExpressions.collect
                 |> Model.Exposings.collect
                 |> Model.References.collect
@@ -66,8 +68,7 @@ update message model =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Sub.batch
-        [ process ProcessFile ]
+    Sub.batch [ process ProcessFile ]
 
 
 andSendReport : String -> Model -> ( Model, Cmd Message )

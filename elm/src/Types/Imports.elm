@@ -1,4 +1,4 @@
-module Types.Imports exposing (Imports, decoder, default, encoder)
+module Types.Imports exposing (Imports, addEntry, decoder, default, encoder)
 
 import Dict exposing (Dict)
 import Elm.Syntax.Base exposing (ModuleName)
