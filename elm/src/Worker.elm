@@ -11,6 +11,7 @@ import Model.References
 import Model.Report
 import Model.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
+import Types.Imports exposing (Imports)
 import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
@@ -18,6 +19,7 @@ import Types.TopLevelExpressions exposing (TopLevelExpressions)
 type alias Model =
     { fileAST : Result (List String) RawFile
     , moduleName : ModuleName
+    , imports : Imports
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
     , references : References
@@ -41,6 +43,7 @@ init : ( Model, Cmd Message )
 init =
     { fileAST = Err []
     , moduleName = []
+    , imports = Types.Imports.default
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
     , references = Types.References.default

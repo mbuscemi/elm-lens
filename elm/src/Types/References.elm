@@ -6,6 +6,7 @@ import Elm.Syntax.Base exposing (ModuleName)
 import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
 import Types.Reference exposing (Reference)
+import Util.ModuleName
 
 
 type alias References =
@@ -30,13 +31,8 @@ encoder references =
 encodeExternalsDict : Dict ModuleName (List Reference) -> List ( String, Value )
 encodeExternalsDict externals =
     Dict.toList externals
-        |> List.map (Tuple.mapFirst encodeModuleName)
+        |> List.map (Tuple.mapFirst Util.ModuleName.toHashed)
         |> List.map (Tuple.mapSecond Types.Reference.listEncoder)
-
-
-encodeModuleName : ModuleName -> String
-encodeModuleName moduleName =
-    String.join "|" moduleName
 
 
 decoder : Decoder References
@@ -63,7 +59,7 @@ toDictionary dictList =
 
 addEntry : ( String, List Reference ) -> Dict ModuleName (List Reference) -> Dict ModuleName (List Reference)
 addEntry ( encodedModuleName, references ) dict =
-    Dict.insert (String.split "|" encodedModuleName) references dict
+    Dict.insert (Util.ModuleName.fromHashed encodedModuleName) references dict
 
 
 addInternal : Reference -> References -> References

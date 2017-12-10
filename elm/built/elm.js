@@ -14158,6 +14158,18 @@ var _user$project$Types_Reference$decoder = A2(
 	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
 var _user$project$Types_Reference$listDecoder = _elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder);
 
+var _user$project$Util_ModuleName$fromHashed = function (encodedModuleName) {
+	return A2(_elm_lang$core$String$split, '|', encodedModuleName);
+};
+var _user$project$Util_ModuleName$toHashed = function (moduleName) {
+	return A2(_elm_lang$core$String$join, '|', moduleName);
+};
+var _user$project$Util_ModuleName$decoder = _elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string);
+var _user$project$Util_ModuleName$encoder = function (moduleName) {
+	return _elm_lang$core$Json_Encode$list(
+		A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, moduleName));
+};
+
 var _user$project$Types_References$externalReferenceUpdate = F2(
 	function (referencesA, referencesB) {
 		var newReference = _elm_lang$core$List$head(referencesB);
@@ -14198,7 +14210,7 @@ var _user$project$Types_References$addEntry = F2(
 		var _p2 = _p1;
 		return A3(
 			_elm_lang$core$Dict$insert,
-			A2(_elm_lang$core$String$split, '|', _p2._0),
+			_user$project$Util_ModuleName$fromHashed(_p2._0),
 			_p2._1,
 			dict);
 	});
@@ -14207,16 +14219,13 @@ var _user$project$Types_References$toDictionary = function (dictList) {
 };
 var _user$project$Types_References$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder);
 var _user$project$Types_References$decodeExternalsDict = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_References$toDictionary, _user$project$Types_References$tupleListDecoder);
-var _user$project$Types_References$encodeModuleName = function (moduleName) {
-	return A2(_elm_lang$core$String$join, '|', moduleName);
-};
 var _user$project$Types_References$encodeExternalsDict = function (externals) {
 	return A2(
 		_elm_lang$core$List$map,
 		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
 		A2(
 			_elm_lang$core$List$map,
-			_elm_lang$core$Tuple$mapFirst(_user$project$Types_References$encodeModuleName),
+			_elm_lang$core$Tuple$mapFirst(_user$project$Util_ModuleName$toHashed),
 			_elm_lang$core$Dict$toList(externals)));
 };
 var _user$project$Types_References$encoder = function (references) {
@@ -15269,11 +15278,33 @@ var _user$project$Model_TopLevelExpressions$collect = function (model) {
 		});
 };
 
+var _user$project$Types_Imports$addEntry = F2(
+	function (_p0, imports) {
+		var _p1 = _p0;
+		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, imports);
+	});
+var _user$project$Types_Imports$toDictionary = function (pairs) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addEntry, _elm_lang$core$Dict$empty, pairs);
+};
+var _user$project$Types_Imports$decoder = A2(
+	_elm_lang$core$Json_Decode$map,
+	_user$project$Types_Imports$toDictionary,
+	_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder));
+var _user$project$Types_Imports$encoder = function (imports) {
+	return _elm_lang$core$Json_Encode$object(
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$mapSecond(_user$project$Util_ModuleName$encoder),
+			_elm_lang$core$Dict$toList(imports)));
+};
+var _user$project$Types_Imports$default = _elm_lang$core$Dict$empty;
+
 var _user$project$Worker$init = _user$project$And$doNothing(
 	{
 		fileAST: _elm_lang$core$Result$Err(
 			{ctor: '[]'}),
 		moduleName: {ctor: '[]'},
+		imports: _user$project$Types_Imports$default,
 		topLevelExpressions: _user$project$Types_TopLevelExpressions$default,
 		exposings: _user$project$Types_Exposings$default,
 		references: _user$project$Types_References$default
@@ -15317,9 +15348,9 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Worker$Model = F5(
-	function (a, b, c, d, e) {
-		return {fileAST: a, moduleName: b, topLevelExpressions: c, exposings: d, references: e};
+var _user$project$Worker$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {fileAST: a, moduleName: b, imports: c, topLevelExpressions: d, exposings: e, references: f};
 	});
 var _user$project$Worker$ProcessFile = function (a) {
 	return {ctor: 'ProcessFile', _0: a};

@@ -1,7 +1,7 @@
 module Types.Report exposing (Report, decoder, default, encoder, fromValue)
 
-import Json.Decode as JD exposing (Decoder, Value, decodeValue, field, list, map5, string)
-import Json.Encode as JE exposing (list, object, string)
+import Json.Decode as JD exposing (Decoder)
+import Json.Encode as JE exposing (Value)
 import Types.Exposings exposing (Exposings)
 import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
@@ -28,12 +28,12 @@ default =
 
 fromValue : Value -> Report
 fromValue value =
-    decodeValue decoder value |> Result.withDefault default
+    JD.decodeValue decoder value |> Result.withDefault default
 
 
 encoder : Report -> Value
 encoder report =
-    object
+    JE.object
         [ ( "fileName", JE.string report.fileName )
         , ( "moduleName", JE.list <| List.map JE.string report.moduleName )
         , ( "topLevelExpressions", Types.TopLevelExpressions.encoder report.topLevelExpressions )
@@ -44,9 +44,9 @@ encoder report =
 
 decoder : Decoder Report
 decoder =
-    map5 Report
-        (field "fileName" JD.string)
-        (field "moduleName" (JD.list JD.string))
-        (field "topLevelExpressions" Types.TopLevelExpressions.decoder)
-        (field "exposings" Types.Exposings.decoder)
-        (field "references" Types.References.decoder)
+    JD.map5 Report
+        (JD.field "fileName" JD.string)
+        (JD.field "moduleName" (JD.list JD.string))
+        (JD.field "topLevelExpressions" Types.TopLevelExpressions.decoder)
+        (JD.field "exposings" Types.Exposings.decoder)
+        (JD.field "references" Types.References.decoder)
