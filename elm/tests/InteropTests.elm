@@ -1,4 +1,4 @@
-module InteropTests exposing (exposings, imports, reference, references)
+module InteropTests exposing (exposings, imports, reference, references, report)
 
 import Dict
 import Expect exposing (Expectation)
@@ -6,9 +6,12 @@ import Json.Decode exposing (decodeValue)
 import Set
 import Test exposing (Test, describe, only, test)
 import Types.Exposings exposing (Exposings)
+import Types.Expression exposing (Expression)
 import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
 import Types.References exposing (References)
+import Types.Report exposing (Report)
+import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 exposings : Test
@@ -95,7 +98,7 @@ reference =
 references : Test
 references =
     describe "References" <|
-        [ test "can encode and decode " <|
+        [ test "can encode and decode" <|
             \_ ->
                 let
                     orig =
@@ -112,6 +115,44 @@ references =
                     decoded =
                         decodeValue Types.References.decoder encoded
                             |> Result.withDefault Types.References.default
+                in
+                Expect.equal decoded orig
+        ]
+
+
+report : Test
+report =
+    describe "Report" <|
+        [ test "can encode and decode" <|
+            \_ ->
+                let
+                    orig =
+                        Report
+                            "file name"
+                            [ "module", "name" ]
+                            (TopLevelExpressions
+                                (Dict.singleton "a" (Expression 123))
+                                (Dict.singleton "b" (Expression 234))
+                                (Dict.singleton "c" (Expression 345))
+                            )
+                            (Exposings
+                                (Set.singleton "ur")
+                                (Set.singleton "mom")
+                            )
+                            (References
+                                [ Reference "dgsklh", Reference "sdfljk" ]
+                                (Dict.empty
+                                    |> Dict.insert [ "fds", "xcv", "qwe" ] [ Reference "hj", Reference "io" ]
+                                    |> Dict.insert [ "gyu", "xsq" ] [ Reference "tuyi", Reference "fas" ]
+                                )
+                            )
+
+                    encoded =
+                        Types.Report.encoder orig
+
+                    decoded =
+                        decodeValue Types.Report.decoder encoded
+                            |> Result.withDefault Types.Report.default
                 in
                 Expect.equal decoded orig
         ]
