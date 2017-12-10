@@ -8,6 +8,7 @@ import Elm.Syntax.Pattern exposing (Pattern)
 import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Set exposing (Set)
+import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
 import Types.References exposing (References)
 
@@ -15,38 +16,39 @@ import Types.References exposing (References)
 type alias Model model =
     { model
         | fileAST : Result (List String) RawFile
+        , imports : Imports
         , references : References
     }
 
 
 collect : Model model -> Model model
 collect model =
-    { model | references = collectReferences model.fileAST }
+    { model | references = collectReferences model.imports model.fileAST }
 
 
-collectReferences : Result (List String) RawFile -> References
-collectReferences parseResult =
+collectReferences : Imports -> Result (List String) RawFile -> References
+collectReferences imports parseResult =
     case parseResult of
         Ok rawFile ->
             process init rawFile
                 |> .declarations
-                |> collectRefsFrom
+                |> collectRefsFrom imports
 
         Err errors ->
             Types.References.default
 
 
-collectRefsFrom : List (Ranged Declaration) -> References
-collectRefsFrom declarations =
-    List.foldl collectRefsFromDeclaration Types.References.default declarations
+collectRefsFrom : Imports -> List (Ranged Declaration) -> References
+collectRefsFrom imports declarations =
+    List.foldl (collectRefsFromDeclaration imports) Types.References.default declarations
 
 
-collectRefsFromDeclaration : Ranged Declaration -> References -> References
-collectRefsFromDeclaration declaration references =
+collectRefsFromDeclaration : Imports -> Ranged Declaration -> References -> References
+collectRefsFromDeclaration imports declaration references =
     case declaration of
         ( range, Elm.Syntax.Declaration.FuncDecl function ) ->
             List.foldl argumentsFromPattern Set.empty function.declaration.arguments
-                |> (\args -> refsInExpression args function.declaration.expression references)
+                |> (\args -> refsInExpression args imports function.declaration.expression references)
                 |> appendSignatureReferences function
 
         ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
@@ -56,76 +58,81 @@ collectRefsFromDeclaration declaration references =
             references
 
 
-refsInExpression : Set String -> Ranged Expression -> References -> References
-refsInExpression arguments expression references =
+refsInExpression : Set String -> Imports -> Ranged Expression -> References -> References
+refsInExpression arguments imports expression references =
     case expression of
         ( range, Elm.Syntax.Expression.Application exps ) ->
-            List.foldl (refsInExpression arguments) references exps
+            List.foldl (refsInExpression arguments imports) references exps
 
         ( range, Elm.Syntax.Expression.OperatorApplication _ _ exp1 exp2 ) ->
-            List.foldl (refsInExpression arguments) references [ exp1, exp2 ]
+            List.foldl (refsInExpression arguments imports) references [ exp1, exp2 ]
 
         ( range, Elm.Syntax.Expression.FunctionOrValue name ) ->
-            addReference name arguments references
+            addReference name arguments imports references
 
         ( range, Elm.Syntax.Expression.IfBlock exp1 exp2 exp3 ) ->
-            List.foldl (refsInExpression arguments) references [ exp1, exp2, exp3 ]
+            List.foldl (refsInExpression arguments imports) references [ exp1, exp2, exp3 ]
 
         ( range, Elm.Syntax.Expression.Negation exp ) ->
-            refsInExpression arguments exp references
+            refsInExpression arguments imports exp references
 
         ( range, Elm.Syntax.Expression.TupledExpression exps ) ->
-            List.foldl (refsInExpression arguments) references exps
+            List.foldl (refsInExpression arguments imports) references exps
 
         ( range, Elm.Syntax.Expression.ParenthesizedExpression exp ) ->
-            refsInExpression arguments exp references
+            refsInExpression arguments imports exp references
 
         ( range, Elm.Syntax.Expression.LetExpression letBlock ) ->
             let
                 expressions =
                     List.foldl letDeclarationExpressions [] letBlock.declarations
             in
-            List.foldl (refsInExpression arguments) references (letBlock.expression :: expressions)
+            List.foldl (refsInExpression arguments imports) references (letBlock.expression :: expressions)
 
         ( range, Elm.Syntax.Expression.CaseExpression caseBlock ) ->
             let
                 allArguments =
                     Set.union arguments (additionalArguments (List.map Tuple.first caseBlock.cases))
             in
-            List.foldl (refsInExpression allArguments) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
+            List.foldl (refsInExpression allArguments imports) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
 
         ( range, Elm.Syntax.Expression.LambdaExpression lambda ) ->
             let
                 allArguments =
                     Set.union arguments (additionalArguments lambda.args)
             in
-            refsInExpression allArguments lambda.expression references
+            refsInExpression allArguments imports lambda.expression references
 
         ( range, Elm.Syntax.Expression.RecordExpr recordSetters ) ->
-            List.foldl (refsInExpression arguments) references (List.map Tuple.second recordSetters)
+            List.foldl (refsInExpression arguments imports) references (List.map Tuple.second recordSetters)
 
         ( range, Elm.Syntax.Expression.ListExpr exps ) ->
-            List.foldl (refsInExpression arguments) references exps
+            List.foldl (refsInExpression arguments imports) references exps
 
         ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
             Types.References.addExternal moduleName (Reference name) references
 
         ( range, Elm.Syntax.Expression.RecordAccessFunction name ) ->
-            addReference name arguments references
+            addReference name arguments imports references
 
         ( range, Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ) ->
-            List.foldl (refsInExpression arguments) references (List.map Tuple.second recordUpdate.updates)
+            List.foldl (refsInExpression arguments imports) references (List.map Tuple.second recordUpdate.updates)
 
         _ ->
             references
 
 
-addReference : String -> Set String -> References -> References
-addReference name arguments references =
-    if Set.member name arguments then
-        references
-    else
-        Types.References.addInternal (Reference name) references
+addReference : String -> Set String -> Imports -> References -> References
+addReference name arguments imports references =
+    case ( Set.member name arguments, Types.Imports.moduleNameForEntry name imports ) of
+        ( True, _ ) ->
+            references
+
+        ( _, Just moduleName ) ->
+            Types.References.addExternal moduleName (Reference name) references
+
+        _ ->
+            Types.References.addInternal (Reference name) references
 
 
 refsInTypeAnnotation : Ranged TypeAnnotation -> References -> References

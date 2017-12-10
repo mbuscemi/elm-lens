@@ -14871,6 +14871,10 @@ var _user$project$Model_Exposings$collect = function (model) {
 		});
 };
 
+var _user$project$Types_Imports$moduleNameForEntry = F2(
+	function (name, imports) {
+		return A2(_elm_lang$core$Dict$get, name, imports);
+	});
 var _user$project$Types_Imports$addEntry = F2(
 	function (_p0, imports) {
 		var _p1 = _p0;
@@ -14929,43 +14933,35 @@ var _user$project$Model_Imports$collectFromExposing = F3(
 				_p3._0);
 		}
 	});
-var _user$project$Model_Imports$collectFromDeclaration = F3(
-	function (moduleName, import_, imports) {
+var _user$project$Model_Imports$collectFromDeclaration = F2(
+	function (import_, imports) {
 		var _p4 = import_.exposingList;
 		if (_p4.ctor === 'Just') {
-			return A3(_user$project$Model_Imports$collectFromExposing, moduleName, _p4._0, imports);
+			return A3(_user$project$Model_Imports$collectFromExposing, import_.moduleName, _p4._0, imports);
 		} else {
 			return imports;
 		}
 	});
-var _user$project$Model_Imports$collectFrom = F2(
-	function (moduleName, importList) {
-		return A3(
-			_elm_lang$core$List$foldl,
-			_user$project$Model_Imports$collectFromDeclaration(moduleName),
-			_elm_lang$core$Dict$empty,
-			importList);
-	});
-var _user$project$Model_Imports$collectImports = F2(
-	function (moduleName, parseResult) {
-		var _p5 = parseResult;
-		if (_p5.ctor === 'Ok') {
-			return A2(
-				_user$project$Model_Imports$collectFrom,
-				moduleName,
-				function (_) {
-					return _.imports;
-				}(
-					A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p5._0)));
-		} else {
-			return _user$project$Types_Imports$default;
-		}
-	});
+var _user$project$Model_Imports$collectFrom = function (importList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Model_Imports$collectFromDeclaration, _elm_lang$core$Dict$empty, importList);
+};
+var _user$project$Model_Imports$collectImports = function (parseResult) {
+	var _p5 = parseResult;
+	if (_p5.ctor === 'Ok') {
+		return _user$project$Model_Imports$collectFrom(
+			function (_) {
+				return _.imports;
+			}(
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p5._0)));
+	} else {
+		return _user$project$Types_Imports$default;
+	}
+};
 var _user$project$Model_Imports$collect = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			imports: A2(_user$project$Model_Imports$collectImports, model.moduleName, model.fileAST)
+			imports: _user$project$Model_Imports$collectImports(model.fileAST)
 		});
 };
 
@@ -15082,208 +15078,247 @@ var _user$project$Model_References$appendSignatureReferences = F2(
 			return references;
 		}
 	});
-var _user$project$Model_References$addReference = F3(
-	function (name, $arguments, references) {
-		return A2(_elm_lang$core$Set$member, name, $arguments) ? references : A2(
+var _user$project$Model_References$addReference = F4(
+	function (name, $arguments, imports, references) {
+		var _p4 = {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$Set$member, name, $arguments),
+			_1: A2(_user$project$Types_Imports$moduleNameForEntry, name, imports)
+		};
+		_v4_2:
+		do {
+			if (_p4.ctor === '_Tuple2') {
+				if (_p4._0 === true) {
+					return references;
+				} else {
+					if (_p4._1.ctor === 'Just') {
+						return A3(
+							_user$project$Types_References$addExternal,
+							_p4._1._0,
+							_user$project$Types_Reference$Reference(name),
+							references);
+					} else {
+						break _v4_2;
+					}
+				}
+			} else {
+				break _v4_2;
+			}
+		} while(false);
+		return A2(
 			_user$project$Types_References$addInternal,
 			_user$project$Types_Reference$Reference(name),
 			references);
 	});
-var _user$project$Model_References$refsInExpression = F3(
-	function ($arguments, expression, references) {
+var _user$project$Model_References$refsInExpression = F4(
+	function ($arguments, imports, expression, references) {
 		refsInExpression:
 		while (true) {
-			var _p4 = expression;
-			_v4_15:
+			var _p5 = expression;
+			_v5_15:
 			do {
-				if (_p4.ctor === '_Tuple2') {
-					switch (_p4._1.ctor) {
+				if (_p5.ctor === '_Tuple2') {
+					switch (_p5._1.ctor) {
 						case 'Application':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
-								_p4._1._0);
+								_p5._1._0);
 						case 'OperatorApplication':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
 								{
 									ctor: '::',
-									_0: _p4._1._2,
+									_0: _p5._1._2,
 									_1: {
 										ctor: '::',
-										_0: _p4._1._3,
+										_0: _p5._1._3,
 										_1: {ctor: '[]'}
 									}
 								});
 						case 'FunctionOrValue':
-							return A3(_user$project$Model_References$addReference, _p4._1._0, $arguments, references);
+							return A4(_user$project$Model_References$addReference, _p5._1._0, $arguments, imports, references);
 						case 'IfBlock':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
 								{
 									ctor: '::',
-									_0: _p4._1._0,
+									_0: _p5._1._0,
 									_1: {
 										ctor: '::',
-										_0: _p4._1._1,
+										_0: _p5._1._1,
 										_1: {
 											ctor: '::',
-											_0: _p4._1._2,
+											_0: _p5._1._2,
 											_1: {ctor: '[]'}
 										}
 									}
 								});
 						case 'Negation':
-							var _v5 = $arguments,
-								_v6 = _p4._1._0,
-								_v7 = references;
-							$arguments = _v5;
-							expression = _v6;
-							references = _v7;
+							var _v6 = $arguments,
+								_v7 = imports,
+								_v8 = _p5._1._0,
+								_v9 = references;
+							$arguments = _v6;
+							imports = _v7;
+							expression = _v8;
+							references = _v9;
 							continue refsInExpression;
 						case 'TupledExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
-								_p4._1._0);
+								_p5._1._0);
 						case 'ParenthesizedExpression':
-							var _v8 = $arguments,
-								_v9 = _p4._1._0,
-								_v10 = references;
-							$arguments = _v8;
-							expression = _v9;
-							references = _v10;
+							var _v10 = $arguments,
+								_v11 = imports,
+								_v12 = _p5._1._0,
+								_v13 = references;
+							$arguments = _v10;
+							imports = _v11;
+							expression = _v12;
+							references = _v13;
 							continue refsInExpression;
 						case 'LetExpression':
-							var _p5 = _p4._1._0;
+							var _p6 = _p5._1._0;
 							var expressions = A3(
 								_elm_lang$core$List$foldl,
 								_user$project$Model_References$letDeclarationExpressions,
 								{ctor: '[]'},
-								_p5.declarations);
+								_p6.declarations);
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
-								{ctor: '::', _0: _p5.expression, _1: expressions});
+								{ctor: '::', _0: _p6.expression, _1: expressions});
 						case 'CaseExpression':
-							var _p6 = _p4._1._0;
+							var _p7 = _p5._1._0;
 							var allArguments = A2(
 								_elm_lang$core$Set$union,
 								$arguments,
 								_user$project$Model_References$additionalArguments(
-									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p6.cases)));
+									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p7.cases)));
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression(allArguments),
+								A2(_user$project$Model_References$refsInExpression, allArguments, imports),
 								references,
 								{
 									ctor: '::',
-									_0: _p6.expression,
-									_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p6.cases)
+									_0: _p7.expression,
+									_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p7.cases)
 								});
 						case 'LambdaExpression':
-							var _p7 = _p4._1._0;
+							var _p8 = _p5._1._0;
 							var allArguments = A2(
 								_elm_lang$core$Set$union,
 								$arguments,
-								_user$project$Model_References$additionalArguments(_p7.args));
-							var _v11 = allArguments,
-								_v12 = _p7.expression,
-								_v13 = references;
-							$arguments = _v11;
-							expression = _v12;
-							references = _v13;
+								_user$project$Model_References$additionalArguments(_p8.args));
+							var _v14 = allArguments,
+								_v15 = imports,
+								_v16 = _p8.expression,
+								_v17 = references;
+							$arguments = _v14;
+							imports = _v15;
+							expression = _v16;
+							references = _v17;
 							continue refsInExpression;
 						case 'RecordExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
-								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._1._0));
+								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p5._1._0));
 						case 'ListExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
-								_p4._1._0);
+								_p5._1._0);
 						case 'QualifiedExpr':
 							return A3(
 								_user$project$Types_References$addExternal,
-								_p4._1._0,
-								_user$project$Types_Reference$Reference(_p4._1._1),
+								_p5._1._0,
+								_user$project$Types_Reference$Reference(_p5._1._1),
 								references);
 						case 'RecordAccessFunction':
-							return A3(_user$project$Model_References$addReference, _p4._1._0, $arguments, references);
+							return A4(_user$project$Model_References$addReference, _p5._1._0, $arguments, imports, references);
 						case 'RecordUpdateExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$refsInExpression($arguments),
+								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
 								references,
-								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p4._1._0.updates));
+								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p5._1._0.updates));
 						default:
-							break _v4_15;
+							break _v5_15;
 					}
 				} else {
-					break _v4_15;
+					break _v5_15;
 				}
 			} while(false);
 			return references;
 		}
 	});
-var _user$project$Model_References$collectRefsFromDeclaration = F2(
-	function (declaration, references) {
-		var _p8 = declaration;
-		_v14_2:
+var _user$project$Model_References$collectRefsFromDeclaration = F3(
+	function (imports, declaration, references) {
+		var _p9 = declaration;
+		_v18_2:
 		do {
-			if (_p8.ctor === '_Tuple2') {
-				switch (_p8._1.ctor) {
+			if (_p9.ctor === '_Tuple2') {
+				switch (_p9._1.ctor) {
 					case 'FuncDecl':
-						var _p9 = _p8._1._0;
+						var _p10 = _p9._1._0;
 						return A2(
 							_user$project$Model_References$appendSignatureReferences,
-							_p9,
+							_p10,
 							function (args) {
-								return A3(_user$project$Model_References$refsInExpression, args, _p9.declaration.expression, references);
+								return A4(_user$project$Model_References$refsInExpression, args, imports, _p10.declaration.expression, references);
 							}(
-								A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p9.declaration.$arguments)));
+								A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p10.declaration.$arguments)));
 					case 'AliasDecl':
-						return A2(_user$project$Model_References$refsInTypeAnnotation, _p8._1._0.typeAnnotation, references);
+						return A2(_user$project$Model_References$refsInTypeAnnotation, _p9._1._0.typeAnnotation, references);
 					default:
-						break _v14_2;
+						break _v18_2;
 				}
 			} else {
-				break _v14_2;
+				break _v18_2;
 			}
 		} while(false);
 		return references;
 	});
-var _user$project$Model_References$collectRefsFrom = function (declarations) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Model_References$collectRefsFromDeclaration, _user$project$Types_References$default, declarations);
-};
-var _user$project$Model_References$collectReferences = function (parseResult) {
-	var _p10 = parseResult;
-	if (_p10.ctor === 'Ok') {
-		return _user$project$Model_References$collectRefsFrom(
-			function (_) {
-				return _.declarations;
-			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p10._0)));
-	} else {
-		return _user$project$Types_References$default;
-	}
-};
+var _user$project$Model_References$collectRefsFrom = F2(
+	function (imports, declarations) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$Model_References$collectRefsFromDeclaration(imports),
+			_user$project$Types_References$default,
+			declarations);
+	});
+var _user$project$Model_References$collectReferences = F2(
+	function (imports, parseResult) {
+		var _p11 = parseResult;
+		if (_p11.ctor === 'Ok') {
+			return A2(
+				_user$project$Model_References$collectRefsFrom,
+				imports,
+				function (_) {
+					return _.declarations;
+				}(
+					A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p11._0)));
+		} else {
+			return _user$project$Types_References$default;
+		}
+	});
 var _user$project$Model_References$collect = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			references: _user$project$Model_References$collectReferences(model.fileAST)
+			references: A2(_user$project$Model_References$collectReferences, model.imports, model.fileAST)
 		});
 };
 

@@ -13,38 +13,37 @@ import Types.Imports exposing (Imports)
 type alias Model model =
     { model
         | fileAST : Result (List String) RawFile
-        , moduleName : ModuleName
         , imports : Imports
     }
 
 
 collect : Model model -> Model model
 collect model =
-    { model | imports = collectImports model.moduleName model.fileAST }
+    { model | imports = collectImports model.fileAST }
 
 
-collectImports : ModuleName -> Result (List String) RawFile -> Imports
-collectImports moduleName parseResult =
+collectImports : Result (List String) RawFile -> Imports
+collectImports parseResult =
     case parseResult of
         Ok rawFile ->
             process init rawFile
                 |> .imports
-                |> collectFrom moduleName
+                |> collectFrom
 
         Err errors ->
             Types.Imports.default
 
 
-collectFrom : ModuleName -> List Import -> Imports
-collectFrom moduleName importList =
-    List.foldl (collectFromDeclaration moduleName) Dict.empty importList
+collectFrom : List Import -> Imports
+collectFrom importList =
+    List.foldl collectFromDeclaration Dict.empty importList
 
 
-collectFromDeclaration : ModuleName -> Import -> Imports -> Imports
-collectFromDeclaration moduleName import_ imports =
+collectFromDeclaration : Import -> Imports -> Imports
+collectFromDeclaration import_ imports =
     case import_.exposingList of
         Just exposing_ ->
-            collectFromExposing moduleName exposing_ imports
+            collectFromExposing import_.moduleName exposing_ imports
 
         Nothing ->
             imports

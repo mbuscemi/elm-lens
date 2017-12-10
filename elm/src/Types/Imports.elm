@@ -1,4 +1,4 @@
-module Types.Imports exposing (Imports, addEntry, decoder, default, encoder)
+module Types.Imports exposing (Imports, addEntry, decoder, default, encoder, moduleNameForEntry)
 
 import Dict exposing (Dict)
 import Elm.Syntax.Base exposing (ModuleName)
@@ -36,3 +36,8 @@ toDictionary pairs =
 addEntry : ( String, ModuleName ) -> Imports -> Imports
 addEntry ( funcName, moduleName ) imports =
     Dict.insert funcName moduleName imports
+
+
+moduleNameForEntry : String -> Imports -> Maybe ModuleName
+moduleNameForEntry name imports =
+    Dict.get name imports
