@@ -14163,7 +14163,7 @@ var _user$project$Types_References$externalReferenceUpdate = F2(
 		var newReference = _elm_lang$core$List$head(referencesB);
 		var _p0 = newReference;
 		if (_p0.ctor === 'Just') {
-			return {ctor: '::', _0: _p0._0, _1: referencesB};
+			return {ctor: '::', _0: _p0._0, _1: referencesA};
 		} else {
 			return referencesB;
 		}
@@ -14485,6 +14485,33 @@ var _user$project$Types_FileMarkup$ExpressionData = F5(
 		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d, numExternalRefs: e};
 	});
 
+var _user$project$Model_FileMarkup$otherReferenceCounter = F6(
+	function (moduleName, funcName, fileName, curFileName, fileData, count) {
+		return _elm_lang$core$Native_Utils.eq(curFileName, fileName) ? count : A2(
+			F2(
+				function (x, y) {
+					return x + y;
+				}),
+			count,
+			_elm_lang$core$List$length(
+				A2(
+					_elm_lang$core$List$filter,
+					function (reference) {
+						return _elm_lang$core$Native_Utils.eq(reference.name, funcName);
+					},
+					A2(
+						_elm_lang$core$Maybe$withDefault,
+						{ctor: '[]'},
+						A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external)))));
+	});
+var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F5(
+	function (fileIsExposed, moduleName, funcName, fileName, projectFileData) {
+		return fileIsExposed ? A3(
+			_elm_lang$core$Dict$foldl,
+			A3(_user$project$Model_FileMarkup$otherReferenceCounter, moduleName, funcName, fileName),
+			0,
+			projectFileData) : 0;
+	});
 var _user$project$Model_FileMarkup$referenceCounter = F3(
 	function (funcName, reference, count) {
 		return _elm_lang$core$Native_Utils.eq(reference.name, funcName) ? (count + 1) : count;
@@ -14496,18 +14523,6 @@ var _user$project$Model_FileMarkup$numOccurencesInOwnReferences = F2(
 			_user$project$Model_FileMarkup$referenceCounter(funcName),
 			0,
 			fileData.references.internal);
-	});
-var _user$project$Model_FileMarkup$otherReferenceCounter = F5(
-	function (funcName, fileName, curFileName, fileData, count) {
-		return _elm_lang$core$Native_Utils.eq(curFileName, fileName) ? count : (count + A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData));
-	});
-var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F4(
-	function (fileIsExposed, funcName, fileName, projectFileData) {
-		return fileIsExposed ? A3(
-			_elm_lang$core$Dict$foldl,
-			A2(_user$project$Model_FileMarkup$otherReferenceCounter, funcName, fileName),
-			0,
-			projectFileData) : 0;
 	});
 var _user$project$Model_FileMarkup$isExposed = F2(
 	function (expName, fileData) {
@@ -14524,7 +14539,7 @@ var _user$project$Model_FileMarkup$makeExpression = F6(
 				funcData.lineNumber,
 				fileIsExposed,
 				A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData),
-				A4(_user$project$Model_FileMarkup$numOccurencesInOtherReferences, fileIsExposed, funcName, fileName, projectFileData)),
+				A5(_user$project$Model_FileMarkup$numOccurencesInOtherReferences, fileIsExposed, fileData.moduleName, funcName, fileName, projectFileData)),
 			_1: list
 		};
 	});

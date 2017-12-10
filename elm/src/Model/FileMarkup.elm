@@ -1,6 +1,7 @@
 module Model.FileMarkup exposing (make)
 
 import Dict
+import Elm.Syntax.Base exposing (ModuleName)
 import Model.BatchProcess
 import Set exposing (Set)
 import Types.Expression exposing (Expression)
@@ -66,7 +67,7 @@ makeExpression fileName projectFileData fileData funcName funcData list =
         funcData.lineNumber
         fileIsExposed
         (numOccurencesInOwnReferences funcName fileData)
-        (numOccurencesInOtherReferences fileIsExposed funcName fileName projectFileData)
+        (numOccurencesInOtherReferences fileIsExposed fileData.moduleName funcName fileName projectFileData)
         :: list
 
 
@@ -88,17 +89,21 @@ referenceCounter funcName reference count =
         count
 
 
-numOccurencesInOtherReferences : Bool -> String -> String -> ProjectFileData -> Int
-numOccurencesInOtherReferences fileIsExposed funcName fileName projectFileData =
+numOccurencesInOtherReferences : Bool -> ModuleName -> String -> String -> ProjectFileData -> Int
+numOccurencesInOtherReferences fileIsExposed moduleName funcName fileName projectFileData =
     if fileIsExposed then
-        Dict.foldl (otherReferenceCounter funcName fileName) 0 projectFileData
+        Dict.foldl (otherReferenceCounter moduleName funcName fileName) 0 projectFileData
     else
         0
 
 
-otherReferenceCounter : String -> String -> String -> FileData -> Int -> Int
-otherReferenceCounter funcName fileName curFileName fileData count =
+otherReferenceCounter : ModuleName -> String -> String -> String -> FileData -> Int -> Int
+otherReferenceCounter moduleName funcName fileName curFileName fileData count =
     if curFileName == fileName then
         count
     else
-        count + numOccurencesInOwnReferences funcName fileData
+        Dict.get moduleName fileData.references.external
+            |> Maybe.withDefault []
+            |> List.filter (\reference -> reference.name == funcName)
+            |> List.length
+            |> (+) count

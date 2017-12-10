@@ -84,7 +84,7 @@ externalReferenceUpdate referencesA referencesB =
     in
     case newReference of
         Just reference ->
-            reference :: referencesB
+            reference :: referencesA
 
         Nothing ->
             referencesB
