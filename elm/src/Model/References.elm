@@ -9,12 +9,13 @@ import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Set exposing (Set)
 import Types.Reference exposing (Reference)
+import Types.References exposing (References)
 
 
 type alias Model model =
     { model
         | fileAST : Result (List String) RawFile
-        , references : List Reference
+        , references : References
     }
 
 
@@ -23,7 +24,7 @@ collect model =
     { model | references = collectReferences model.fileAST }
 
 
-collectReferences : Result (List String) RawFile -> List Reference
+collectReferences : Result (List String) RawFile -> References
 collectReferences parseResult =
     case parseResult of
         Ok rawFile ->
@@ -32,15 +33,15 @@ collectReferences parseResult =
                 |> collectRefsFrom
 
         Err errors ->
-            []
+            Types.References.default
 
 
-collectRefsFrom : List (Ranged Declaration) -> List Reference
+collectRefsFrom : List (Ranged Declaration) -> References
 collectRefsFrom declarations =
-    List.foldl collectRefsFromDeclaration [] declarations
+    List.foldl collectRefsFromDeclaration Types.References.default declarations
 
 
-collectRefsFromDeclaration : Ranged Declaration -> List Reference -> List Reference
+collectRefsFromDeclaration : Ranged Declaration -> References -> References
 collectRefsFromDeclaration declaration references =
     case declaration of
         ( range, Elm.Syntax.Declaration.FuncDecl function ) ->
@@ -55,7 +56,7 @@ collectRefsFromDeclaration declaration references =
             references
 
 
-refsInExpression : Set String -> Ranged Expression -> List Reference -> List Reference
+refsInExpression : Set String -> Ranged Expression -> References -> References
 refsInExpression arguments expression references =
     case expression of
         ( range, Elm.Syntax.Expression.Application exps ) ->
@@ -119,19 +120,19 @@ refsInExpression arguments expression references =
             references
 
 
-addReference : String -> Set String -> List Reference -> List Reference
+addReference : String -> Set String -> References -> References
 addReference name arguments references =
     if Set.member name arguments then
         references
     else
-        Reference name :: references
+        Types.References.addInternal (Reference name) references
 
 
-refsInTypeAnnotation : Ranged TypeAnnotation -> List Reference -> List Reference
+refsInTypeAnnotation : Ranged TypeAnnotation -> References -> References
 refsInTypeAnnotation typeAnnotation references =
     case typeAnnotation of
         ( range, Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations ) ->
-            List.foldl refsInTypeAnnotation (Reference name :: references) typeAnnotations
+            List.foldl refsInTypeAnnotation (Types.References.addInternal (Reference name) references) typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
             List.foldl refsInTypeAnnotation references typeAnnotations
@@ -143,7 +144,7 @@ refsInTypeAnnotation typeAnnotation references =
             references
 
 
-appendSignatureReferences : Function -> List Reference -> List Reference
+appendSignatureReferences : Function -> References -> References
 appendSignatureReferences function references =
     case function.signature of
         Just ( range, signature ) ->

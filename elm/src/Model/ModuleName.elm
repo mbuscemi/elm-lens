@@ -2,13 +2,14 @@ module Model.ModuleName exposing (record)
 
 import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
+import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.Module exposing (Module)
 
 
 type alias Model model =
     { model
         | fileAST : Result (List String) RawFile
-        , moduleName : List String
+        , moduleName : ModuleName
     }
 
 
@@ -17,7 +18,7 @@ record model =
     { model | moduleName = recordModuleName model.fileAST }
 
 
-recordModuleName : Result (List String) RawFile -> List String
+recordModuleName : Result (List String) RawFile -> ModuleName
 recordModuleName parseResult =
     case parseResult of
         Ok rawFile ->
@@ -29,7 +30,7 @@ recordModuleName parseResult =
             []
 
 
-toModuleName : Module -> List String
+toModuleName : Module -> ModuleName
 toModuleName module_ =
     case module_ of
         Elm.Syntax.Module.NormalModule data ->

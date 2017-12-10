@@ -3,7 +3,7 @@ module Types.Report exposing (Report, decoder, default, encoder, fromValue)
 import Json.Decode as JD exposing (Decoder, Value, decodeValue, field, list, map5, string)
 import Json.Encode as JE exposing (list, object, string)
 import Types.Exposings exposing (Exposings)
-import Types.Reference exposing (Reference)
+import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
@@ -12,7 +12,7 @@ type alias Report =
     , moduleName : List String
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
-    , references : List Reference
+    , references : References
     }
 
 
@@ -22,7 +22,7 @@ default =
     , moduleName = []
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
-    , references = []
+    , references = Types.References.default
     }
 
 
@@ -38,7 +38,7 @@ encoder report =
         , ( "moduleName", JE.list <| List.map JE.string report.moduleName )
         , ( "topLevelExpressions", Types.TopLevelExpressions.encoder report.topLevelExpressions )
         , ( "exposings", Types.Exposings.encoder report.exposings )
-        , ( "references", JE.list <| List.map Types.Reference.encoder report.references )
+        , ( "references", Types.References.encoder report.references )
         ]
 
 
@@ -49,4 +49,4 @@ decoder =
         (field "moduleName" (JD.list JD.string))
         (field "topLevelExpressions" Types.TopLevelExpressions.decoder)
         (field "exposings" Types.Exposings.decoder)
-        (field "references" (JD.list Types.Reference.decoder))
+        (field "references" Types.References.decoder)

@@ -2,6 +2,7 @@ port module Worker exposing (main)
 
 import And
 import Elm.RawFile exposing (RawFile)
+import Elm.Syntax.Base exposing (ModuleName)
 import Json.Decode exposing (Value)
 import Model.AST
 import Model.Exposings
@@ -10,16 +11,16 @@ import Model.References
 import Model.Report
 import Model.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
-import Types.Reference exposing (Reference)
+import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias Model =
     { fileAST : Result (List String) RawFile
-    , moduleName : List String
+    , moduleName : ModuleName
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
-    , references : List Reference
+    , references : References
     }
 
 
@@ -42,7 +43,7 @@ init =
     , moduleName = []
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
-    , references = []
+    , references = Types.References.default
     }
         |> And.doNothing
 

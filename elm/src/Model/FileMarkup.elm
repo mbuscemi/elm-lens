@@ -77,7 +77,7 @@ isExposed expName fileData =
 
 numOccurencesInOwnReferences : String -> FileData -> Int
 numOccurencesInOwnReferences funcName fileData =
-    List.foldl (referenceCounter funcName) 0 fileData.references
+    List.foldl (referenceCounter funcName) 0 fileData.references.internal
 
 
 referenceCounter : String -> Reference -> Int -> Int
