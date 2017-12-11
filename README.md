@@ -15,6 +15,8 @@ Elm code visualizations for maximum productivity
 
 ## Feature Overview
 
-Elm Lens add contextual markup to all functions, types, and and type aliases in your project.
+Elm Lens add contextual markup to all functions, types, and and type aliases in all Elm files in your project.
 
 Exposed expressions are marked up as **exposed**, while non-exposed expressions are marked up as **local**. Reference counts are also displayed.
+
+Elm Lens runs parallel background processes in order to gather its data, so you aren't blocked from working on your project while Elm Lens does its work.
