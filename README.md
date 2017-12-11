@@ -1,4 +1,4 @@
-# elm-lens
+# Elm Lens
 [![Build Status](https://travis-ci.org/mbuscemi/elm-lens.svg?branch=master)](https://travis-ci.org/mbuscemi/elm-lens)
 
 Elm code visualizations for maximum productivity
