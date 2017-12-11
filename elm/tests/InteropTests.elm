@@ -1,4 +1,4 @@
-module InteropTests exposing (exposings, imports, reference, references, report)
+module InteropTests exposing (exposings, imports, reference, references, report, topLevelExpressions)
 
 import Dict
 import Expect exposing (Expectation)
@@ -153,6 +153,29 @@ report =
                     decoded =
                         decodeValue Types.Report.decoder encoded
                             |> Result.withDefault Types.Report.default
+                in
+                Expect.equal decoded orig
+        ]
+
+
+topLevelExpressions : Test
+topLevelExpressions =
+    describe "TopLevelExpressions" <|
+        [ test "can encode and decode" <|
+            \_ ->
+                let
+                    orig =
+                        TopLevelExpressions
+                            (Dict.singleton "vdsohjn" (Expression 329))
+                            (Dict.singleton "hjoiash" (Expression 672))
+                            (Dict.singleton "fdoktjr" (Expression 784))
+
+                    encoded =
+                        Types.TopLevelExpressions.encoder orig
+
+                    decoded =
+                        decodeValue Types.TopLevelExpressions.decoder encoded
+                            |> Result.withDefault Types.TopLevelExpressions.default
                 in
                 Expect.equal decoded orig
         ]
