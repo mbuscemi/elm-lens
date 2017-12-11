@@ -2,13 +2,23 @@
     "name": "elm-lens",
     "main": "./lib/elm-lens",
     "version": "0.0.0",
-    "description": "A short description of your package",
-    "keywords": [],
+    "description": "Elm code visualizations for maximum productivity",
+    "keywords": [
+        "elm",
+        "tool",
+        "tools",
+        "tooling",
+        "meta",
+        "metadata"
+    ],
     "activationCommands": {},
-    "repository": "https://github.com/atom/temp",
+    "repository": "https://github.com/mbuscemi/elm-lens",
     "license": "MIT",
     "engines": {
         "atom": ">=1.0.0 <2.0.0"
     },
-    "dependencies": {}
+    "dependencies": {},
+    "scripts": {
+        "test": "cd elm ; elm-test"
+    }
 }
