@@ -124,7 +124,7 @@ refsInExpression arguments imports expression references =
 
 addReference : String -> Set String -> Imports -> References -> References
 addReference name arguments imports references =
-    case ( Set.member name arguments, Types.Imports.moduleNameForEntry name imports ) of
+    case ( Set.member name arguments, Types.Imports.moduleNameForEntry name imports.direct ) of
         ( True, _ ) ->
             references
 

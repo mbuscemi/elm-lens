@@ -14872,29 +14872,104 @@ var _user$project$Model_Exposings$collect = function (model) {
 };
 
 var _user$project$Types_Imports$moduleNameForEntry = F2(
-	function (name, imports) {
-		return A2(_elm_lang$core$Dict$get, name, imports);
+	function (name, directImports) {
+		return A2(_elm_lang$core$Dict$get, name, directImports);
 	});
-var _user$project$Types_Imports$addEntry = F2(
-	function (_p0, imports) {
+var _user$project$Types_Imports$addAliasEntry = F2(
+	function (_p0, aliasImports) {
 		var _p1 = _p0;
-		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, imports);
+		return A3(
+			_elm_lang$core$Dict$insert,
+			_user$project$Util_ModuleName$fromHashed(_p1._0),
+			_p1._1,
+			aliasImports);
 	});
-var _user$project$Types_Imports$toDictionary = function (pairs) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addEntry, _elm_lang$core$Dict$empty, pairs);
+var _user$project$Types_Imports$toAliasesDict = function (pairs) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addAliasEntry, _elm_lang$core$Dict$empty, pairs);
 };
-var _user$project$Types_Imports$decoder = A2(
-	_elm_lang$core$Json_Decode$map,
-	_user$project$Types_Imports$toDictionary,
-	_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder));
-var _user$project$Types_Imports$encoder = function (imports) {
+var _user$project$Types_Imports$addDirectEntry = F2(
+	function (_p2, directImports) {
+		var _p3 = _p2;
+		return A3(_elm_lang$core$Dict$insert, _p3._0, _p3._1, directImports);
+	});
+var _user$project$Types_Imports$toDirectsDict = function (pairs) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addDirectEntry, _elm_lang$core$Dict$empty, pairs);
+};
+var _user$project$Types_Imports$encodeAliases = function (aliasImports) {
 	return _elm_lang$core$Json_Encode$object(
 		A2(
 			_elm_lang$core$List$map,
 			_elm_lang$core$Tuple$mapSecond(_user$project$Util_ModuleName$encoder),
-			_elm_lang$core$Dict$toList(imports)));
+			A2(
+				_elm_lang$core$List$map,
+				_elm_lang$core$Tuple$mapFirst(_user$project$Util_ModuleName$toHashed),
+				_elm_lang$core$Dict$toList(aliasImports))));
 };
-var _user$project$Types_Imports$default = _elm_lang$core$Dict$empty;
+var _user$project$Types_Imports$encodeDirect = function (directImports) {
+	return _elm_lang$core$Json_Encode$object(
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$mapSecond(_user$project$Util_ModuleName$encoder),
+			_elm_lang$core$Dict$toList(directImports)));
+};
+var _user$project$Types_Imports$encoder = function (imports) {
+	return _elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'direct',
+				_1: _user$project$Types_Imports$encodeDirect(imports.direct)
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'aliases',
+					_1: _user$project$Types_Imports$encodeAliases(imports.aliases)
+				},
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$Types_Imports$addAlias = F3(
+	function (aliasName, realModuleName, imports) {
+		return _elm_lang$core$Native_Utils.update(
+			imports,
+			{
+				aliases: A3(_elm_lang$core$Dict$insert, aliasName, realModuleName, imports.aliases)
+			});
+	});
+var _user$project$Types_Imports$addDirect = F3(
+	function (funcName, moduleName, imports) {
+		return _elm_lang$core$Native_Utils.update(
+			imports,
+			{
+				direct: A3(_elm_lang$core$Dict$insert, funcName, moduleName, imports.direct)
+			});
+	});
+var _user$project$Types_Imports$default = {direct: _elm_lang$core$Dict$empty, aliases: _elm_lang$core$Dict$empty};
+var _user$project$Types_Imports$Imports = F2(
+	function (a, b) {
+		return {direct: a, aliases: b};
+	});
+var _user$project$Types_Imports$decoder = A3(
+	_elm_lang$core$Json_Decode$map2,
+	_user$project$Types_Imports$Imports,
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'direct',
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			_user$project$Types_Imports$toDirectsDict,
+			_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder))),
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'aliases',
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			_user$project$Types_Imports$toAliasesDict,
+			_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder))));
 
 var _user$project$Model_Imports$fromExposing = F3(
 	function (moduleName, _p0, imports) {
@@ -14902,20 +14977,11 @@ var _user$project$Model_Imports$fromExposing = F3(
 		var _p2 = _p1._1;
 		switch (_p2.ctor) {
 			case 'FunctionExpose':
-				return A2(
-					_user$project$Types_Imports$addEntry,
-					{ctor: '_Tuple2', _0: _p2._0, _1: moduleName},
-					imports);
+				return A3(_user$project$Types_Imports$addDirect, _p2._0, moduleName, imports);
 			case 'TypeOrAliasExpose':
-				return A2(
-					_user$project$Types_Imports$addEntry,
-					{ctor: '_Tuple2', _0: _p2._0, _1: moduleName},
-					imports);
+				return A3(_user$project$Types_Imports$addDirect, _p2._0, moduleName, imports);
 			case 'TypeExpose':
-				return A2(
-					_user$project$Types_Imports$addEntry,
-					{ctor: '_Tuple2', _0: _p2._0.name, _1: moduleName},
-					imports);
+				return A3(_user$project$Types_Imports$addDirect, _p2._0.name, moduleName, imports);
 			default:
 				return imports;
 		}
@@ -14943,7 +15009,7 @@ var _user$project$Model_Imports$collectFromDeclaration = F2(
 		}
 	});
 var _user$project$Model_Imports$collectFrom = function (importList) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Model_Imports$collectFromDeclaration, _elm_lang$core$Dict$empty, importList);
+	return A3(_elm_lang$core$List$foldl, _user$project$Model_Imports$collectFromDeclaration, _user$project$Types_Imports$default, importList);
 };
 var _user$project$Model_Imports$collectImports = function (parseResult) {
 	var _p5 = parseResult;
@@ -15083,7 +15149,7 @@ var _user$project$Model_References$addReference = F4(
 		var _p4 = {
 			ctor: '_Tuple2',
 			_0: A2(_elm_lang$core$Set$member, name, $arguments),
-			_1: A2(_user$project$Types_Imports$moduleNameForEntry, name, imports)
+			_1: A2(_user$project$Types_Imports$moduleNameForEntry, name, imports.direct)
 		};
 		_v4_2:
 		do {

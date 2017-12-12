@@ -1,6 +1,5 @@
 module Model.Imports exposing (collect)
 
-import Dict exposing (Dict)
 import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
@@ -36,7 +35,7 @@ collectImports parseResult =
 
 collectFrom : List Import -> Imports
 collectFrom importList =
-    List.foldl collectFromDeclaration Dict.empty importList
+    List.foldl collectFromDeclaration Types.Imports.default importList
 
 
 collectFromDeclaration : Import -> Imports -> Imports
@@ -63,13 +62,13 @@ fromExposing : ModuleName -> Ranged TopLevelExpose -> Imports -> Imports
 fromExposing moduleName ( range, topLevelExpose ) imports =
     case topLevelExpose of
         Elm.Syntax.Exposing.FunctionExpose name ->
-            Types.Imports.addEntry ( name, moduleName ) imports
+            Types.Imports.addDirect name moduleName imports
 
         Elm.Syntax.Exposing.TypeOrAliasExpose name ->
-            Types.Imports.addEntry ( name, moduleName ) imports
+            Types.Imports.addDirect name moduleName imports
 
         Elm.Syntax.Exposing.TypeExpose exposedType ->
-            Types.Imports.addEntry ( exposedType.name, moduleName ) imports
+            Types.Imports.addDirect exposedType.name moduleName imports
 
         _ ->
             imports

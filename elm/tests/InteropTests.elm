@@ -43,9 +43,15 @@ imports =
             \_ ->
                 let
                     orig =
-                        Dict.empty
-                            |> Dict.insert "a" [ "b", "c", "d" ]
-                            |> Dict.insert "e" [ "d", "f" ]
+                        Imports
+                            (Dict.empty
+                                |> Dict.insert "a" [ "b", "c", "d" ]
+                                |> Dict.insert "e" [ "d", "f" ]
+                            )
+                            (Dict.empty
+                                |> Dict.insert [ "g" ] [ "h", "i", "k" ]
+                                |> Dict.insert [ "l", "m" ] [ "n", "o" ]
+                            )
 
                     encoded =
                         Types.Imports.encoder orig
