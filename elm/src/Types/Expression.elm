@@ -1,13 +1,8 @@
-module Types.Expression exposing (Expression, decoder, elmEntrypointExpression, elmTestExpression, encoder, specialTypeToString, standardExpression, updateLineNumber)
+module Types.Expression exposing (Expression, decoder, elmEntrypointExpression, elmTestExpression, encoder, standardExpression, updateLineNumber)
 
 import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
-
-
-type SpecialType
-    = None
-    | ElmProgram
-    | ElmTest
+import Types.SpecialType exposing (SpecialType)
 
 
 type alias Expression =
@@ -18,17 +13,17 @@ type alias Expression =
 
 standardExpression : Int -> Expression
 standardExpression lineNumber =
-    Expression lineNumber None
+    Expression lineNumber Types.SpecialType.none
 
 
 elmEntrypointExpression : Int -> Expression
 elmEntrypointExpression lineNumber =
-    Expression lineNumber ElmProgram
+    Expression lineNumber Types.SpecialType.elmProgram
 
 
 elmTestExpression : Int -> Expression
 elmTestExpression lineNumber =
-    Expression lineNumber ElmTest
+    Expression lineNumber Types.SpecialType.elmTest
 
 
 updateLineNumber : Int -> Expression -> Expression
@@ -40,56 +35,12 @@ decoder : Decoder Expression
 decoder =
     JD.map2 Expression
         (JD.field "lineNumber" JD.int)
-        (JD.field "specialType" specialTypeDecoder)
+        (JD.field "specialType" Types.SpecialType.decoder)
 
 
 encoder : Expression -> Value
 encoder expression =
     JE.object
         [ ( "lineNumber", JE.int expression.lineNumber )
-        , ( "specialType", specialTypeEncoder expression.specialType )
+        , ( "specialType", Types.SpecialType.encoder expression.specialType )
         ]
-
-
-specialTypeDecoder : Decoder SpecialType
-specialTypeDecoder =
-    JD.string |> JD.andThen specialTypeFromString
-
-
-specialTypeEncoder : SpecialType -> Value
-specialTypeEncoder specialType =
-    case specialType of
-        None ->
-            JE.string "None"
-
-        ElmProgram ->
-            JE.string "ElmProgram"
-
-        ElmTest ->
-            JE.string "ElmTest"
-
-
-specialTypeFromString : String -> Decoder SpecialType
-specialTypeFromString string =
-    case string of
-        "ElmProgram" ->
-            JD.succeed ElmProgram
-
-        "ElmTest" ->
-            JD.succeed ElmTest
-
-        _ ->
-            JD.succeed None
-
-
-specialTypeToString : SpecialType -> String
-specialTypeToString specialType =
-    case specialType of
-        None ->
-            "None"
-
-        ElmProgram ->
-            "ElmProgram"
-
-        ElmTest ->
-            "ElmTest"

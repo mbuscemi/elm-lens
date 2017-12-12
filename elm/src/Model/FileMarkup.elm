@@ -9,6 +9,7 @@ import Types.FileData exposing (FileData)
 import Types.FileMarkup exposing (ExpressionData, FileMarkup)
 import Types.ProjectFileData exposing (ProjectFileData)
 import Types.Reference exposing (Reference)
+import Types.SpecialType
 
 
 type alias Model model =
@@ -68,7 +69,7 @@ makeExpression fileName projectFileData fileData funcName funcData list =
         fileIsExposed
         (numOccurencesInOwnReferences funcName fileData)
         (numOccurencesInOtherReferences fileIsExposed fileData.moduleName funcName fileName projectFileData)
-        (Types.Expression.specialTypeToString funcData.specialType)
+        (Types.SpecialType.toString funcData.specialType)
         :: list
 
 

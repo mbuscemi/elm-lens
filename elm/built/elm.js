@@ -14267,7 +14267,7 @@ var _user$project$Types_References$decoder = A3(
 		_elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder)),
 	A2(_elm_lang$core$Json_Decode$field, 'external', _user$project$Types_References$decodeExternalsDict));
 
-var _user$project$Types_Expression$specialTypeToString = function (specialType) {
+var _user$project$Types_SpecialType$toString = function (specialType) {
 	var _p0 = specialType;
 	switch (_p0.ctor) {
 		case 'None':
@@ -14278,7 +14278,7 @@ var _user$project$Types_Expression$specialTypeToString = function (specialType) 
 			return 'ElmTest';
 	}
 };
-var _user$project$Types_Expression$specialTypeEncoder = function (specialType) {
+var _user$project$Types_SpecialType$encoder = function (specialType) {
 	var _p1 = specialType;
 	switch (_p1.ctor) {
 		case 'None':
@@ -14289,6 +14289,25 @@ var _user$project$Types_Expression$specialTypeEncoder = function (specialType) {
 			return _elm_lang$core$Json_Encode$string('ElmTest');
 	}
 };
+var _user$project$Types_SpecialType$ElmTest = {ctor: 'ElmTest'};
+var _user$project$Types_SpecialType$elmTest = _user$project$Types_SpecialType$ElmTest;
+var _user$project$Types_SpecialType$ElmProgram = {ctor: 'ElmProgram'};
+var _user$project$Types_SpecialType$elmProgram = _user$project$Types_SpecialType$ElmProgram;
+var _user$project$Types_SpecialType$None = {ctor: 'None'};
+var _user$project$Types_SpecialType$none = _user$project$Types_SpecialType$None;
+var _user$project$Types_SpecialType$fromString = function (string) {
+	var _p2 = string;
+	switch (_p2) {
+		case 'ElmProgram':
+			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_SpecialType$ElmProgram);
+		case 'ElmTest':
+			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_SpecialType$ElmTest);
+		default:
+			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_SpecialType$None);
+	}
+};
+var _user$project$Types_SpecialType$decoder = A2(_elm_lang$core$Json_Decode$andThen, _user$project$Types_SpecialType$fromString, _elm_lang$core$Json_Decode$string);
+
 var _user$project$Types_Expression$encoder = function (expression) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -14303,7 +14322,7 @@ var _user$project$Types_Expression$encoder = function (expression) {
 				_0: {
 					ctor: '_Tuple2',
 					_0: 'specialType',
-					_1: _user$project$Types_Expression$specialTypeEncoder(expression.specialType)
+					_1: _user$project$Types_SpecialType$encoder(expression.specialType)
 				},
 				_1: {ctor: '[]'}
 			}
@@ -14319,35 +14338,20 @@ var _user$project$Types_Expression$Expression = F2(
 	function (a, b) {
 		return {lineNumber: a, specialType: b};
 	});
-var _user$project$Types_Expression$ElmTest = {ctor: 'ElmTest'};
-var _user$project$Types_Expression$elmTestExpression = function (lineNumber) {
-	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_Expression$ElmTest);
-};
-var _user$project$Types_Expression$ElmProgram = {ctor: 'ElmProgram'};
-var _user$project$Types_Expression$elmEntrypointExpression = function (lineNumber) {
-	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_Expression$ElmProgram);
-};
-var _user$project$Types_Expression$None = {ctor: 'None'};
 var _user$project$Types_Expression$standardExpression = function (lineNumber) {
-	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_Expression$None);
+	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_SpecialType$none);
 };
-var _user$project$Types_Expression$specialTypeFromString = function (string) {
-	var _p2 = string;
-	switch (_p2) {
-		case 'ElmProgram':
-			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_Expression$ElmProgram);
-		case 'ElmTest':
-			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_Expression$ElmTest);
-		default:
-			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_Expression$None);
-	}
+var _user$project$Types_Expression$elmEntrypointExpression = function (lineNumber) {
+	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_SpecialType$elmProgram);
 };
-var _user$project$Types_Expression$specialTypeDecoder = A2(_elm_lang$core$Json_Decode$andThen, _user$project$Types_Expression$specialTypeFromString, _elm_lang$core$Json_Decode$string);
+var _user$project$Types_Expression$elmTestExpression = function (lineNumber) {
+	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_SpecialType$elmTest);
+};
 var _user$project$Types_Expression$decoder = A3(
 	_elm_lang$core$Json_Decode$map2,
 	_user$project$Types_Expression$Expression,
 	A2(_elm_lang$core$Json_Decode$field, 'lineNumber', _elm_lang$core$Json_Decode$int),
-	A2(_elm_lang$core$Json_Decode$field, 'specialType', _user$project$Types_Expression$specialTypeDecoder));
+	A2(_elm_lang$core$Json_Decode$field, 'specialType', _user$project$Types_SpecialType$decoder));
 
 var _user$project$Types_TopLevelExpressions$expressionDictDecoder = _elm_lang$core$Json_Decode$dict(_user$project$Types_Expression$decoder);
 var _user$project$Types_TopLevelExpressions$expressionValue = function (dict) {
@@ -14577,7 +14581,7 @@ var _user$project$Model_FileMarkup$makeExpression = F6(
 				fileIsExposed,
 				A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData),
 				A5(_user$project$Model_FileMarkup$numOccurencesInOtherReferences, fileIsExposed, fileData.moduleName, funcName, fileName, projectFileData),
-				_user$project$Types_Expression$specialTypeToString(funcData.specialType)),
+				_user$project$Types_SpecialType$toString(funcData.specialType)),
 			_1: list
 		};
 	});
