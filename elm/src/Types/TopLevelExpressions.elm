@@ -1,13 +1,9 @@
-module Types.TopLevelExpressions exposing (TopLevelExpressions, Updater, decoder, default, encoder, updateFunctionLineNumber, updateTypeAliasLineNumber, updateTypeLineNumber)
+module Types.TopLevelExpressions exposing (TopLevelExpressions, decoder, default, encoder)
 
 import Dict exposing (Dict)
-import Json.Decode as JD exposing (Decoder, dict, field, int, map, map3)
-import Json.Encode as JE exposing (Value, int, list, object, string)
+import Json.Decode as JD exposing (Decoder)
+import Json.Encode as JE exposing (Value)
 import Types.Expression exposing (Expression)
-
-
-type alias Updater =
-    String -> Int -> TopLevelExpressions -> TopLevelExpressions
 
 
 type alias TopLevelExpressions =
@@ -25,21 +21,6 @@ default =
     }
 
 
-updateFunctionLineNumber : Updater
-updateFunctionLineNumber name lineNumber topLevelExpressions =
-    { topLevelExpressions | functions = updateLineNumberFor name lineNumber topLevelExpressions.functions }
-
-
-updateTypeLineNumber : Updater
-updateTypeLineNumber name lineNumber topLevelExpressions =
-    { topLevelExpressions | types = updateLineNumberFor name lineNumber topLevelExpressions.types }
-
-
-updateTypeAliasLineNumber : Updater
-updateTypeAliasLineNumber name lineNumber topLevelExpressions =
-    { topLevelExpressions | typeAliases = updateLineNumberFor name lineNumber topLevelExpressions.typeAliases }
-
-
 updateLineNumberFor : String -> Int -> Dict String Expression -> Dict String Expression
 updateLineNumberFor functionName lineNumber expressionDict =
     Dict.update
@@ -50,7 +31,7 @@ updateLineNumberFor functionName lineNumber expressionDict =
 
 encoder : TopLevelExpressions -> Value
 encoder expressions =
-    object
+    JE.object
         [ ( "functions", expressionValue expressions.functions )
         , ( "types", expressionValue expressions.types )
         , ( "typeAliases", expressionValue expressions.typeAliases )
@@ -59,24 +40,19 @@ encoder expressions =
 
 decoder : Decoder TopLevelExpressions
 decoder =
-    map3 TopLevelExpressions
-        (field "functions" expressionDictDecoder)
-        (field "types" expressionDictDecoder)
-        (field "typeAliases" expressionDictDecoder)
+    JD.map3 TopLevelExpressions
+        (JD.field "functions" expressionDictDecoder)
+        (JD.field "types" expressionDictDecoder)
+        (JD.field "typeAliases" expressionDictDecoder)
 
 
 expressionValue : Dict String Expression -> Value
 expressionValue dict =
     Dict.toList dict
-        |> List.map (\( name, exp ) -> ( name, object [ ( "lineNumber", JE.int exp.lineNumber ) ] ))
-        |> object
+        |> List.map (\( name, exp ) -> ( name, Types.Expression.encoder exp ))
+        |> JE.object
 
 
 expressionDictDecoder : Decoder (Dict String Expression)
 expressionDictDecoder =
-    dict expressionDecoder
-
-
-expressionDecoder : Decoder Expression
-expressionDecoder =
-    map Expression (field "lineNumber" JD.int)
+    JD.dict Types.Expression.decoder

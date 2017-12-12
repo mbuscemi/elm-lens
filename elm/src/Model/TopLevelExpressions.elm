@@ -5,8 +5,9 @@ import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Ranged exposing (Ranged)
+import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Types.Expression exposing (Expression)
-import Types.TopLevelExpressions exposing (TopLevelExpressions, Updater)
+import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias Model model =
@@ -53,8 +54,18 @@ collectExpsFromDeclaration declaration topLevelExpressions =
 
                         Nothing ->
                             function.declaration.name.range.start.row
+
+                isAnElmProgram =
+                    case function.signature of
+                        Just ( range, signature ) ->
+                            signature.typeAnnotation
+                                |> Tuple.second
+                                |> firstTypeIsProgram
+
+                        Nothing ->
+                            False
             in
-            { topLevelExpressions | functions = Dict.insert name (Expression lineNumber) topLevelExpressions.functions }
+            { topLevelExpressions | functions = Dict.insert name (Expression lineNumber isAnElmProgram) topLevelExpressions.functions }
 
         ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
             let
@@ -64,7 +75,7 @@ collectExpsFromDeclaration declaration topLevelExpressions =
                 lineNumber =
                     range.start.row
             in
-            { topLevelExpressions | typeAliases = Dict.insert name (Expression lineNumber) topLevelExpressions.typeAliases }
+            { topLevelExpressions | typeAliases = Dict.insert name (Expression lineNumber False) topLevelExpressions.typeAliases }
 
         ( range, Elm.Syntax.Declaration.TypeDecl type_ ) ->
             let
@@ -74,7 +85,17 @@ collectExpsFromDeclaration declaration topLevelExpressions =
                 lineNumber =
                     range.start.row
             in
-            { topLevelExpressions | types = Dict.insert name (Expression lineNumber) topLevelExpressions.types }
+            { topLevelExpressions | types = Dict.insert name (Expression lineNumber False) topLevelExpressions.types }
 
         _ ->
             topLevelExpressions
+
+
+firstTypeIsProgram : TypeAnnotation -> Bool
+firstTypeIsProgram typeAnnotation =
+    case typeAnnotation of
+        Elm.Syntax.TypeAnnotation.Typed _ name _ ->
+            name == "Program"
+
+        _ ->
+            False

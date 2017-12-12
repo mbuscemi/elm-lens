@@ -1,4 +1,4 @@
-module Types.FileMarkup exposing (ExpressionData, FileMarkup, default)
+module Types.FileMarkup exposing (ExpressionData, FileMarkup)
 
 
 type alias FileMarkup =
@@ -15,13 +15,5 @@ type alias ExpressionData =
     , isExposed : Bool
     , numInternalRefs : Int
     , numExternalRefs : Int
-    }
-
-
-default : FileMarkup
-default =
-    { fileName = ""
-    , projectIsProcessed = False
-    , fileIsReprocessing = False
-    , expressions = []
+    , isOfTypeProgram : Bool
     }
