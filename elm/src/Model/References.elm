@@ -49,10 +49,10 @@ collectRefsFromDeclaration imports declaration references =
         ( range, Elm.Syntax.Declaration.FuncDecl function ) ->
             List.foldl argumentsFromPattern Set.empty function.declaration.arguments
                 |> (\args -> refsInExpression args imports function.declaration.expression references)
-                |> appendSignatureReferences function
+                |> appendSignatureReferences imports function
 
         ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
-            refsInTypeAnnotation typeAlias.typeAnnotation references
+            refsInTypeAnnotation imports typeAlias.typeAnnotation references
 
         _ ->
             references
@@ -135,27 +135,27 @@ addReference name arguments imports references =
             Types.References.addInternal (Reference name) references
 
 
-refsInTypeAnnotation : Ranged TypeAnnotation -> References -> References
-refsInTypeAnnotation typeAnnotation references =
+refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> References
+refsInTypeAnnotation imports typeAnnotation references =
     case typeAnnotation of
         ( range, Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations ) ->
-            List.foldl refsInTypeAnnotation (Types.References.addInternal (Reference name) references) typeAnnotations
+            List.foldl (refsInTypeAnnotation imports) (addReference name Set.empty imports references) typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
-            List.foldl refsInTypeAnnotation references typeAnnotations
+            List.foldl (refsInTypeAnnotation imports) references typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.FunctionTypeAnnotation ta1 ta2 ) ->
-            List.foldl refsInTypeAnnotation references [ ta1, ta2 ]
+            List.foldl (refsInTypeAnnotation imports) references [ ta1, ta2 ]
 
         _ ->
             references
 
 
-appendSignatureReferences : Function -> References -> References
-appendSignatureReferences function references =
+appendSignatureReferences : Imports -> Function -> References -> References
+appendSignatureReferences imports function references =
     case function.signature of
         Just ( range, signature ) ->
-            refsInTypeAnnotation signature.typeAnnotation references
+            refsInTypeAnnotation imports signature.typeAnnotation references
 
         Nothing ->
             references

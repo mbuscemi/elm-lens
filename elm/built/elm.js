@@ -15119,87 +15119,88 @@ var _user$project$Model_References$letDeclarationExpressions = F2(
 			return {ctor: '::', _0: _p1._1._1, _1: expressions};
 		}
 	});
-var _user$project$Model_References$refsInTypeAnnotation = F2(
-	function (typeAnnotation, references) {
-		var _p2 = typeAnnotation;
-		_v2_3:
-		do {
-			if (_p2.ctor === '_Tuple2') {
-				switch (_p2._1.ctor) {
-					case 'Typed':
-						return A3(
-							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInTypeAnnotation,
-							A2(
-								_user$project$Types_References$addInternal,
-								_user$project$Types_Reference$Reference(_p2._1._1),
-								references),
-							_p2._1._2);
-					case 'Tupled':
-						return A3(_elm_lang$core$List$foldl, _user$project$Model_References$refsInTypeAnnotation, references, _p2._1._0);
-					case 'FunctionTypeAnnotation':
-						return A3(
-							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInTypeAnnotation,
-							references,
-							{
-								ctor: '::',
-								_0: _p2._1._0,
-								_1: {
-									ctor: '::',
-									_0: _p2._1._1,
-									_1: {ctor: '[]'}
-								}
-							});
-					default:
-						break _v2_3;
-				}
-			} else {
-				break _v2_3;
-			}
-		} while(false);
-		return references;
-	});
-var _user$project$Model_References$appendSignatureReferences = F2(
-	function ($function, references) {
-		var _p3 = $function.signature;
-		if (_p3.ctor === 'Just') {
-			return A2(_user$project$Model_References$refsInTypeAnnotation, _p3._0._1.typeAnnotation, references);
-		} else {
-			return references;
-		}
-	});
 var _user$project$Model_References$addReference = F4(
 	function (name, $arguments, imports, references) {
-		var _p4 = {
+		var _p2 = {
 			ctor: '_Tuple2',
 			_0: A2(_elm_lang$core$Set$member, name, $arguments),
 			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports)
 		};
-		_v4_2:
+		_v2_2:
 		do {
-			if (_p4.ctor === '_Tuple2') {
-				if (_p4._0 === true) {
+			if (_p2.ctor === '_Tuple2') {
+				if (_p2._0 === true) {
 					return references;
 				} else {
-					if (_p4._1.ctor === 'Just') {
+					if (_p2._1.ctor === 'Just') {
 						return A3(
 							_user$project$Types_References$addExternal,
-							_p4._1._0,
+							_p2._1._0,
 							_user$project$Types_Reference$Reference(name),
 							references);
 					} else {
-						break _v4_2;
+						break _v2_2;
 					}
 				}
 			} else {
-				break _v4_2;
+				break _v2_2;
 			}
 		} while(false);
 		return A2(
 			_user$project$Types_References$addInternal,
 			_user$project$Types_Reference$Reference(name),
 			references);
+	});
+var _user$project$Model_References$refsInTypeAnnotation = F3(
+	function (imports, typeAnnotation, references) {
+		var _p3 = typeAnnotation;
+		_v3_3:
+		do {
+			if (_p3.ctor === '_Tuple2') {
+				switch (_p3._1.ctor) {
+					case 'Typed':
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$Model_References$refsInTypeAnnotation(imports),
+							A4(_user$project$Model_References$addReference, _p3._1._1, _elm_lang$core$Set$empty, imports, references),
+							_p3._1._2);
+					case 'Tupled':
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$Model_References$refsInTypeAnnotation(imports),
+							references,
+							_p3._1._0);
+					case 'FunctionTypeAnnotation':
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$Model_References$refsInTypeAnnotation(imports),
+							references,
+							{
+								ctor: '::',
+								_0: _p3._1._0,
+								_1: {
+									ctor: '::',
+									_0: _p3._1._1,
+									_1: {ctor: '[]'}
+								}
+							});
+					default:
+						break _v3_3;
+				}
+			} else {
+				break _v3_3;
+			}
+		} while(false);
+		return references;
+	});
+var _user$project$Model_References$appendSignatureReferences = F3(
+	function (imports, $function, references) {
+		var _p4 = $function.signature;
+		if (_p4.ctor === 'Just') {
+			return A3(_user$project$Model_References$refsInTypeAnnotation, imports, _p4._0._1.typeAnnotation, references);
+		} else {
+			return references;
+		}
 	});
 var _user$project$Model_References$refsInExpression = F4(
 	function ($arguments, imports, expression, references) {
@@ -15364,15 +15365,16 @@ var _user$project$Model_References$collectRefsFromDeclaration = F3(
 				switch (_p9._1.ctor) {
 					case 'FuncDecl':
 						var _p10 = _p9._1._0;
-						return A2(
+						return A3(
 							_user$project$Model_References$appendSignatureReferences,
+							imports,
 							_p10,
 							function (args) {
 								return A4(_user$project$Model_References$refsInExpression, args, imports, _p10.declaration.expression, references);
 							}(
 								A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p10.declaration.$arguments)));
 					case 'AliasDecl':
-						return A2(_user$project$Model_References$refsInTypeAnnotation, _p9._1._0.typeAnnotation, references);
+						return A3(_user$project$Model_References$refsInTypeAnnotation, imports, _p9._1._0.typeAnnotation, references);
 					default:
 						break _v18_2;
 				}
