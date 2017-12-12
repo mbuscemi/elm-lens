@@ -14267,6 +14267,28 @@ var _user$project$Types_References$decoder = A3(
 		_elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder)),
 	A2(_elm_lang$core$Json_Decode$field, 'external', _user$project$Types_References$decodeExternalsDict));
 
+var _user$project$Types_Expression$specialTypeToString = function (specialType) {
+	var _p0 = specialType;
+	switch (_p0.ctor) {
+		case 'None':
+			return 'None';
+		case 'ElmProgram':
+			return 'ElmProgram';
+		default:
+			return 'ElmTest';
+	}
+};
+var _user$project$Types_Expression$specialTypeEncoder = function (specialType) {
+	var _p1 = specialType;
+	switch (_p1.ctor) {
+		case 'None':
+			return _elm_lang$core$Json_Encode$string('None');
+		case 'ElmProgram':
+			return _elm_lang$core$Json_Encode$string('ElmProgram');
+		default:
+			return _elm_lang$core$Json_Encode$string('ElmTest');
+	}
+};
 var _user$project$Types_Expression$encoder = function (expression) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -14280,8 +14302,8 @@ var _user$project$Types_Expression$encoder = function (expression) {
 				ctor: '::',
 				_0: {
 					ctor: '_Tuple2',
-					_0: 'isOfTypeProgram',
-					_1: _elm_lang$core$Json_Encode$bool(expression.isOfTypeProgram)
+					_0: 'specialType',
+					_1: _user$project$Types_Expression$specialTypeEncoder(expression.specialType)
 				},
 				_1: {ctor: '[]'}
 			}
@@ -14295,13 +14317,37 @@ var _user$project$Types_Expression$updateLineNumber = F2(
 	});
 var _user$project$Types_Expression$Expression = F2(
 	function (a, b) {
-		return {lineNumber: a, isOfTypeProgram: b};
+		return {lineNumber: a, specialType: b};
 	});
+var _user$project$Types_Expression$ElmTest = {ctor: 'ElmTest'};
+var _user$project$Types_Expression$elmTestExpression = function (lineNumber) {
+	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_Expression$ElmTest);
+};
+var _user$project$Types_Expression$ElmProgram = {ctor: 'ElmProgram'};
+var _user$project$Types_Expression$elmEntrypointExpression = function (lineNumber) {
+	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_Expression$ElmProgram);
+};
+var _user$project$Types_Expression$None = {ctor: 'None'};
+var _user$project$Types_Expression$standardExpression = function (lineNumber) {
+	return A2(_user$project$Types_Expression$Expression, lineNumber, _user$project$Types_Expression$None);
+};
+var _user$project$Types_Expression$specialTypeFromString = function (string) {
+	var _p2 = string;
+	switch (_p2) {
+		case 'ElmProgram':
+			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_Expression$ElmProgram);
+		case 'ElmTest':
+			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_Expression$ElmTest);
+		default:
+			return _elm_lang$core$Json_Decode$succeed(_user$project$Types_Expression$None);
+	}
+};
+var _user$project$Types_Expression$specialTypeDecoder = A2(_elm_lang$core$Json_Decode$andThen, _user$project$Types_Expression$specialTypeFromString, _elm_lang$core$Json_Decode$string);
 var _user$project$Types_Expression$decoder = A3(
 	_elm_lang$core$Json_Decode$map2,
 	_user$project$Types_Expression$Expression,
 	A2(_elm_lang$core$Json_Decode$field, 'lineNumber', _elm_lang$core$Json_Decode$int),
-	A2(_elm_lang$core$Json_Decode$field, 'isOfTypeProgram', _elm_lang$core$Json_Decode$bool));
+	A2(_elm_lang$core$Json_Decode$field, 'specialType', _user$project$Types_Expression$specialTypeDecoder));
 
 var _user$project$Types_TopLevelExpressions$expressionDictDecoder = _elm_lang$core$Json_Decode$dict(_user$project$Types_Expression$decoder);
 var _user$project$Types_TopLevelExpressions$expressionValue = function (dict) {
@@ -14473,7 +14519,7 @@ var _user$project$Types_FileMarkup$FileMarkup = F4(
 	});
 var _user$project$Types_FileMarkup$ExpressionData = F6(
 	function (a, b, c, d, e, f) {
-		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d, numExternalRefs: e, isOfTypeProgram: f};
+		return {name: a, lineNumber: b, isExposed: c, numInternalRefs: d, numExternalRefs: e, specialType: f};
 	});
 
 var _user$project$Model_FileMarkup$otherReferenceCounter = F6(
@@ -14531,7 +14577,7 @@ var _user$project$Model_FileMarkup$makeExpression = F6(
 				fileIsExposed,
 				A2(_user$project$Model_FileMarkup$numOccurencesInOwnReferences, funcName, fileData),
 				A5(_user$project$Model_FileMarkup$numOccurencesInOtherReferences, fileIsExposed, fileData.moduleName, funcName, fileName, projectFileData),
-				funcData.isOfTypeProgram),
+				_user$project$Types_Expression$specialTypeToString(funcData.specialType)),
 			_1: list
 		};
 	});
@@ -14589,7 +14635,7 @@ var _user$project$And_FileMarkup$markupForFile = _elm_lang$core$Native_Platform.
 			fileIsReprocessing: v.fileIsReprocessing,
 			expressions: _elm_lang$core$Native_List.toArray(v.expressions).map(
 				function (v) {
-					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs, numExternalRefs: v.numExternalRefs, isOfTypeProgram: v.isOfTypeProgram};
+					return {name: v.name, lineNumber: v.lineNumber, isExposed: v.isExposed, numInternalRefs: v.numInternalRefs, numExternalRefs: v.numExternalRefs, specialType: v.specialType};
 				})
 		};
 	});
@@ -15404,32 +15450,37 @@ var _user$project$Model_Report$make = F2(
 			A5(_user$project$Types_Report$Report, fileName, model.moduleName, model.topLevelExpressions, model.exposings, model.references));
 	});
 
-var _user$project$Model_TopLevelExpressions$firstTypeIsProgram = function (typeAnnotation) {
-	var _p0 = typeAnnotation;
-	if (_p0.ctor === 'Typed') {
-		return _elm_lang$core$Native_Utils.eq(_p0._1, 'Program');
-	} else {
-		return false;
-	}
-};
+var _user$project$Model_TopLevelExpressions$firstTypeIs = F2(
+	function (typeName, typeAnnotation) {
+		var _p0 = typeAnnotation;
+		if (_p0.ctor === 'Typed') {
+			return _elm_lang$core$Native_Utils.eq(_p0._1, typeName);
+		} else {
+			return false;
+		}
+	});
+var _user$project$Model_TopLevelExpressions$isA = F2(
+	function (typeName, $function) {
+		var _p1 = $function.signature;
+		if (_p1.ctor === 'Just') {
+			return A2(
+				_user$project$Model_TopLevelExpressions$firstTypeIs,
+				typeName,
+				_elm_lang$core$Tuple$second(_p1._0._1.typeAnnotation));
+		} else {
+			return false;
+		}
+	});
 var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
 	function (declaration, topLevelExpressions) {
-		var _p1 = declaration;
-		_v1_3:
+		var _p2 = declaration;
+		_v2_3:
 		do {
-			if (_p1.ctor === '_Tuple2') {
-				switch (_p1._1.ctor) {
+			if (_p2.ctor === '_Tuple2') {
+				switch (_p2._1.ctor) {
 					case 'FuncDecl':
-						var _p4 = _p1._1._0;
-						var isAnElmProgram = function () {
-							var _p2 = _p4.signature;
-							if (_p2.ctor === 'Just') {
-								return _user$project$Model_TopLevelExpressions$firstTypeIsProgram(
-									_elm_lang$core$Tuple$second(_p2._0._1.typeAnnotation));
-							} else {
-								return false;
-							}
-						}();
+						var _p4 = _p2._1._0;
+						var expressionBase = A2(_user$project$Model_TopLevelExpressions$isA, 'Program', _p4) ? _user$project$Types_Expression$elmEntrypointExpression : (A2(_user$project$Model_TopLevelExpressions$isA, 'Test', _p4) ? _user$project$Types_Expression$elmTestExpression : _user$project$Types_Expression$standardExpression);
 						var lineNumber = function () {
 							var _p3 = _p4.signature;
 							if (_p3.ctor === 'Just') {
@@ -15445,38 +15496,38 @@ var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
 								functions: A3(
 									_elm_lang$core$Dict$insert,
 									name,
-									A2(_user$project$Types_Expression$Expression, lineNumber, isAnElmProgram),
+									expressionBase(lineNumber),
 									topLevelExpressions.functions)
 							});
 					case 'AliasDecl':
-						var lineNumber = _p1._0.start.row;
-						var name = _p1._1._0.name;
+						var lineNumber = _p2._0.start.row;
+						var name = _p2._1._0.name;
 						return _elm_lang$core$Native_Utils.update(
 							topLevelExpressions,
 							{
 								typeAliases: A3(
 									_elm_lang$core$Dict$insert,
 									name,
-									A2(_user$project$Types_Expression$Expression, lineNumber, false),
+									_user$project$Types_Expression$standardExpression(lineNumber),
 									topLevelExpressions.typeAliases)
 							});
 					case 'TypeDecl':
-						var lineNumber = _p1._0.start.row;
-						var name = _p1._1._0.name;
+						var lineNumber = _p2._0.start.row;
+						var name = _p2._1._0.name;
 						return _elm_lang$core$Native_Utils.update(
 							topLevelExpressions,
 							{
 								types: A3(
 									_elm_lang$core$Dict$insert,
 									name,
-									A2(_user$project$Types_Expression$Expression, lineNumber, false),
+									_user$project$Types_Expression$standardExpression(lineNumber),
 									topLevelExpressions.types)
 							});
 					default:
-						break _v1_3;
+						break _v2_3;
 				}
 			} else {
-				break _v1_3;
+				break _v2_3;
 			}
 		} while(false);
 		return topLevelExpressions;

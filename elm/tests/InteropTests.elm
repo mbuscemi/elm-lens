@@ -137,9 +137,9 @@ report =
                             "file name"
                             [ "module", "name" ]
                             (TopLevelExpressions
-                                (Dict.singleton "a" (Expression 123 True))
-                                (Dict.singleton "b" (Expression 234 False))
-                                (Dict.singleton "c" (Expression 345 False))
+                                (Dict.singleton "a" (Types.Expression.standardExpression 123))
+                                (Dict.singleton "b" (Types.Expression.standardExpression 234))
+                                (Dict.singleton "c" (Types.Expression.standardExpression 345))
                             )
                             (Exposings
                                 (Set.singleton "ur")
@@ -172,9 +172,9 @@ topLevelExpressions =
                 let
                     orig =
                         TopLevelExpressions
-                            (Dict.singleton "vdsohjn" (Expression 329 False))
-                            (Dict.singleton "hjoiash" (Expression 672 True))
-                            (Dict.singleton "fdoktjr" (Expression 784 False))
+                            (Dict.singleton "vdsohjn" (Types.Expression.standardExpression 329))
+                            (Dict.singleton "hjoiash" (Types.Expression.standardExpression 672))
+                            (Dict.singleton "fdoktjr" (Types.Expression.standardExpression 784))
 
                     encoded =
                         Types.TopLevelExpressions.encoder orig

@@ -1,6 +1,7 @@
 @import "ui-variables";
 
 @lens-font-size: @font-size - 1px;
+@warning-color: #ed3939;
 
 .fa {
     font-family: 'FontAwesome';
@@ -26,10 +27,14 @@
 }
 
 .elm-lens-marker .external-refs.warning {
-    color: #ed3939;
+    color: @warning-color;
+}
+
+.elm-lens-marker .warning-icon,
+.elm-lens-marker .test-icon {
+    padding-right: 8px;
 }
 
 .elm-lens-marker .warning-icon {
-    color: #ed3939;
-    padding-right: 10px;
+    color: @warning-color;
 }

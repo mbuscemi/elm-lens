@@ -15,5 +15,5 @@ type alias ExpressionData =
     , isExposed : Bool
     , numInternalRefs : Int
     , numExternalRefs : Int
-    , isOfTypeProgram : Bool
+    , specialType : String
     }

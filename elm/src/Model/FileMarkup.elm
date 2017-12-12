@@ -68,7 +68,7 @@ makeExpression fileName projectFileData fileData funcName funcData list =
         fileIsExposed
         (numOccurencesInOwnReferences funcName fileData)
         (numOccurencesInOtherReferences fileIsExposed fileData.moduleName funcName fileName projectFileData)
-        funcData.isOfTypeProgram
+        (Types.Expression.specialTypeToString funcData.specialType)
         :: list
 
 
