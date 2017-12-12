@@ -110,7 +110,7 @@ refsInExpression arguments imports expression references =
             List.foldl (refsInExpression arguments imports) references exps
 
         ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
-            Types.References.addExternal moduleName (Reference name) references
+            Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name) references
 
         ( range, Elm.Syntax.Expression.RecordAccessFunction name ) ->
             addReference name arguments imports references
@@ -124,7 +124,7 @@ refsInExpression arguments imports expression references =
 
 addReference : String -> Set String -> Imports -> References -> References
 addReference name arguments imports references =
-    case ( Set.member name arguments, Types.Imports.moduleNameForEntry name imports.direct ) of
+    case ( Set.member name arguments, Types.Imports.moduleNameForDirectEntry name imports ) of
         ( True, _ ) ->
             references
 

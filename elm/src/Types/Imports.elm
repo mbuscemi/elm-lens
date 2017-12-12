@@ -1,4 +1,4 @@
-module Types.Imports exposing (Imports, addAlias, addDirect, decoder, default, encoder, moduleNameForEntry)
+module Types.Imports exposing (Imports, addAlias, addDirect, decoder, default, encoder, moduleNameForDirectEntry, unaliasedModuleName)
 
 import Dict exposing (Dict)
 import Elm.Syntax.Base exposing (ModuleName)
@@ -28,6 +28,21 @@ addDirect funcName moduleName imports =
 addAlias : ModuleName -> ModuleName -> Imports -> Imports
 addAlias aliasName realModuleName imports =
     { imports | aliases = Dict.insert aliasName realModuleName imports.aliases }
+
+
+moduleNameForDirectEntry : String -> Imports -> Maybe ModuleName
+moduleNameForDirectEntry name imports =
+    Dict.get name imports.direct
+
+
+unaliasedModuleName : ModuleName -> Imports -> ModuleName
+unaliasedModuleName moduleName imports =
+    case Dict.get moduleName imports.aliases of
+        Just realModuleName ->
+            realModuleName
+
+        Nothing ->
+            moduleName
 
 
 encoder : Imports -> Value
@@ -78,8 +93,3 @@ toAliasesDict pairs =
 addAliasEntry : ( String, ModuleName ) -> Dict ModuleName ModuleName -> Dict ModuleName ModuleName
 addAliasEntry ( encodedAlias, realModuleName ) aliasImports =
     Dict.insert (Util.ModuleName.fromHashed encodedAlias) realModuleName aliasImports
-
-
-moduleNameForEntry : String -> Dict String ModuleName -> Maybe ModuleName
-moduleNameForEntry name directImports =
-    Dict.get name directImports

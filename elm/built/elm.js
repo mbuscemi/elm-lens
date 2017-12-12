@@ -14871,10 +14871,6 @@ var _user$project$Model_Exposings$collect = function (model) {
 		});
 };
 
-var _user$project$Types_Imports$moduleNameForEntry = F2(
-	function (name, directImports) {
-		return A2(_elm_lang$core$Dict$get, name, directImports);
-	});
 var _user$project$Types_Imports$addAliasEntry = F2(
 	function (_p0, aliasImports) {
 		var _p1 = _p0;
@@ -14932,6 +14928,19 @@ var _user$project$Types_Imports$encoder = function (imports) {
 			}
 		});
 };
+var _user$project$Types_Imports$unaliasedModuleName = F2(
+	function (moduleName, imports) {
+		var _p4 = A2(_elm_lang$core$Dict$get, moduleName, imports.aliases);
+		if (_p4.ctor === 'Just') {
+			return _p4._0;
+		} else {
+			return moduleName;
+		}
+	});
+var _user$project$Types_Imports$moduleNameForDirectEntry = F2(
+	function (name, imports) {
+		return A2(_elm_lang$core$Dict$get, name, imports.direct);
+	});
 var _user$project$Types_Imports$addAlias = F3(
 	function (aliasName, realModuleName, imports) {
 		return _elm_lang$core$Native_Utils.update(
@@ -14999,7 +15008,7 @@ var _user$project$Model_Imports$collectFromExposing = F3(
 				_p3._0);
 		}
 	});
-var _user$project$Model_Imports$collectFromDeclaration = F2(
+var _user$project$Model_Imports$collectFromExposings = F2(
 	function (import_, imports) {
 		var _p4 = import_.exposingList;
 		if (_p4.ctor === 'Just') {
@@ -15008,17 +15017,33 @@ var _user$project$Model_Imports$collectFromDeclaration = F2(
 			return imports;
 		}
 	});
+var _user$project$Model_Imports$collectFromAliases = F2(
+	function (import_, imports) {
+		var _p5 = import_.moduleAlias;
+		if (_p5.ctor === 'Just') {
+			return A3(_user$project$Types_Imports$addAlias, _p5._0, import_.moduleName, imports);
+		} else {
+			return imports;
+		}
+	});
+var _user$project$Model_Imports$collectFromAll = F2(
+	function (import_, imports) {
+		return A2(
+			_user$project$Model_Imports$collectFromExposings,
+			import_,
+			A2(_user$project$Model_Imports$collectFromAliases, import_, imports));
+	});
 var _user$project$Model_Imports$collectFrom = function (importList) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Model_Imports$collectFromDeclaration, _user$project$Types_Imports$default, importList);
+	return A3(_elm_lang$core$List$foldl, _user$project$Model_Imports$collectFromAll, _user$project$Types_Imports$default, importList);
 };
 var _user$project$Model_Imports$collectImports = function (parseResult) {
-	var _p5 = parseResult;
-	if (_p5.ctor === 'Ok') {
+	var _p6 = parseResult;
+	if (_p6.ctor === 'Ok') {
 		return _user$project$Model_Imports$collectFrom(
 			function (_) {
 				return _.imports;
 			}(
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p5._0)));
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p6._0)));
 	} else {
 		return _user$project$Types_Imports$default;
 	}
@@ -15149,7 +15174,7 @@ var _user$project$Model_References$addReference = F4(
 		var _p4 = {
 			ctor: '_Tuple2',
 			_0: A2(_elm_lang$core$Set$member, name, $arguments),
-			_1: A2(_user$project$Types_Imports$moduleNameForEntry, name, imports.direct)
+			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports)
 		};
 		_v4_2:
 		do {
@@ -15309,7 +15334,7 @@ var _user$project$Model_References$refsInExpression = F4(
 						case 'QualifiedExpr':
 							return A3(
 								_user$project$Types_References$addExternal,
-								_p5._1._0,
+								A2(_user$project$Types_Imports$unaliasedModuleName, _p5._1._0, imports),
 								_user$project$Types_Reference$Reference(_p5._1._1),
 								references);
 						case 'RecordAccessFunction':
