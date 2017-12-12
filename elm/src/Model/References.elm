@@ -144,11 +144,22 @@ refsInTypeAnnotation imports typeAnnotation references =
         ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
             List.foldl (refsInTypeAnnotation imports) references typeAnnotations
 
+        ( range, Elm.Syntax.TypeAnnotation.Record recordFields ) ->
+            List.foldl (refsInRecordField imports) references recordFields
+
+        ( range, Elm.Syntax.TypeAnnotation.GenericRecord _ recordFields ) ->
+            List.foldl (refsInRecordField imports) references recordFields
+
         ( range, Elm.Syntax.TypeAnnotation.FunctionTypeAnnotation ta1 ta2 ) ->
             List.foldl (refsInTypeAnnotation imports) references [ ta1, ta2 ]
 
         _ ->
             references
+
+
+refsInRecordField : Imports -> ( String, Ranged TypeAnnotation ) -> References -> References
+refsInRecordField imports ( string, typeAnnotation ) references =
+    refsInTypeAnnotation imports typeAnnotation references
 
 
 appendSignatureReferences : Imports -> Function -> References -> References
