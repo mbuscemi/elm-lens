@@ -35,11 +35,27 @@ collectImports parseResult =
 
 collectFrom : List Import -> Imports
 collectFrom importList =
-    List.foldl collectFromDeclaration Types.Imports.default importList
+    List.foldl collectFromAll Types.Imports.default importList
 
 
-collectFromDeclaration : Import -> Imports -> Imports
-collectFromDeclaration import_ imports =
+collectFromAll : Import -> Imports -> Imports
+collectFromAll import_ imports =
+    collectFromAliases import_ imports
+        |> collectFromExposings import_
+
+
+collectFromAliases : Import -> Imports -> Imports
+collectFromAliases import_ imports =
+    case import_.moduleAlias of
+        Just moduleAlias ->
+            Types.Imports.addAlias moduleAlias import_.moduleName imports
+
+        Nothing ->
+            imports
+
+
+collectFromExposings : Import -> Imports -> Imports
+collectFromExposings import_ imports =
     case import_.exposingList of
         Just exposing_ ->
             collectFromExposing import_.moduleName exposing_ imports
