@@ -92,14 +92,17 @@ refsInExpression arguments imports expression references =
         ( range, Elm.Syntax.Expression.CaseExpression caseBlock ) ->
             let
                 allArguments =
-                    Set.union arguments (additionalArguments (List.map Tuple.first caseBlock.cases))
+                    List.map Tuple.first caseBlock.cases
+                        |> additionalArguments
+                        |> Set.union arguments
             in
             List.foldl (refsInExpression allArguments imports) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
 
         ( range, Elm.Syntax.Expression.LambdaExpression lambda ) ->
             let
                 allArguments =
-                    Set.union arguments (additionalArguments lambda.args)
+                    additionalArguments lambda.args
+                        |> Set.union arguments
             in
             refsInExpression allArguments imports lambda.expression references
 
