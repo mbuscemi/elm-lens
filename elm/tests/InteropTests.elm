@@ -4,7 +4,7 @@ import Dict
 import Expect exposing (Expectation)
 import Json.Decode exposing (decodeValue)
 import Set
-import Test exposing (Test, describe, only, test)
+import Test exposing (Test, describe, test)
 import Types.Exposings exposing (Exposings)
 import Types.Expression exposing (Expression)
 import Types.Imports exposing (Imports)
