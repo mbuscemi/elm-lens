@@ -1,7 +1,6 @@
 module ElmFile.Exposings exposing (fromFile)
 
 import Dict
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
 import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Module exposing (Module(EffectModule, NormalModule, PortModule))
@@ -9,14 +8,6 @@ import Elm.Syntax.Ranged exposing (Ranged)
 import Set exposing (Set)
 import Types.Exposings exposing (Exposings)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
-
-
-type alias Model model =
-    { model
-        | fileAST : Result (List String) RawFile
-        , exposings : Exposings
-        , topLevelExpressions : TopLevelExpressions
-    }
 
 
 fromFile : TopLevelExpressions -> File -> Exposings

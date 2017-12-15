@@ -1,19 +1,11 @@
 module ElmFile.Imports exposing (fromFile)
 
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
 import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Module exposing (Import)
 import Elm.Syntax.Ranged exposing (Ranged)
 import Types.Imports exposing (Imports)
-
-
-type alias Model model =
-    { model
-        | fileAST : Result (List String) RawFile
-        , imports : Imports
-    }
 
 
 fromFile : File -> Imports

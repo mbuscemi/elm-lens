@@ -1,16 +1,8 @@
 module ElmFile.ModuleName exposing (fromFile)
 
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Module exposing (Module)
-
-
-type alias Model model =
-    { model
-        | fileAST : Result (List String) RawFile
-        , moduleName : ModuleName
-    }
 
 
 fromFile : File -> ModuleName

@@ -1,6 +1,5 @@
 module ElmFile.References exposing (fromFile)
 
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
 import Elm.Syntax.File exposing (File)
@@ -11,14 +10,6 @@ import Set exposing (Set)
 import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
 import Types.References exposing (References)
-
-
-type alias Model model =
-    { model
-        | fileAST : Result (List String) RawFile
-        , imports : Imports
-        , references : References
-    }
 
 
 fromFile : Imports -> File -> References

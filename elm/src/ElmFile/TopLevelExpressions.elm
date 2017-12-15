@@ -1,7 +1,6 @@
 module ElmFile.TopLevelExpressions exposing (fromFile)
 
 import Dict exposing (Dict)
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Function)
 import Elm.Syntax.File exposing (File)
@@ -9,13 +8,6 @@ import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Types.Expression exposing (Expression)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
-
-
-type alias Model model =
-    { model
-        | fileAST : Result (List String) RawFile
-        , topLevelExpressions : TopLevelExpressions
-    }
 
 
 fromFile : File -> TopLevelExpressions
