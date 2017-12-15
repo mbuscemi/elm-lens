@@ -1,4 +1,4 @@
-module Types.Expression exposing (Expression, decoder, elmEntrypointExpression, elmTestExpression, encoder, standardExpression, updateLineNumber)
+module Types.Expression exposing (Expression, decoder, elmEntrypointExpression, elmTestExpression, encoder, standardExpression)
 
 import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
@@ -24,11 +24,6 @@ elmEntrypointExpression lineNumber =
 elmTestExpression : Int -> Expression
 elmTestExpression lineNumber =
     Expression lineNumber Types.SpecialType.elmTest
-
-
-updateLineNumber : Int -> Expression -> Expression
-updateLineNumber lineNumber expression =
-    { expression | lineNumber = lineNumber }
 
 
 decoder : Decoder Expression

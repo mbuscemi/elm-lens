@@ -14328,12 +14328,6 @@ var _user$project$Types_Expression$encoder = function (expression) {
 			}
 		});
 };
-var _user$project$Types_Expression$updateLineNumber = F2(
-	function (lineNumber, expression) {
-		return _elm_lang$core$Native_Utils.update(
-			expression,
-			{lineNumber: lineNumber});
-	});
 var _user$project$Types_Expression$Expression = F2(
 	function (a, b) {
 		return {lineNumber: a, specialType: b};
@@ -14396,15 +14390,6 @@ var _user$project$Types_TopLevelExpressions$encoder = function (expressions) {
 			}
 		});
 };
-var _user$project$Types_TopLevelExpressions$updateLineNumberFor = F3(
-	function (functionName, lineNumber, expressionDict) {
-		return A3(
-			_elm_lang$core$Dict$update,
-			functionName,
-			_elm_lang$core$Maybe$map(
-				_user$project$Types_Expression$updateLineNumber(lineNumber)),
-			expressionDict);
-	});
 var _user$project$Types_TopLevelExpressions$default = {functions: _elm_lang$core$Dict$empty, types: _elm_lang$core$Dict$empty, typeAliases: _elm_lang$core$Dict$empty};
 var _user$project$Types_TopLevelExpressions$TopLevelExpressions = F3(
 	function (a, b, c) {

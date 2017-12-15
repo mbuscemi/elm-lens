@@ -21,14 +21,6 @@ default =
     }
 
 
-updateLineNumberFor : String -> Int -> Dict String Expression -> Dict String Expression
-updateLineNumberFor functionName lineNumber expressionDict =
-    Dict.update
-        functionName
-        (Maybe.map <| Types.Expression.updateLineNumber lineNumber)
-        expressionDict
-
-
 encoder : TopLevelExpressions -> Value
 encoder expressions =
     JE.object
