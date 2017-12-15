@@ -1,30 +1,13 @@
 port module Worker exposing (main)
 
 import And
-import Elm.RawFile exposing (RawFile)
-import Elm.Syntax.Base exposing (ModuleName)
+import ElmFile exposing (ElmFile)
 import Json.Decode exposing (Value)
-import Model.AST
-import Model.Exposings
-import Model.Imports
-import Model.ModuleName
-import Model.References
 import Model.Report
-import Model.TopLevelExpressions
-import Types.Exposings exposing (Exposings)
-import Types.Imports exposing (Imports)
-import Types.References exposing (References)
-import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
 type alias Model =
-    { fileAST : Result (List String) RawFile
-    , moduleName : ModuleName
-    , imports : Imports
-    , topLevelExpressions : TopLevelExpressions
-    , exposings : Exposings
-    , references : References
-    }
+    ElmFile
 
 
 type Message
@@ -42,28 +25,14 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { fileAST = Err []
-    , moduleName = []
-    , imports = Types.Imports.default
-    , topLevelExpressions = Types.TopLevelExpressions.default
-    , exposings = Types.Exposings.default
-    , references = Types.References.default
-    }
-        |> And.doNothing
+    ElmFile.default |> And.doNothing
 
 
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         ProcessFile ( fileName, text ) ->
-            model
-                |> Model.AST.buildFrom text
-                |> Model.ModuleName.record
-                |> Model.Imports.collect
-                |> Model.TopLevelExpressions.collect
-                |> Model.Exposings.collect
-                |> Model.References.collect
-                |> andSendReport fileName
+            ElmFile.fromString fileName text |> andSendReport fileName
 
 
 subscriptions : Model -> Sub Message

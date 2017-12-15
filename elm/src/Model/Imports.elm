@@ -1,9 +1,9 @@
-module Model.Imports exposing (collect)
+module Model.Imports exposing (fromFile)
 
-import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
+import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Module exposing (Import)
 import Elm.Syntax.Ranged exposing (Ranged)
 import Types.Imports exposing (Imports)
@@ -16,21 +16,11 @@ type alias Model model =
     }
 
 
-collect : Model model -> Model model
-collect model =
-    { model | imports = collectImports model.fileAST }
-
-
-collectImports : Result (List String) RawFile -> Imports
-collectImports parseResult =
-    case parseResult of
-        Ok rawFile ->
-            process init rawFile
-                |> .imports
-                |> collectFrom
-
-        Err errors ->
-            Types.Imports.default
+fromFile : File -> Imports
+fromFile file =
+    file
+        |> .imports
+        |> collectFrom
 
 
 collectFrom : List Import -> Imports

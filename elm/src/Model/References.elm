@@ -1,9 +1,9 @@
-module Model.References exposing (collect)
+module Model.References exposing (fromFile)
 
-import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
+import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Pattern exposing (Pattern)
 import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
@@ -21,21 +21,11 @@ type alias Model model =
     }
 
 
-collect : Model model -> Model model
-collect model =
-    { model | references = collectReferences model.imports model.fileAST }
-
-
-collectReferences : Imports -> Result (List String) RawFile -> References
-collectReferences imports parseResult =
-    case parseResult of
-        Ok rawFile ->
-            process init rawFile
-                |> .declarations
-                |> collectRefsFrom imports
-
-        Err errors ->
-            Types.References.default
+fromFile : Imports -> File -> References
+fromFile imports file =
+    file
+        |> .declarations
+        |> collectRefsFrom imports
 
 
 collectRefsFrom : Imports -> List (Ranged Declaration) -> References

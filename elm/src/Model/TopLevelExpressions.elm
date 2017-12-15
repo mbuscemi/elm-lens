@@ -1,10 +1,10 @@
-module Model.TopLevelExpressions exposing (collect)
+module Model.TopLevelExpressions exposing (fromFile)
 
 import Dict exposing (Dict)
-import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Function)
+import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Types.Expression exposing (Expression)
@@ -18,21 +18,11 @@ type alias Model model =
     }
 
 
-collect : Model model -> Model model
-collect model =
-    { model | topLevelExpressions = collectExpressions model.fileAST }
-
-
-collectExpressions : Result (List String) RawFile -> TopLevelExpressions
-collectExpressions parseResult =
-    case parseResult of
-        Ok rawFile ->
-            process init rawFile
-                |> .declarations
-                |> collectExpsFrom
-
-        Err errors ->
-            Types.TopLevelExpressions.default
+fromFile : File -> TopLevelExpressions
+fromFile file =
+    file
+        |> .declarations
+        |> collectExpsFrom
 
 
 collectExpsFrom : List (Ranged Declaration) -> TopLevelExpressions

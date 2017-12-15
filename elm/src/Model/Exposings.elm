@@ -1,9 +1,9 @@
-module Model.Exposings exposing (collect)
+module Model.Exposings exposing (fromFile)
 
 import Dict
-import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
+import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Module exposing (Module(EffectModule, NormalModule, PortModule))
 import Elm.Syntax.Ranged exposing (Ranged)
 import Set exposing (Set)
@@ -19,22 +19,12 @@ type alias Model model =
     }
 
 
-collect : Model model -> Model model
-collect model =
-    { model | exposings = collectExposings model.topLevelExpressions model.fileAST }
-
-
-collectExposings : TopLevelExpressions -> Result (List String) RawFile -> Exposings
-collectExposings topLevelExpressions parseResult =
-    case parseResult of
-        Ok rawFile ->
-            process init rawFile
-                |> .moduleDefinition
-                |> exposingListFromModule
-                |> gatherExposings topLevelExpressions
-
-        Err errors ->
-            Types.Exposings.default
+fromFile : TopLevelExpressions -> File -> Exposings
+fromFile topLevelExpressions file =
+    file
+        |> .moduleDefinition
+        |> exposingListFromModule
+        |> gatherExposings topLevelExpressions
 
 
 exposingListFromModule : Module -> Exposing (Ranged TopLevelExpose)

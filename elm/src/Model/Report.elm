@@ -1,27 +1,16 @@
 module Model.Report exposing (make)
 
+import ElmFile exposing (ElmFile)
 import Json.Encode exposing (Value, list, object, string)
-import Types.Exposings exposing (Exposings)
-import Types.References exposing (References)
 import Types.Report exposing (Report)
-import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
-type alias Model model =
-    { model
-        | moduleName : List String
-        , topLevelExpressions : TopLevelExpressions
-        , exposings : Exposings
-        , references : References
-    }
-
-
-make : String -> Model model -> Value
-make fileName model =
+make : String -> ElmFile -> Value
+make fileName elmFile =
     Report
         fileName
-        model.moduleName
-        model.topLevelExpressions
-        model.exposings
-        model.references
+        elmFile.moduleName
+        elmFile.topLevelExpressions
+        elmFile.exposings
+        elmFile.references
         |> Types.Report.encoder

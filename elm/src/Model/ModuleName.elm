@@ -1,8 +1,8 @@
-module Model.ModuleName exposing (record)
+module Model.ModuleName exposing (fromFile)
 
-import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
+import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Module exposing (Module)
 
 
@@ -13,21 +13,11 @@ type alias Model model =
     }
 
 
-record : Model model -> Model model
-record model =
-    { model | moduleName = recordModuleName model.fileAST }
-
-
-recordModuleName : Result (List String) RawFile -> ModuleName
-recordModuleName parseResult =
-    case parseResult of
-        Ok rawFile ->
-            process init rawFile
-                |> .moduleDefinition
-                |> toModuleName
-
-        Err errors ->
-            []
+fromFile : File -> ModuleName
+fromFile file =
+    file
+        |> .moduleDefinition
+        |> toModuleName
 
 
 toModuleName : Module -> ModuleName
