@@ -1,7 +1,7 @@
 module InteropTests exposing (exposings, imports, reference, references, report, topLevelExpressions)
 
 import Dict
-import Expect exposing (Expectation)
+import Expect
 import Json.Decode exposing (decodeValue)
 import Set
 import Test exposing (Test, describe, test)
