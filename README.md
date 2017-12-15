@@ -25,13 +25,20 @@ counts are also displayed.
 Elm Lens runs parallel background processes in order to gather its data, so you aren't blocked from working on your project
 while Elm Lens does its work.
 
+### Unused Local Functions
+
+![Unused Exposed Function Warning](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/local-no-references-warning.png?raw=true)
+
+If a local function does not have any references in its file, Elm Lens highlights the internal references field
+bright red and displays a warning icon. You can clear the warning by using the function, or by simply deleting it.
+
 ### Unused Exposed Functions
 
 ![Unused Exposed Function Warning](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/exposed-no-references-warning.png?raw=true)
 
-If a function is exposed, but no other file in the system contains a reference to it, Elm Lens highlights the external
-references field bright red and displays a warning icon. You can clear the warning by removing the function from the
-module's `exposing` declaration, by referencing it in another module, or by simply deleting it.
+If an exposed function has no references in any Elm file in the current active project, Elm Lens turns the
+external references field red and displays a warning icon. You can clear the warning by removing the function from the
+module's `exposing` declaration, by referencing it in another module, or by deleting it.
 
 ### Platform.Program
 
