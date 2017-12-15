@@ -1,4 +1,4 @@
-module Model.References exposing (fromFile)
+module ElmFile.References exposing (fromFile)
 
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Declaration exposing (Declaration)

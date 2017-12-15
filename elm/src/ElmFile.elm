@@ -5,11 +5,11 @@ import Elm.Processing exposing (init, process)
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.File exposing (File)
-import Model.Exposings
-import Model.Imports
-import Model.ModuleName
-import Model.References
-import Model.TopLevelExpressions
+import ElmFile.Exposings
+import ElmFile.Imports
+import ElmFile.ModuleName
+import ElmFile.References
+import ElmFile.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
 import Types.Imports exposing (Imports)
 import Types.References exposing (References)
@@ -56,14 +56,14 @@ fromFile : File -> ElmFile
 fromFile file =
     let
         imports =
-            Model.Imports.fromFile file
+            ElmFile.Imports.fromFile file
 
         topLevelExpressions =
-            Model.TopLevelExpressions.fromFile file
+            ElmFile.TopLevelExpressions.fromFile file
     in
-    { moduleName = Model.ModuleName.fromFile file
+    { moduleName = ElmFile.ModuleName.fromFile file
     , imports = imports
     , topLevelExpressions = topLevelExpressions
-    , exposings = Model.Exposings.fromFile topLevelExpressions file
-    , references = Model.References.fromFile imports file
+    , exposings = ElmFile.Exposings.fromFile topLevelExpressions file
+    , references = ElmFile.References.fromFile imports file
     }

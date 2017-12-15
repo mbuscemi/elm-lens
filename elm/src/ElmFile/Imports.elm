@@ -1,4 +1,4 @@
-module Model.Imports exposing (fromFile)
+module ElmFile.Imports exposing (fromFile)
 
 import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)

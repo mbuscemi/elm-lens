@@ -14698,7 +14698,7 @@ var _user$project$And_FileMarkup$transmit = function (model) {
 		_user$project$And_FileMarkup$lifecycleBasedtransmission(model));
 };
 
-var _user$project$Model_Exposings$processExposing = F2(
+var _user$project$ElmFile_Exposings$processExposing = F2(
 	function (topLevelExpose, exposings) {
 		var _p0 = topLevelExpose;
 		switch (_p0._1.ctor) {
@@ -14720,7 +14720,7 @@ var _user$project$Model_Exposings$processExposing = F2(
 				return exposings;
 		}
 	});
-var _user$project$Model_Exposings$useAllTopLevelExpressions = function (topLevelExpressions) {
+var _user$project$ElmFile_Exposings$useAllTopLevelExpressions = function (topLevelExpressions) {
 	return {
 		functions: _elm_lang$core$Set$fromList(
 			_elm_lang$core$Dict$keys(topLevelExpressions.functions)),
@@ -14729,16 +14729,16 @@ var _user$project$Model_Exposings$useAllTopLevelExpressions = function (topLevel
 				A2(_elm_lang$core$Dict$union, topLevelExpressions.types, topLevelExpressions.typeAliases)))
 	};
 };
-var _user$project$Model_Exposings$gatherExposings = F2(
+var _user$project$ElmFile_Exposings$gatherExposings = F2(
 	function (topLevelExpressions, topLevelExposeExposing) {
 		var _p1 = topLevelExposeExposing;
 		if (_p1.ctor === 'All') {
-			return _user$project$Model_Exposings$useAllTopLevelExpressions(topLevelExpressions);
+			return _user$project$ElmFile_Exposings$useAllTopLevelExpressions(topLevelExpressions);
 		} else {
-			return A3(_elm_lang$core$List$foldl, _user$project$Model_Exposings$processExposing, _user$project$Types_Exposings$default, _p1._0);
+			return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_Exposings$processExposing, _user$project$Types_Exposings$default, _p1._0);
 		}
 	});
-var _user$project$Model_Exposings$exposingListFromModule = function (module_) {
+var _user$project$ElmFile_Exposings$exposingListFromModule = function (module_) {
 	var _p2 = module_;
 	switch (_p2.ctor) {
 		case 'NormalModule':
@@ -14749,12 +14749,12 @@ var _user$project$Model_Exposings$exposingListFromModule = function (module_) {
 			return _p2._0.exposingList;
 	}
 };
-var _user$project$Model_Exposings$fromFile = F2(
+var _user$project$ElmFile_Exposings$fromFile = F2(
 	function (topLevelExpressions, file) {
 		return A2(
-			_user$project$Model_Exposings$gatherExposings,
+			_user$project$ElmFile_Exposings$gatherExposings,
 			topLevelExpressions,
-			_user$project$Model_Exposings$exposingListFromModule(
+			_user$project$ElmFile_Exposings$exposingListFromModule(
 				function (_) {
 					return _.moduleDefinition;
 				}(file)));
@@ -14869,7 +14869,7 @@ var _user$project$Types_Imports$decoder = A3(
 			_user$project$Types_Imports$toAliasesDict,
 			_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder))));
 
-var _user$project$Model_Imports$fromExposing = F3(
+var _user$project$ElmFile_Imports$fromExposing = F3(
 	function (moduleName, _p0, imports) {
 		var _p1 = _p0;
 		var _p2 = _p1._1;
@@ -14884,7 +14884,7 @@ var _user$project$Model_Imports$fromExposing = F3(
 				return imports;
 		}
 	});
-var _user$project$Model_Imports$collectFromExposing = F3(
+var _user$project$ElmFile_Imports$collectFromExposing = F3(
 	function (moduleName, exposing_, imports) {
 		var _p3 = exposing_;
 		if (_p3.ctor === 'All') {
@@ -14892,21 +14892,21 @@ var _user$project$Model_Imports$collectFromExposing = F3(
 		} else {
 			return A3(
 				_elm_lang$core$List$foldl,
-				_user$project$Model_Imports$fromExposing(moduleName),
+				_user$project$ElmFile_Imports$fromExposing(moduleName),
 				imports,
 				_p3._0);
 		}
 	});
-var _user$project$Model_Imports$collectFromExposings = F2(
+var _user$project$ElmFile_Imports$collectFromExposings = F2(
 	function (import_, imports) {
 		var _p4 = import_.exposingList;
 		if (_p4.ctor === 'Just') {
-			return A3(_user$project$Model_Imports$collectFromExposing, import_.moduleName, _p4._0, imports);
+			return A3(_user$project$ElmFile_Imports$collectFromExposing, import_.moduleName, _p4._0, imports);
 		} else {
 			return imports;
 		}
 	});
-var _user$project$Model_Imports$collectFromAliases = F2(
+var _user$project$ElmFile_Imports$collectFromAliases = F2(
 	function (import_, imports) {
 		var _p5 = import_.moduleAlias;
 		if (_p5.ctor === 'Just') {
@@ -14915,24 +14915,24 @@ var _user$project$Model_Imports$collectFromAliases = F2(
 			return imports;
 		}
 	});
-var _user$project$Model_Imports$collectFromAll = F2(
+var _user$project$ElmFile_Imports$collectFromAll = F2(
 	function (import_, imports) {
 		return A2(
-			_user$project$Model_Imports$collectFromExposings,
+			_user$project$ElmFile_Imports$collectFromExposings,
 			import_,
-			A2(_user$project$Model_Imports$collectFromAliases, import_, imports));
+			A2(_user$project$ElmFile_Imports$collectFromAliases, import_, imports));
 	});
-var _user$project$Model_Imports$collectFrom = function (importList) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Model_Imports$collectFromAll, _user$project$Types_Imports$default, importList);
+var _user$project$ElmFile_Imports$collectFrom = function (importList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_Imports$collectFromAll, _user$project$Types_Imports$default, importList);
 };
-var _user$project$Model_Imports$fromFile = function (file) {
-	return _user$project$Model_Imports$collectFrom(
+var _user$project$ElmFile_Imports$fromFile = function (file) {
+	return _user$project$ElmFile_Imports$collectFrom(
 		function (_) {
 			return _.imports;
 		}(file));
 };
 
-var _user$project$Model_ModuleName$toModuleName = function (module_) {
+var _user$project$ElmFile_ModuleName$toModuleName = function (module_) {
 	var _p0 = module_;
 	switch (_p0.ctor) {
 		case 'NormalModule':
@@ -14943,14 +14943,14 @@ var _user$project$Model_ModuleName$toModuleName = function (module_) {
 			return _p0._0.moduleName;
 	}
 };
-var _user$project$Model_ModuleName$fromFile = function (file) {
-	return _user$project$Model_ModuleName$toModuleName(
+var _user$project$ElmFile_ModuleName$fromFile = function (file) {
+	return _user$project$ElmFile_ModuleName$toModuleName(
 		function (_) {
 			return _.moduleDefinition;
 		}(file));
 };
 
-var _user$project$Model_References$argumentsFromPattern = F2(
+var _user$project$ElmFile_References$argumentsFromPattern = F2(
 	function (pattern, $arguments) {
 		var _p0 = pattern;
 		_v0_2:
@@ -14960,7 +14960,7 @@ var _user$project$Model_References$argumentsFromPattern = F2(
 					case 'VarPattern':
 						return A2(_elm_lang$core$Set$insert, _p0._1._0, $arguments);
 					case 'NamedPattern':
-						return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, $arguments, _p0._1._1);
+						return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, $arguments, _p0._1._1);
 					default:
 						break _v0_2;
 				}
@@ -14970,10 +14970,10 @@ var _user$project$Model_References$argumentsFromPattern = F2(
 		} while(false);
 		return $arguments;
 	});
-var _user$project$Model_References$additionalArguments = function (patterns) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, patterns);
+var _user$project$ElmFile_References$additionalArguments = function (patterns) {
+	return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, patterns);
 };
-var _user$project$Model_References$letDeclarationExpressions = F2(
+var _user$project$ElmFile_References$letDeclarationExpressions = F2(
 	function (letDeclaration, expressions) {
 		var _p1 = letDeclaration;
 		if (_p1._1.ctor === 'LetFunction') {
@@ -14982,7 +14982,7 @@ var _user$project$Model_References$letDeclarationExpressions = F2(
 			return {ctor: '::', _0: _p1._1._1, _1: expressions};
 		}
 	});
-var _user$project$Model_References$addReference = F4(
+var _user$project$ElmFile_References$addReference = F4(
 	function (name, $arguments, imports, references) {
 		var _p2 = {
 			ctor: '_Tuple2',
@@ -15014,7 +15014,7 @@ var _user$project$Model_References$addReference = F4(
 			_user$project$Types_Reference$Reference(name),
 			references);
 	});
-var _user$project$Model_References$refsInTypeAnnotation = F3(
+var _user$project$ElmFile_References$refsInTypeAnnotation = F3(
 	function (imports, typeAnnotation, references) {
 		var _p3 = typeAnnotation;
 		_v3_5:
@@ -15024,31 +15024,31 @@ var _user$project$Model_References$refsInTypeAnnotation = F3(
 					case 'Typed':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInTypeAnnotation(imports),
-							A4(_user$project$Model_References$addReference, _p3._1._1, _elm_lang$core$Set$empty, imports, references),
+							_user$project$ElmFile_References$refsInTypeAnnotation(imports),
+							A4(_user$project$ElmFile_References$addReference, _p3._1._1, _elm_lang$core$Set$empty, imports, references),
 							_p3._1._2);
 					case 'Tupled':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInTypeAnnotation(imports),
+							_user$project$ElmFile_References$refsInTypeAnnotation(imports),
 							references,
 							_p3._1._0);
 					case 'Record':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInRecordField(imports),
+							_user$project$ElmFile_References$refsInRecordField(imports),
 							references,
 							_p3._1._0);
 					case 'GenericRecord':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInRecordField(imports),
+							_user$project$ElmFile_References$refsInRecordField(imports),
 							references,
 							_p3._1._1);
 					case 'FunctionTypeAnnotation':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$Model_References$refsInTypeAnnotation(imports),
+							_user$project$ElmFile_References$refsInTypeAnnotation(imports),
 							references,
 							{
 								ctor: '::',
@@ -15068,21 +15068,21 @@ var _user$project$Model_References$refsInTypeAnnotation = F3(
 		} while(false);
 		return references;
 	});
-var _user$project$Model_References$refsInRecordField = F3(
+var _user$project$ElmFile_References$refsInRecordField = F3(
 	function (imports, _p4, references) {
 		var _p5 = _p4;
-		return A3(_user$project$Model_References$refsInTypeAnnotation, imports, _p5._1, references);
+		return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p5._1, references);
 	});
-var _user$project$Model_References$appendSignatureReferences = F3(
+var _user$project$ElmFile_References$appendSignatureReferences = F3(
 	function (imports, $function, references) {
 		var _p6 = $function.signature;
 		if (_p6.ctor === 'Just') {
-			return A3(_user$project$Model_References$refsInTypeAnnotation, imports, _p6._0._1.typeAnnotation, references);
+			return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p6._0._1.typeAnnotation, references);
 		} else {
 			return references;
 		}
 	});
-var _user$project$Model_References$refsInExpression = F4(
+var _user$project$ElmFile_References$refsInExpression = F4(
 	function ($arguments, imports, expression, references) {
 		refsInExpression:
 		while (true) {
@@ -15094,13 +15094,13 @@ var _user$project$Model_References$refsInExpression = F4(
 						case 'Application':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								_p7._1._0);
 						case 'OperatorApplication':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								{
 									ctor: '::',
@@ -15112,11 +15112,11 @@ var _user$project$Model_References$refsInExpression = F4(
 									}
 								});
 						case 'FunctionOrValue':
-							return A4(_user$project$Model_References$addReference, _p7._1._0, $arguments, imports, references);
+							return A4(_user$project$ElmFile_References$addReference, _p7._1._0, $arguments, imports, references);
 						case 'IfBlock':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								{
 									ctor: '::',
@@ -15144,7 +15144,7 @@ var _user$project$Model_References$refsInExpression = F4(
 						case 'TupledExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								_p7._1._0);
 						case 'ParenthesizedExpression':
@@ -15161,12 +15161,12 @@ var _user$project$Model_References$refsInExpression = F4(
 							var _p8 = _p7._1._0;
 							var expressions = A3(
 								_elm_lang$core$List$foldl,
-								_user$project$Model_References$letDeclarationExpressions,
+								_user$project$ElmFile_References$letDeclarationExpressions,
 								{ctor: '[]'},
 								_p8.declarations);
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								{ctor: '::', _0: _p8.expression, _1: expressions});
 						case 'CaseExpression':
@@ -15174,11 +15174,11 @@ var _user$project$Model_References$refsInExpression = F4(
 							var allArguments = A2(
 								_elm_lang$core$Set$union,
 								$arguments,
-								_user$project$Model_References$additionalArguments(
+								_user$project$ElmFile_References$additionalArguments(
 									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p9.cases)));
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, allArguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, allArguments, imports),
 								references,
 								{
 									ctor: '::',
@@ -15190,7 +15190,7 @@ var _user$project$Model_References$refsInExpression = F4(
 							var allArguments = A2(
 								_elm_lang$core$Set$union,
 								$arguments,
-								_user$project$Model_References$additionalArguments(_p10.args));
+								_user$project$ElmFile_References$additionalArguments(_p10.args));
 							var _v15 = allArguments,
 								_v16 = imports,
 								_v17 = _p10.expression,
@@ -15203,13 +15203,13 @@ var _user$project$Model_References$refsInExpression = F4(
 						case 'RecordExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p7._1._0));
 						case 'ListExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								_p7._1._0);
 						case 'QualifiedExpr':
@@ -15219,11 +15219,11 @@ var _user$project$Model_References$refsInExpression = F4(
 								_user$project$Types_Reference$Reference(_p7._1._1),
 								references);
 						case 'RecordAccessFunction':
-							return A4(_user$project$Model_References$addReference, _p7._1._0, $arguments, imports, references);
+							return A4(_user$project$ElmFile_References$addReference, _p7._1._0, $arguments, imports, references);
 						case 'RecordUpdateExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$Model_References$refsInExpression, $arguments, imports),
+								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
 								references,
 								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p7._1._0.updates));
 						default:
@@ -15236,7 +15236,7 @@ var _user$project$Model_References$refsInExpression = F4(
 			return references;
 		}
 	});
-var _user$project$Model_References$collectRefsFromDeclaration = F3(
+var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 	function (imports, declaration, references) {
 		var _p11 = declaration;
 		_v19_2:
@@ -15246,15 +15246,15 @@ var _user$project$Model_References$collectRefsFromDeclaration = F3(
 					case 'FuncDecl':
 						var _p12 = _p11._1._0;
 						return A3(
-							_user$project$Model_References$appendSignatureReferences,
+							_user$project$ElmFile_References$appendSignatureReferences,
 							imports,
 							_p12,
 							function (args) {
-								return A4(_user$project$Model_References$refsInExpression, args, imports, _p12.declaration.expression, references);
+								return A4(_user$project$ElmFile_References$refsInExpression, args, imports, _p12.declaration.expression, references);
 							}(
-								A3(_elm_lang$core$List$foldl, _user$project$Model_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p12.declaration.$arguments)));
+								A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p12.declaration.$arguments)));
 					case 'AliasDecl':
-						return A3(_user$project$Model_References$refsInTypeAnnotation, imports, _p11._1._0.typeAnnotation, references);
+						return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p11._1._0.typeAnnotation, references);
 					default:
 						break _v19_2;
 				}
@@ -15264,25 +15264,25 @@ var _user$project$Model_References$collectRefsFromDeclaration = F3(
 		} while(false);
 		return references;
 	});
-var _user$project$Model_References$collectRefsFrom = F2(
+var _user$project$ElmFile_References$collectRefsFrom = F2(
 	function (imports, declarations) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			_user$project$Model_References$collectRefsFromDeclaration(imports),
+			_user$project$ElmFile_References$collectRefsFromDeclaration(imports),
 			_user$project$Types_References$default,
 			declarations);
 	});
-var _user$project$Model_References$fromFile = F2(
+var _user$project$ElmFile_References$fromFile = F2(
 	function (imports, file) {
 		return A2(
-			_user$project$Model_References$collectRefsFrom,
+			_user$project$ElmFile_References$collectRefsFrom,
 			imports,
 			function (_) {
 				return _.declarations;
 			}(file));
 	});
 
-var _user$project$Model_TopLevelExpressions$firstTypeIs = F2(
+var _user$project$ElmFile_TopLevelExpressions$firstTypeIs = F2(
 	function (typeName, typeAnnotation) {
 		var _p0 = typeAnnotation;
 		if (_p0.ctor === 'Typed') {
@@ -15291,19 +15291,19 @@ var _user$project$Model_TopLevelExpressions$firstTypeIs = F2(
 			return false;
 		}
 	});
-var _user$project$Model_TopLevelExpressions$isA = F2(
+var _user$project$ElmFile_TopLevelExpressions$isA = F2(
 	function (typeName, $function) {
 		var _p1 = $function.signature;
 		if (_p1.ctor === 'Just') {
 			return A2(
-				_user$project$Model_TopLevelExpressions$firstTypeIs,
+				_user$project$ElmFile_TopLevelExpressions$firstTypeIs,
 				typeName,
 				_elm_lang$core$Tuple$second(_p1._0._1.typeAnnotation));
 		} else {
 			return false;
 		}
 	});
-var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
+var _user$project$ElmFile_TopLevelExpressions$collectExpsFromDeclaration = F2(
 	function (declaration, topLevelExpressions) {
 		var _p2 = declaration;
 		_v2_3:
@@ -15312,7 +15312,7 @@ var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
 				switch (_p2._1.ctor) {
 					case 'FuncDecl':
 						var _p4 = _p2._1._0;
-						var expressionBase = A2(_user$project$Model_TopLevelExpressions$isA, 'Program', _p4) ? _user$project$Types_Expression$elmEntrypointExpression : (A2(_user$project$Model_TopLevelExpressions$isA, 'Test', _p4) ? _user$project$Types_Expression$elmTestExpression : _user$project$Types_Expression$standardExpression);
+						var expressionBase = A2(_user$project$ElmFile_TopLevelExpressions$isA, 'Program', _p4) ? _user$project$Types_Expression$elmEntrypointExpression : (A2(_user$project$ElmFile_TopLevelExpressions$isA, 'Test', _p4) ? _user$project$Types_Expression$elmTestExpression : _user$project$Types_Expression$standardExpression);
 						var lineNumber = function () {
 							var _p3 = _p4.signature;
 							if (_p3.ctor === 'Just') {
@@ -15364,25 +15364,25 @@ var _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration = F2(
 		} while(false);
 		return topLevelExpressions;
 	});
-var _user$project$Model_TopLevelExpressions$collectExpsFrom = function (declarations) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Model_TopLevelExpressions$collectExpsFromDeclaration, _user$project$Types_TopLevelExpressions$default, declarations);
+var _user$project$ElmFile_TopLevelExpressions$collectExpsFrom = function (declarations) {
+	return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_TopLevelExpressions$collectExpsFromDeclaration, _user$project$Types_TopLevelExpressions$default, declarations);
 };
-var _user$project$Model_TopLevelExpressions$fromFile = function (file) {
-	return _user$project$Model_TopLevelExpressions$collectExpsFrom(
+var _user$project$ElmFile_TopLevelExpressions$fromFile = function (file) {
+	return _user$project$ElmFile_TopLevelExpressions$collectExpsFrom(
 		function (_) {
 			return _.declarations;
 		}(file));
 };
 
 var _user$project$ElmFile$fromFile = function (file) {
-	var topLevelExpressions = _user$project$Model_TopLevelExpressions$fromFile(file);
-	var imports = _user$project$Model_Imports$fromFile(file);
+	var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
+	var imports = _user$project$ElmFile_Imports$fromFile(file);
 	return {
-		moduleName: _user$project$Model_ModuleName$fromFile(file),
+		moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
 		imports: imports,
 		topLevelExpressions: topLevelExpressions,
-		exposings: A2(_user$project$Model_Exposings$fromFile, topLevelExpressions, file),
-		references: A2(_user$project$Model_References$fromFile, imports, file)
+		exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file),
+		references: A2(_user$project$ElmFile_References$fromFile, imports, file)
 	};
 };
 var _user$project$ElmFile$default = {
@@ -15532,15 +15532,6 @@ var _user$project$Main$subscriptions = function (model) {
 };
 var _user$project$Main$main = _elm_lang$core$Platform$program(
 	{init: _user$project$Main$init, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
-
-var _user$project$Model_AST$buildFrom = F2(
-	function (fileText, model) {
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				fileAST: _stil4m$elm_syntax$Elm_Parser$parse(fileText)
-			});
-	});
 
 var _user$project$Model_Report$make = F2(
 	function (fileName, elmFile) {

@@ -1,4 +1,4 @@
-module Model.Exposings exposing (fromFile)
+module ElmFile.Exposings exposing (fromFile)
 
 import Dict
 import Elm.RawFile exposing (RawFile)

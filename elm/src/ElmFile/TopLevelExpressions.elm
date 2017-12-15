@@ -1,4 +1,4 @@
-module Model.TopLevelExpressions exposing (fromFile)
+module ElmFile.TopLevelExpressions exposing (fromFile)
 
 import Dict exposing (Dict)
 import Elm.RawFile exposing (RawFile)
