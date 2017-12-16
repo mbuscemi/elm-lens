@@ -1,4 +1,4 @@
-module ASTParsing.Simple exposing (parse)
+module ASTParsing.Simple exposing (canParseSimple)
 
 import Dict
 import ElmFile
@@ -9,8 +9,8 @@ import Types.Expression
 import Types.Reference exposing (Reference)
 
 
-parse : Test
-parse =
+canParseSimple : Test
+canParseSimple =
     describe "Simple Elm File" <|
         let
             elmFile =
