@@ -33,24 +33,32 @@ canParseSimple =
                 Expect.equal elmFile.topLevelExpressions
                     { functions =
                         Dict.empty
-                            |> Dict.insert "blarg" (Types.Expression.standardExpression 5)
-                            |> Dict.insert "frangle" (Types.Expression.standardExpression 9)
-                            |> Dict.insert "blargargle" (Types.Expression.standardExpression 13)
-                            |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 17)
+                            |> Dict.insert "$$" (Types.Expression.standardExpression 30)
+                            |> Dict.insert "blarg" (Types.Expression.standardExpression 14)
+                            |> Dict.insert "frangle" (Types.Expression.standardExpression 18)
+                            |> Dict.insert "blargargle" (Types.Expression.standardExpression 22)
+                            |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 26)
                     , types =
                         Dict.empty
+                            |> Dict.insert "UnaryThing" (Types.Expression.standardExpression 5)
+                            |> Dict.insert "BinaryThing" (Types.Expression.standardExpression 8)
                     , typeAliases =
                         Dict.empty
+                            |> Dict.insert "Other" (Types.Expression.standardExpression 11)
                     }
         , test "has expected exposings" <|
             \_ ->
                 Expect.equal elmFile.exposings
                     { functions =
                         Set.empty
+                            |> Set.insert "$$"
                             |> Set.insert "blarg"
                             |> Set.insert "frangle"
                     , types =
                         Set.empty
+                            |> Set.insert "UnaryThing"
+                            |> Set.insert "BinaryThing"
+                            |> Set.insert "Other"
                     }
         , test "has expected references" <|
             \_ ->
@@ -60,6 +68,7 @@ canParseSimple =
                         , Reference "blarg"
                         , Reference "blargargle"
                         , Reference "toString"
+                        , Reference "BinaryThing"
                         ]
                     , external =
                         Dict.empty
@@ -126,10 +135,19 @@ canParseSimpleExposingAll =
 
 simpleDotElm : String
 simpleDotElm =
-    """module Simple exposing (blarg, frangle)
+    """module Simple exposing (blarg, frangle, UnaryThing, BinaryThing(One, Another), Other, ($$))
 
 import Dict exposing (empty)
 import Set exposing (insert)
+
+type UnaryThing =
+    Single
+
+type BinaryThing =
+    One | Another
+
+type alias Other =
+    BinaryThing
 
 blarg : Int
 blarg =
@@ -146,6 +164,10 @@ blargargle num text =
 toStringCanMakeNumberText : Bool
 toStringCanMakeNumberText =
     blargargle blarg frangle
+
+($$) : String -> String -> String
+($$) a b =
+    a ++ " $$ " ++ b
 
 """
 

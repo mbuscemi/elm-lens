@@ -14687,9 +14687,13 @@ var _user$project$ElmFile_Exposings$processExposing = F2(
 	function (topLevelExpose, exposings) {
 		var _p0 = topLevelExpose;
 		switch (_p0._1.ctor) {
-			case 'InfixExpose':
-				return exposings;
 			case 'FunctionExpose':
+				return _elm_lang$core$Native_Utils.update(
+					exposings,
+					{
+						functions: A2(_elm_lang$core$Set$insert, _p0._1._0, exposings.functions)
+					});
+			case 'InfixExpose':
 				return _elm_lang$core$Native_Utils.update(
 					exposings,
 					{
@@ -14702,7 +14706,11 @@ var _user$project$ElmFile_Exposings$processExposing = F2(
 						types: A2(_elm_lang$core$Set$insert, _p0._1._0, exposings.types)
 					});
 			default:
-				return exposings;
+				return _elm_lang$core$Native_Utils.update(
+					exposings,
+					{
+						types: A2(_elm_lang$core$Set$insert, _p0._1._0.name, exposings.types)
+					});
 		}
 	});
 var _user$project$ElmFile_Exposings$useAllTopLevelExpressions = function (topLevelExpressions) {

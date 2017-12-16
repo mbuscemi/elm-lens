@@ -57,14 +57,14 @@ useAllTopLevelExpressions topLevelExpressions =
 processExposing : Ranged TopLevelExpose -> Exposings -> Exposings
 processExposing topLevelExpose exposings =
     case topLevelExpose of
-        ( range, Elm.Syntax.Exposing.InfixExpose name ) ->
-            exposings
-
         ( range, Elm.Syntax.Exposing.FunctionExpose name ) ->
+            { exposings | functions = Set.insert name exposings.functions }
+
+        ( range, Elm.Syntax.Exposing.InfixExpose name ) ->
             { exposings | functions = Set.insert name exposings.functions }
 
         ( range, Elm.Syntax.Exposing.TypeOrAliasExpose name ) ->
             { exposings | types = Set.insert name exposings.types }
 
         ( range, Elm.Syntax.Exposing.TypeExpose exposedType ) ->
-            exposings
+            { exposings | types = Set.insert exposedType.name exposings.types }
