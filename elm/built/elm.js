@@ -14874,7 +14874,7 @@ var _user$project$ElmFile_Imports$fromExposing = F3(
 			case 'TypeExpose':
 				return A3(_user$project$Types_Imports$addDirect, _p2._0.name, moduleName, imports);
 			default:
-				return imports;
+				return A3(_user$project$Types_Imports$addDirect, _p2._0, moduleName, imports);
 		}
 	});
 var _user$project$ElmFile_Imports$collectFromExposing = F3(
@@ -15127,7 +15127,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 		refsInExpression:
 		while (true) {
 			var _p7 = expression;
-			_v6_15:
+			_v6_14:
 			do {
 				if (_p7.ctor === '_Tuple2') {
 					switch (_p7._1.ctor) {
@@ -15258,8 +15258,6 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 								A2(_user$project$Types_Imports$unaliasedModuleName, _p7._1._0, imports),
 								_user$project$Types_Reference$Reference(_p7._1._1),
 								references);
-						case 'RecordAccessFunction':
-							return A4(_user$project$ElmFile_References$addReference, _p7._1._0, $arguments, imports, references);
 						case 'RecordUpdateExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
@@ -15267,10 +15265,10 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 								references,
 								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p7._1._0.updates));
 						default:
-							break _v6_15;
+							break _v6_14;
 					}
 				} else {
-					break _v6_15;
+					break _v6_14;
 				}
 			} while(false);
 			return references;
