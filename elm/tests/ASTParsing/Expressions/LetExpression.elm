@@ -30,8 +30,10 @@ canParseFromLet =
                 Expect.equal elmFile.topLevelExpressions
                     { functions =
                         Dict.empty
-                            |> Dict.insert "reference" (Types.Expression.standardExpression 2)
-                            |> Dict.insert "letExpression" (Types.Expression.standardExpression 6)
+                            |> Dict.insert "reference1" (Types.Expression.standardExpression 2)
+                            |> Dict.insert "reference2" (Types.Expression.standardExpression 6)
+                            |> Dict.insert "letExpression" (Types.Expression.standardExpression 10)
+                            |> Dict.insert "letDestructuring" (Types.Expression.standardExpression 18)
                     , types = Dict.empty
                     , typeAliases = Dict.empty
                     }
@@ -46,7 +48,12 @@ canParseFromLet =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Reference "reference", Reference "incremented" ]
+                    { internal =
+                        [ Reference "reference2"
+                        , Reference "first"
+                        , Reference "reference1"
+                        , Reference "incremented"
+                        ]
                     , external = Dict.empty
                     }
         ]
@@ -56,16 +63,28 @@ elmFileText : String
 elmFileText =
     """module Simple exposing (letExpression)
 
-reference : Int
-reference =
+reference1 : Int
+reference1 =
     1
+
+reference2 : ( Int, Int )
+reference2 =
+    ( 2, 3 )
 
 letExpression : Int
 letExpression =
     let
         incremented =
-            reference + 1
+            reference1 + 1
     in
     incremented + 1
+
+letDestructuring : Int
+letDestructuring =
+    let
+        ( first, second ) =
+            reference2
+    in
+    first
 
 """

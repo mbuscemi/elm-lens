@@ -25,6 +25,7 @@ canParseSimple =
                     { direct =
                         Dict.empty
                             |> Dict.insert "==" [ "Basics" ]
+                            |> Dict.insert "toString" [ "Basics" ]
                             |> Dict.insert "Dict" [ "Dict" ]
                             |> Dict.insert "empty" [ "Dict" ]
                             |> Dict.insert "Set" [ "Set" ]
@@ -41,11 +42,12 @@ canParseSimple =
                 Expect.equal elmFile.topLevelExpressions
                     { functions =
                         Dict.empty
-                            |> Dict.insert "$$" (Types.Expression.standardExpression 34)
                             |> Dict.insert "blarg" (Types.Expression.standardExpression 18)
-                            |> Dict.insert "frangle" (Types.Expression.standardExpression 22)
-                            |> Dict.insert "blargargle" (Types.Expression.standardExpression 26)
-                            |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 30)
+                            |> Dict.insert "frangle" (Types.Expression.standardExpression 21)
+                            |> Dict.insert "blargargle" (Types.Expression.standardExpression 24)
+                            |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 28)
+                            |> Dict.insert "$$" (Types.Expression.standardExpression 32)
+                            |> Dict.insert "tupled" (Types.Expression.standardExpression 36)
                     , types =
                         Dict.empty
                             |> Dict.insert "UnaryThing" (Types.Expression.standardExpression 9)
@@ -72,14 +74,18 @@ canParseSimple =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "frangle"
+                        [ Reference "BinaryThing"
+                        , Reference "UnaryThing"
+                        , Reference "One"
+                        , Reference "Single"
+                        , Reference "frangle"
                         , Reference "blarg"
                         , Reference "blargargle"
-                        , Reference "toString"
                         , Reference "BinaryThing"
                         ]
                     , external =
                         Dict.empty
+                            |> Dict.insert [ "Basics" ] [ Reference "toString" ]
                     }
         ]
 
@@ -145,7 +151,7 @@ simpleDotElm : String
 simpleDotElm =
     """module Simple exposing (blarg, frangle, UnaryThing, BinaryThing(One, Another), Other, ($$))
 
-import Basics exposing ((==))
+import Basics exposing ((==), toString)
 import Dict exposing (Dict, empty)
 import Set exposing (Set, insert)
 import Result exposing (..)
@@ -161,11 +167,9 @@ type BinaryThing =
 type alias Other =
     BinaryThing
 
-blarg : Int
 blarg =
     10
 
-frangle : String
 frangle =
     "ten"
 
@@ -180,6 +184,10 @@ toStringCanMakeNumberText =
 ($$) : String -> String -> String
 ($$) a b =
     a ++ " $$ " ++ b
+
+tupled : (UnaryThing, BinaryThing)
+tupled =
+    (Single, One)
 
 """
 

@@ -32,6 +32,7 @@ canParseFromRecord =
                         Dict.empty
                             |> Dict.insert "reference" (Types.Expression.standardExpression 2)
                             |> Dict.insert "recordExpression" (Types.Expression.standardExpression 6)
+                            |> Dict.insert "otherRecordExpression" (Types.Expression.standardExpression 10)
                     , types = Dict.empty
                     , typeAliases = Dict.empty
                     }
@@ -63,5 +64,9 @@ reference =
 recordExpression : { field: Int }
 recordExpression =
     { field = reference }
+
+otherRecordExpression : { record | field : Int } -> Int
+otherRecordExpression record =
+    .field record
 
 """
