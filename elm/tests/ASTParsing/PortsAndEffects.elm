@@ -110,15 +110,12 @@ canParseEffects =
                         , Reference "SomeTask"
                         , Reference "SomeState"
                         , Reference "SomeCmd"
-                        , Reference "List"
                         , Reference "SomeCmd"
                         , Reference "Router"
                         , Reference "State"
                         , Reference "SomeTask"
                         , Reference "State"
                         , Reference "SomeState"
-                        , Reference "Never"
-                        , Reference "Task"
                         ]
                     , external =
                         Dict.empty

@@ -124,7 +124,7 @@ addReference name arguments imports references =
 
 coreTypes : Set String
 coreTypes =
-    Set.fromList [ "String", "Int", "Float", "Bool", "Char" ]
+    Set.fromList [ "String", "Int", "Float", "Bool", "Char", "List", "Set", "Dict", "Task", "Never" ]
 
 
 refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> References

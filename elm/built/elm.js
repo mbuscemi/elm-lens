@@ -14983,7 +14983,27 @@ var _user$project$ElmFile_References$coreTypes = _elm_lang$core$Set$fromList(
 					_1: {
 						ctor: '::',
 						_0: 'Char',
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: 'List',
+							_1: {
+								ctor: '::',
+								_0: 'Set',
+								_1: {
+									ctor: '::',
+									_0: 'Dict',
+									_1: {
+										ctor: '::',
+										_0: 'Task',
+										_1: {
+											ctor: '::',
+											_0: 'Never',
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
