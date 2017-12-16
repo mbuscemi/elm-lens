@@ -108,15 +108,23 @@ refsInExpression arguments imports expression references =
 
 addReference : String -> Set String -> Imports -> References -> References
 addReference name arguments imports references =
-    case ( Set.member name arguments, Types.Imports.moduleNameForDirectEntry name imports ) of
-        ( True, _ ) ->
+    case ( Set.member name arguments, Set.member name coreTypes, Types.Imports.moduleNameForDirectEntry name imports ) of
+        ( True, _, _ ) ->
             references
 
-        ( _, Just moduleName ) ->
+        ( _, True, _ ) ->
+            references
+
+        ( _, _, Just moduleName ) ->
             Types.References.addExternal moduleName (Reference name) references
 
         _ ->
             Types.References.addInternal (Reference name) references
+
+
+coreTypes : Set String
+coreTypes =
+    Set.fromList [ "String", "Int", "Float", "Bool", "Char" ]
 
 
 refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> References

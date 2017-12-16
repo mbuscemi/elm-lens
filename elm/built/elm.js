@@ -14967,31 +14967,54 @@ var _user$project$ElmFile_References$letDeclarationExpressions = F2(
 			return {ctor: '::', _0: _p1._1._1, _1: expressions};
 		}
 	});
+var _user$project$ElmFile_References$coreTypes = _elm_lang$core$Set$fromList(
+	{
+		ctor: '::',
+		_0: 'String',
+		_1: {
+			ctor: '::',
+			_0: 'Int',
+			_1: {
+				ctor: '::',
+				_0: 'Float',
+				_1: {
+					ctor: '::',
+					_0: 'Bool',
+					_1: {ctor: '[]'}
+				}
+			}
+		}
+	});
 var _user$project$ElmFile_References$addReference = F4(
 	function (name, $arguments, imports, references) {
 		var _p2 = {
-			ctor: '_Tuple2',
+			ctor: '_Tuple3',
 			_0: A2(_elm_lang$core$Set$member, name, $arguments),
-			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports)
+			_1: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreTypes),
+			_2: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports)
 		};
-		_v2_2:
+		_v2_3:
 		do {
-			if (_p2.ctor === '_Tuple2') {
+			if (_p2.ctor === '_Tuple3') {
 				if (_p2._0 === true) {
 					return references;
 				} else {
-					if (_p2._1.ctor === 'Just') {
-						return A3(
-							_user$project$Types_References$addExternal,
-							_p2._1._0,
-							_user$project$Types_Reference$Reference(name),
-							references);
+					if (_p2._1 === true) {
+						return references;
 					} else {
-						break _v2_2;
+						if (_p2._2.ctor === 'Just') {
+							return A3(
+								_user$project$Types_References$addExternal,
+								_p2._2._0,
+								_user$project$Types_Reference$Reference(name),
+								references);
+						} else {
+							break _v2_3;
+						}
 					}
 				}
 			} else {
-				break _v2_2;
+				break _v2_3;
 			}
 		} while(false);
 		return A2(

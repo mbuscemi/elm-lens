@@ -56,16 +56,10 @@ parse =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "Bool"
-                        , Reference "frangle"
+                        [ Reference "frangle"
                         , Reference "blarg"
                         , Reference "blargargle"
-                        , Reference "Bool"
-                        , Reference "String"
-                        , Reference "Int"
                         , Reference "toString"
-                        , Reference "String"
-                        , Reference "Int"
                         ]
                     , external =
                         Dict.empty
