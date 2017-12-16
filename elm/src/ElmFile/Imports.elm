@@ -68,5 +68,5 @@ fromExposing moduleName ( range, topLevelExpose ) imports =
         Elm.Syntax.Exposing.TypeExpose exposedType ->
             Types.Imports.addDirect exposedType.name moduleName imports
 
-        _ ->
-            imports
+        Elm.Syntax.Exposing.InfixExpose name ->
+            Types.Imports.addDirect name moduleName imports

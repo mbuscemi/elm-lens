@@ -24,27 +24,35 @@ canParseSimple =
                 Expect.equal elmFile.imports
                     { direct =
                         Dict.empty
+                            |> Dict.insert "==" [ "Basics" ]
+                            |> Dict.insert "Dict" [ "Dict" ]
                             |> Dict.insert "empty" [ "Dict" ]
+                            |> Dict.insert "Set" [ "Set" ]
                             |> Dict.insert "insert" [ "Set" ]
-                    , aliases = Dict.empty
+                            |> Dict.insert "Decoder" [ "Json", "Decode" ]
+                            |> Dict.insert "Value" [ "Json", "Encode" ]
+                    , aliases =
+                        Dict.empty
+                            |> Dict.insert [ "JD" ] [ "Json", "Decode" ]
+                            |> Dict.insert [ "JE" ] [ "Json", "Encode" ]
                     }
         , test "has expected top level expressions" <|
             \_ ->
                 Expect.equal elmFile.topLevelExpressions
                     { functions =
                         Dict.empty
-                            |> Dict.insert "$$" (Types.Expression.standardExpression 30)
-                            |> Dict.insert "blarg" (Types.Expression.standardExpression 14)
-                            |> Dict.insert "frangle" (Types.Expression.standardExpression 18)
-                            |> Dict.insert "blargargle" (Types.Expression.standardExpression 22)
-                            |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 26)
+                            |> Dict.insert "$$" (Types.Expression.standardExpression 34)
+                            |> Dict.insert "blarg" (Types.Expression.standardExpression 18)
+                            |> Dict.insert "frangle" (Types.Expression.standardExpression 22)
+                            |> Dict.insert "blargargle" (Types.Expression.standardExpression 26)
+                            |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 30)
                     , types =
                         Dict.empty
-                            |> Dict.insert "UnaryThing" (Types.Expression.standardExpression 5)
-                            |> Dict.insert "BinaryThing" (Types.Expression.standardExpression 8)
+                            |> Dict.insert "UnaryThing" (Types.Expression.standardExpression 9)
+                            |> Dict.insert "BinaryThing" (Types.Expression.standardExpression 12)
                     , typeAliases =
                         Dict.empty
-                            |> Dict.insert "Other" (Types.Expression.standardExpression 11)
+                            |> Dict.insert "Other" (Types.Expression.standardExpression 15)
                     }
         , test "has expected exposings" <|
             \_ ->
@@ -137,8 +145,12 @@ simpleDotElm : String
 simpleDotElm =
     """module Simple exposing (blarg, frangle, UnaryThing, BinaryThing(One, Another), Other, ($$))
 
-import Dict exposing (empty)
-import Set exposing (insert)
+import Basics exposing ((==))
+import Dict exposing (Dict, empty)
+import Set exposing (Set, insert)
+import Result exposing (..)
+import Json.Decode as JD exposing (Decoder(..))
+import Json.Encode as JE exposing (Value)
 
 type UnaryThing =
     Single
