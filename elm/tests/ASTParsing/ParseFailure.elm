@@ -1,4 +1,4 @@
-module ParseFailure exposing (parse)
+module ASTParsing.ParseFailure exposing (parse)
 
 import ElmFile
 import Expect
