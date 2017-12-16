@@ -3,8 +3,10 @@ module ASTParsing.Simple exposing (parse)
 import Dict
 import ElmFile
 import Expect
+import Set
 import Test exposing (Test, describe, test)
 import Types.Expression
+import Types.Reference exposing (Reference)
 
 
 parse : Test
@@ -38,6 +40,34 @@ parse =
                     , types =
                         Dict.empty
                     , typeAliases =
+                        Dict.empty
+                    }
+        , test "has expected exposings" <|
+            \_ ->
+                Expect.equal elmFile.exposings
+                    { functions =
+                        Set.empty
+                            |> Set.insert "blarg"
+                            |> Set.insert "frangle"
+                    , types =
+                        Set.empty
+                    }
+        , test "has expected references" <|
+            \_ ->
+                Expect.equal elmFile.references
+                    { internal =
+                        [ Reference "Bool"
+                        , Reference "frangle"
+                        , Reference "blarg"
+                        , Reference "blargargle"
+                        , Reference "Bool"
+                        , Reference "String"
+                        , Reference "Int"
+                        , Reference "toString"
+                        , Reference "String"
+                        , Reference "Int"
+                        ]
+                    , external =
                         Dict.empty
                     }
         ]
