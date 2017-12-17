@@ -1,8 +1,8 @@
 module Types.Exposings exposing (Exposings, decoder, default, encoder)
 
-import Json.Decode as JD exposing (Decoder, field, list, map2, string)
-import Json.Decode.Extra exposing (set)
-import Json.Encode as JE exposing (Value, list, object, string)
+import Json.Decode as JD exposing (Decoder)
+import Json.Decode.Extra as JD
+import Json.Encode as JE exposing (Value)
 import Set exposing (Set)
 
 
@@ -21,18 +21,14 @@ default =
 
 encoder : Exposings -> Value
 encoder exposings =
-    object
-        [ ( "functions"
-          , JE.list <| List.map JE.string (Set.toList exposings.functions)
-          )
-        , ( "types"
-          , JE.list <| List.map JE.string (Set.toList exposings.types)
-          )
+    JE.object
+        [ ( "functions", JE.list <| List.map JE.string <| Set.toList exposings.functions )
+        , ( "types", JE.list <| List.map JE.string <| Set.toList exposings.types )
         ]
 
 
 decoder : Decoder Exposings
 decoder =
-    map2 Exposings
-        (field "functions" <| set JD.string)
-        (field "types" <| set JD.string)
+    JD.map2 Exposings
+        (JD.field "functions" <| JD.set JD.string)
+        (JD.field "types" <| JD.set JD.string)

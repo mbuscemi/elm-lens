@@ -14990,23 +14990,31 @@ var _user$project$ElmFile_References$coreTypes = _elm_lang$core$Set$fromList(
 					_0: 'Bool',
 					_1: {
 						ctor: '::',
-						_0: 'Char',
+						_0: 'True',
 						_1: {
 							ctor: '::',
-							_0: 'List',
+							_0: 'False',
 							_1: {
 								ctor: '::',
-								_0: 'Set',
+								_0: 'Char',
 								_1: {
 									ctor: '::',
-									_0: 'Dict',
+									_0: 'List',
 									_1: {
 										ctor: '::',
-										_0: 'Task',
+										_0: 'Set',
 										_1: {
 											ctor: '::',
-											_0: 'Never',
-											_1: {ctor: '[]'}
+											_0: 'Dict',
+											_1: {
+												ctor: '::',
+												_0: 'Task',
+												_1: {
+													ctor: '::',
+													_0: 'Never',
+													_1: {ctor: '[]'}
+												}
+											}
 										}
 									}
 								}
@@ -15277,7 +15285,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 	function (imports, declaration, references) {
 		var _p11 = declaration;
-		_v19_2:
+		_v19_3:
 		do {
 			if (_p11.ctor === '_Tuple2') {
 				switch (_p11._1.ctor) {
@@ -15293,11 +15301,13 @@ var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 								A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p12.declaration.$arguments)));
 					case 'AliasDecl':
 						return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p11._1._0.typeAnnotation, references);
+					case 'Destructuring':
+						return A4(_user$project$ElmFile_References$refsInExpression, _elm_lang$core$Set$empty, imports, _p11._1._1, references);
 					default:
-						break _v19_2;
+						break _v19_3;
 				}
 			} else {
-				break _v19_2;
+				break _v19_3;
 			}
 		} while(false);
 		return references;
@@ -15344,63 +15354,59 @@ var _user$project$ElmFile_TopLevelExpressions$isA = F2(
 var _user$project$ElmFile_TopLevelExpressions$collectExpsFromDeclaration = F2(
 	function (declaration, topLevelExpressions) {
 		var _p2 = declaration;
-		_v2_3:
-		do {
-			if (_p2.ctor === '_Tuple2') {
-				switch (_p2._1.ctor) {
-					case 'FuncDecl':
-						var _p4 = _p2._1._0;
-						var expressionBase = A2(_user$project$ElmFile_TopLevelExpressions$isA, 'Program', _p4) ? _user$project$Types_Expression$elmEntrypointExpression : (A2(_user$project$ElmFile_TopLevelExpressions$isA, 'Test', _p4) ? _user$project$Types_Expression$elmTestExpression : _user$project$Types_Expression$standardExpression);
-						var lineNumber = function () {
-							var _p3 = _p4.signature;
-							if (_p3.ctor === 'Just') {
-								return _p3._0._0.start.row;
-							} else {
-								return _p4.declaration.name.range.start.row;
-							}
-						}();
-						var name = _p4.declaration.name.value;
-						return _elm_lang$core$Native_Utils.update(
-							topLevelExpressions,
-							{
-								functions: A3(
-									_elm_lang$core$Dict$insert,
-									name,
-									expressionBase(lineNumber),
-									topLevelExpressions.functions)
-							});
-					case 'AliasDecl':
-						var lineNumber = _p2._0.start.row;
-						var name = _p2._1._0.name;
-						return _elm_lang$core$Native_Utils.update(
-							topLevelExpressions,
-							{
-								typeAliases: A3(
-									_elm_lang$core$Dict$insert,
-									name,
-									_user$project$Types_Expression$standardExpression(lineNumber),
-									topLevelExpressions.typeAliases)
-							});
-					case 'TypeDecl':
-						var lineNumber = _p2._0.start.row;
-						var name = _p2._1._0.name;
-						return _elm_lang$core$Native_Utils.update(
-							topLevelExpressions,
-							{
-								types: A3(
-									_elm_lang$core$Dict$insert,
-									name,
-									_user$project$Types_Expression$standardExpression(lineNumber),
-									topLevelExpressions.types)
-							});
-					default:
-						break _v2_3;
-				}
-			} else {
-				break _v2_3;
-			}
-		} while(false);
-		return topLevelExpressions;
+		switch (_p2._1.ctor) {
+			case 'FuncDecl':
+				var _p4 = _p2._1._0;
+				var expressionBase = A2(_user$project$ElmFile_TopLevelExpressions$isA, 'Program', _p4) ? _user$project$Types_Expression$elmEntrypointExpression : (A2(_user$project$ElmFile_TopLevelExpressions$isA, 'Test', _p4) ? _user$project$Types_Expression$elmTestExpression : _user$project$Types_Expression$standardExpression);
+				var lineNumber = function () {
+					var _p3 = _p4.signature;
+					if (_p3.ctor === 'Just') {
+						return _p3._0._0.start.row;
+					} else {
+						return _p4.declaration.name.range.start.row;
+					}
+				}();
+				var name = _p4.declaration.name.value;
+				return _elm_lang$core$Native_Utils.update(
+					topLevelExpressions,
+					{
+						functions: A3(
+							_elm_lang$core$Dict$insert,
+							name,
+							expressionBase(lineNumber),
+							topLevelExpressions.functions)
+					});
+			case 'AliasDecl':
+				var lineNumber = _p2._0.start.row;
+				var name = _p2._1._0.name;
+				return _elm_lang$core$Native_Utils.update(
+					topLevelExpressions,
+					{
+						typeAliases: A3(
+							_elm_lang$core$Dict$insert,
+							name,
+							_user$project$Types_Expression$standardExpression(lineNumber),
+							topLevelExpressions.typeAliases)
+					});
+			case 'TypeDecl':
+				var lineNumber = _p2._0.start.row;
+				var name = _p2._1._0.name;
+				return _elm_lang$core$Native_Utils.update(
+					topLevelExpressions,
+					{
+						types: A3(
+							_elm_lang$core$Dict$insert,
+							name,
+							_user$project$Types_Expression$standardExpression(lineNumber),
+							topLevelExpressions.types)
+					});
+			case 'PortDeclaration':
+				return topLevelExpressions;
+			case 'InfixDeclaration':
+				return topLevelExpressions;
+			default:
+				return topLevelExpressions;
+		}
 	});
 var _user$project$ElmFile_TopLevelExpressions$collectExpsFrom = function (declarations) {
 	return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_TopLevelExpressions$collectExpsFromDeclaration, _user$project$Types_TopLevelExpressions$default, declarations);
