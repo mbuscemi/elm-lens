@@ -15121,6 +15121,14 @@ var _user$project$ElmFile_References$refsInRecordField = F3(
 		var _p5 = _p4;
 		return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p5._1, references);
 	});
+var _user$project$ElmFile_References$refsInValueConstructor = F3(
+	function (imports, valueConstructor, references) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$ElmFile_References$refsInTypeAnnotation(imports),
+			references,
+			valueConstructor.$arguments);
+	});
 var _user$project$ElmFile_References$appendSignatureReferences = F3(
 	function (imports, $function, references) {
 		var _p6 = $function.signature;
@@ -15285,7 +15293,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 	function (imports, declaration, references) {
 		var _p11 = declaration;
-		_v19_3:
+		_v19_4:
 		do {
 			if (_p11.ctor === '_Tuple2') {
 				switch (_p11._1.ctor) {
@@ -15301,13 +15309,19 @@ var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 								A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p12.declaration.$arguments)));
 					case 'AliasDecl':
 						return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p11._1._0.typeAnnotation, references);
+					case 'TypeDecl':
+						return A3(
+							_elm_lang$core$List$foldl,
+							_user$project$ElmFile_References$refsInValueConstructor(imports),
+							references,
+							_p11._1._0.constructors);
 					case 'Destructuring':
 						return A4(_user$project$ElmFile_References$refsInExpression, _elm_lang$core$Set$empty, imports, _p11._1._1, references);
 					default:
-						break _v19_3;
+						break _v19_4;
 				}
 			} else {
-				break _v19_3;
+				break _v19_4;
 			}
 		} while(false);
 		return references;

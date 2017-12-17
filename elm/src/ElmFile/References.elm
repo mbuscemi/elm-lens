@@ -5,6 +5,7 @@ import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
 import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Pattern exposing (Pattern)
 import Elm.Syntax.Ranged exposing (Ranged)
+import Elm.Syntax.Type exposing (ValueConstructor)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Set exposing (Set)
 import Types.Imports exposing (Imports)
@@ -34,6 +35,9 @@ collectRefsFromDeclaration imports declaration references =
 
         ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
             refsInTypeAnnotation imports typeAlias.typeAnnotation references
+
+        ( range, Elm.Syntax.Declaration.TypeDecl type_ ) ->
+            List.foldl (refsInValueConstructor imports) references type_.constructors
 
         ( range, Elm.Syntax.Declaration.Destructuring rangedPattern rangedExpression ) ->
             refsInExpression Set.empty imports rangedExpression references
@@ -125,6 +129,11 @@ addReference name arguments imports references =
 coreTypes : Set String
 coreTypes =
     Set.fromList [ "String", "Int", "Float", "Bool", "True", "False", "Char", "List", "Set", "Dict", "Task", "Never" ]
+
+
+refsInValueConstructor : Imports -> ValueConstructor -> References -> References
+refsInValueConstructor imports valueConstructor references =
+    List.foldl (refsInTypeAnnotation imports) references valueConstructor.arguments
 
 
 refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> References

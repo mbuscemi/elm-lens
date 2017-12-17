@@ -85,6 +85,7 @@ canParseSimple =
                         , Reference "blarg"
                         , Reference "blargargle"
                         , Reference "BinaryThing"
+                        , Reference "UnaryThing"
                         ]
                     , external =
                         Dict.empty
@@ -109,7 +110,7 @@ type UnaryThing =
     Single
 
 type BinaryThing =
-    One | Another
+    One | Another | YetAnother UnaryThing
 
 type alias Other =
     BinaryThing
