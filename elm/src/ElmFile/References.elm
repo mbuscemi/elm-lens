@@ -126,6 +126,22 @@ addReference name arguments imports references =
             Types.References.addInternal (Reference name) references
 
 
+addTypeReference : String -> List String -> Imports -> References -> References
+addTypeReference name moduleName imports references =
+    case ( Set.member name coreTypes, Types.Imports.moduleNameForDirectEntry name imports, moduleName ) of
+        ( True, _, _ ) ->
+            references
+
+        ( _, Just externalModule, _ ) ->
+            Types.References.addExternal externalModule (Reference name) references
+
+        ( _, _, [] ) ->
+            Types.References.addInternal (Reference name) references
+
+        ( _, _, externalModule ) ->
+            Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name) references
+
+
 coreTypes : Set String
 coreTypes =
     Set.fromList [ "String", "Int", "Float", "Bool", "True", "False", "Char", "List", "Set", "Dict", "Task", "Never" ]
@@ -140,7 +156,7 @@ refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> Referen
 refsInTypeAnnotation imports typeAnnotation references =
     case typeAnnotation of
         ( range, Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations ) ->
-            List.foldl (refsInTypeAnnotation imports) (addReference name Set.empty imports references) typeAnnotations
+            List.foldl (refsInTypeAnnotation imports) (addTypeReference name moduleName imports references) typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
             List.foldl (refsInTypeAnnotation imports) references typeAnnotations

@@ -105,13 +105,11 @@ canParseEffects =
                         , Reference "SomeState"
                         , Reference "SomeCmd"
                         , Reference "SomeCmd"
-                        , Reference "Router"
                         , Reference "State"
                         , Reference "SomeTask"
                         , Reference "SomeState"
                         , Reference "SomeCmd"
                         , Reference "SomeCmd"
-                        , Reference "Router"
                         , Reference "State"
                         , Reference "SomeTask"
                         , Reference "State"
@@ -120,6 +118,7 @@ canParseEffects =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Task" ] [ Reference "succeed", Reference "succeed", Reference "succeed" ]
+                            |> Dict.insert [ "Platform" ] [ Reference "Router", Reference "Router" ]
                     }
         ]
 
