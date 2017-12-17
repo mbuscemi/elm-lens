@@ -35,6 +35,9 @@ collectRefsFromDeclaration imports declaration references =
         ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
             refsInTypeAnnotation imports typeAlias.typeAnnotation references
 
+        ( range, Elm.Syntax.Declaration.Destructuring rangedPattern rangedExpression ) ->
+            refsInExpression Set.empty imports rangedExpression references
+
         _ ->
             references
 
@@ -121,7 +124,7 @@ addReference name arguments imports references =
 
 coreTypes : Set String
 coreTypes =
-    Set.fromList [ "String", "Int", "Float", "Bool", "Char", "List", "Set", "Dict", "Task", "Never" ]
+    Set.fromList [ "String", "Int", "Float", "Bool", "True", "False", "Char", "List", "Set", "Dict", "Task", "Never" ]
 
 
 refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> References

@@ -68,7 +68,13 @@ collectExpsFromDeclaration declaration topLevelExpressions =
             in
             { topLevelExpressions | types = Dict.insert name (Types.Expression.standardExpression lineNumber) topLevelExpressions.types }
 
-        _ ->
+        ( range, Elm.Syntax.Declaration.PortDeclaration functionSignature ) ->
+            topLevelExpressions
+
+        ( range, Elm.Syntax.Declaration.InfixDeclaration infix_ ) ->
+            topLevelExpressions
+
+        ( range, Elm.Syntax.Declaration.Destructuring rangedPattern rangedExpression ) ->
             topLevelExpressions
 
 
