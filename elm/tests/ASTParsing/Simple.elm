@@ -32,6 +32,7 @@ canParseSimple =
                             |> Dict.insert "insert" [ "Set" ]
                             |> Dict.insert "Decoder" [ "Json", "Decode" ]
                             |> Dict.insert "Value" [ "Json", "Encode" ]
+                            |> Dict.insert "encodeValue" [ "Json", "Encode" ]
                     , aliases =
                         Dict.empty
                             |> Dict.insert [ "JD" ] [ "Json", "Decode" ]
@@ -48,6 +49,7 @@ canParseSimple =
                             |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 28)
                             |> Dict.insert "$$" (Types.Expression.standardExpression 32)
                             |> Dict.insert "tupled" (Types.Expression.standardExpression 38)
+                            |> Dict.insert "value" (Types.Expression.standardExpression 45)
                     , types =
                         Dict.empty
                             |> Dict.insert "UnaryThing" (Types.Expression.standardExpression 9)
@@ -87,6 +89,7 @@ canParseSimple =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Basics" ] [ Reference "toString" ]
+                            |> Dict.insert [ "Json", "Encode" ] [ Reference "Value", Reference "encodeValue" ]
                     }
         ]
 
@@ -100,7 +103,7 @@ import Dict exposing (Dict, empty)
 import Set exposing (Set, insert)
 import Result exposing (..)
 import Json.Decode as JD exposing (Decoder(..))
-import Json.Encode as JE exposing (Value)
+import Json.Encode as JE exposing (Value, encodeValue)
 
 type UnaryThing =
     Single
@@ -137,6 +140,10 @@ tupled =
 
 (destructured1, destructured2) =
     tupled
+
+value : JE.Value
+value =
+    JE.encodeValue
 
 port processReport : (Value -> message) -> Sub message
 
