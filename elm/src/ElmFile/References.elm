@@ -39,6 +39,9 @@ collectRefsFromDeclaration imports declaration references =
         ( range, Elm.Syntax.Declaration.TypeDecl type_ ) ->
             List.foldl (refsInValueConstructor imports) references type_.constructors
 
+        ( range, Elm.Syntax.Declaration.PortDeclaration signature ) ->
+            refsInTypeAnnotation imports signature.typeAnnotation references
+
         ( range, Elm.Syntax.Declaration.Destructuring rangedPattern rangedExpression ) ->
             refsInExpression Set.empty imports rangedExpression references
 

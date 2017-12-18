@@ -15326,7 +15326,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 	function (imports, declaration, references) {
 		var _p12 = declaration;
-		_v20_4:
+		_v20_5:
 		do {
 			if (_p12.ctor === '_Tuple2') {
 				switch (_p12._1.ctor) {
@@ -15348,13 +15348,15 @@ var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 							_user$project$ElmFile_References$refsInValueConstructor(imports),
 							references,
 							_p12._1._0.constructors);
+					case 'PortDeclaration':
+						return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p12._1._0.typeAnnotation, references);
 					case 'Destructuring':
 						return A4(_user$project$ElmFile_References$refsInExpression, _elm_lang$core$Set$empty, imports, _p12._1._1, references);
 					default:
-						break _v20_4;
+						break _v20_5;
 				}
 			} else {
-				break _v20_4;
+				break _v20_5;
 			}
 		} while(false);
 		return references;
