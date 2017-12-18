@@ -76,7 +76,8 @@ canParseSimple =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "tupled"
+                        [ Reference "Sub"
+                        , Reference "tupled"
                         , Reference "BinaryThing"
                         , Reference "UnaryThing"
                         , Reference "One"
@@ -90,7 +91,7 @@ canParseSimple =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Basics" ] [ Reference "toString" ]
-                            |> Dict.insert [ "Json", "Encode" ] [ Reference "Value", Reference "encodeValue" ]
+                            |> Dict.insert [ "Json", "Encode" ] [ Reference "Value", Reference "Value", Reference "encodeValue" ]
                     }
         ]
 
