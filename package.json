@@ -1,24 +1,24 @@
 {
-    "name": "elm-lens",
-    "main": "./lib/elm-lens",
-    "version": "0.0.0",
-    "description": "Elm code visualizations for maximum productivity",
-    "keywords": [
-        "elm",
-        "tool",
-        "tools",
-        "tooling",
-        "meta",
-        "metadata"
-    ],
-    "activationCommands": {},
-    "repository": "https://github.com/mbuscemi/elm-lens",
-    "license": "MIT",
-    "engines": {
-        "atom": ">=1.0.0 <2.0.0"
-    },
-    "dependencies": {},
-    "scripts": {
-        "test": "cd elm ; elm-test"
-    }
+  "name": "elm-lens",
+  "main": "./lib/elm-lens",
+  "version": "0.1.0",
+  "description": "Elm code visualizations for maximum productivity",
+  "keywords": [
+    "elm",
+    "tool",
+    "tools",
+    "tooling",
+    "meta",
+    "metadata"
+  ],
+  "activationCommands": {},
+  "repository": "https://github.com/mbuscemi/elm-lens",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {},
+  "scripts": {
+    "test": "cd elm ; elm-test"
+  }
 }
