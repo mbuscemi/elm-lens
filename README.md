@@ -60,7 +60,8 @@ unreferenced in other modules. Such functions are typically executed by a comman
 tag for any function with a type signature of `Test`.
 
 ## Roadmap
- 
-* 0.3.0 Display test references separately from internal/external
+
+* 0.4.0 Differentiate Test References
+* 0.3.0 Handle Zero-Reference Exposed Functions in `exposed-modules`
 * 0.2.0 Visualization of References
 * 0.1.0 Initial Release
