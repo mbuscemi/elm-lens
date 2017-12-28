@@ -74,22 +74,27 @@ canParseSimple =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "Sub"
-                        , Reference "tupled"
-                        , Reference "BinaryThing"
-                        , Reference "UnaryThing"
-                        , Reference "One"
-                        , Reference "Single"
-                        , Reference "frangle"
-                        , Reference "blarg"
-                        , Reference "blargargle"
-                        , Reference "BinaryThing"
-                        , Reference "UnaryThing"
+                        [ Types.Reference.make "Sub" 43 43 43 54
+                        , Types.Reference.make "tupled" 37 4 37 10
+                        , Types.Reference.make "BinaryThing" 32 22 32 33
+                        , Types.Reference.make "UnaryThing" 32 10 32 20
+                        , Types.Reference.make "One" 34 13 34 16
+                        , Types.Reference.make "Single" 34 5 34 11
+                        , Types.Reference.make "frangle" 30 21 30 28
+                        , Types.Reference.make "blarg" 30 15 30 20
+                        , Types.Reference.make "blargargle" 30 4 30 14
+                        , Types.Reference.make "BinaryThing" 16 4 16 15
+                        , Types.Reference.make "UnaryThing" 13 31 13 41
                         ]
                     , external =
                         Dict.empty
-                            |> Dict.insert [ "Basics" ] [ Reference "toString" ]
-                            |> Dict.insert [ "Json", "Encode" ] [ Reference "Value", Reference "Value", Reference "encodeValue" ]
+                            |> Dict.insert [ "Basics" ]
+                                [ Types.Reference.make "toString" 26 4 26 12 ]
+                            |> Dict.insert [ "Json", "Encode" ]
+                                [ Types.Reference.make "Value" 43 22 43 28
+                                , Types.Reference.make "Value" 39 8 39 16
+                                , Types.Reference.make "encodeValue" 41 4 41 18
+                                ]
                     }
         ]
 

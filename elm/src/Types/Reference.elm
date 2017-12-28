@@ -1,22 +1,34 @@
-module Types.Reference exposing (Reference, decoder, default, encoder, listDecoder, listEncoder)
+module Types.Reference exposing (Reference, decoder, default, encoder, listDecoder, listEncoder, make)
 
-import Json.Decode as JD exposing (Decoder, field, list, map, string)
-import Json.Encode as JE exposing (Value, object, string)
+import Elm.Syntax.Range as Range exposing (Range, decode, emptyRange)
+import Json.Decode as JD exposing (Decoder)
+import Json.Encode as JE exposing (Value)
 
 
 type alias Reference =
-    { name : String }
+    { name : String
+    , range : Range
+    }
 
 
 default : Reference
 default =
-    { name = "" }
+    { name = "", range = emptyRange }
+
+
+make : String -> Int -> Int -> Int -> Int -> Reference
+make name startLine startColumn endLine endColumn =
+    Reference name
+        { start = { row = startLine, column = startColumn }
+        , end = { row = endLine, column = endColumn }
+        }
 
 
 encoder : Reference -> Value
 encoder reference =
-    object
+    JE.object
         [ ( "name", JE.string reference.name )
+        , ( "range", Range.encode reference.range )
         ]
 
 
@@ -27,10 +39,11 @@ listEncoder references =
 
 decoder : Decoder Reference
 decoder =
-    map Reference
-        (field "name" JD.string)
+    JD.map2 Reference
+        (JD.field "name" JD.string)
+        (JD.field "range" Range.decode)
 
 
 listDecoder : Decoder (List Reference)
 listDecoder =
-    list decoder
+    JD.list decoder

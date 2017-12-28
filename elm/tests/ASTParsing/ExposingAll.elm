@@ -55,10 +55,10 @@ canParseSimpleExposingAll =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "frangle"
-                        , Reference "blarg"
-                        , Reference "blargargle"
-                        , Reference "toString"
+                        [ Types.Reference.make "frangle" 16 21 16 28
+                        , Types.Reference.make "blarg" 16 15 16 20
+                        , Types.Reference.make "blargargle" 16 4 16 14
+                        , Types.Reference.make "toString" 12 4 12 12
                         ]
                     , external =
                         Dict.empty

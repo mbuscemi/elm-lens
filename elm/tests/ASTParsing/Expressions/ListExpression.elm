@@ -47,7 +47,10 @@ canParseFromList =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Reference "reference2", Reference "reference1" ]
+                    { internal =
+                        [ Types.Reference.make "reference2" 12 18 12 28
+                        , Types.Reference.make "reference1" 12 6 12 16
+                        ]
                     , external = Dict.empty
                     }
         ]

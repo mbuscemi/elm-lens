@@ -43,12 +43,21 @@ canParseProgram =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Reference "Message", Reference "Model", Reference "Program" ]
+                    { internal =
+                        [ Types.Reference.make "Message" 5 27 5 34
+                        , Types.Reference.make "Model" 5 21 5 34
+                        , Types.Reference.make "Program" 5 7 5 34
+                        ]
                     , external =
                         Dict.empty
-                            |> Dict.insert [ "Cmd" ] [ Reference "none", Reference "none" ]
-                            |> Dict.insert [ "Platform" ] [ Reference "program" ]
-                            |> Dict.insert [ "Sub" ] [ Reference "none" ]
+                            |> Dict.insert [ "Cmd" ]
+                                [ Types.Reference.make "none" 9 33 9 41
+                                , Types.Reference.make "none" 8 22 8 30
+                                ]
+                            |> Dict.insert [ "Platform" ]
+                                [ Types.Reference.make "program" 7 4 7 20 ]
+                            |> Dict.insert [ "Sub" ]
+                                [ Types.Reference.make "none" 10 26 10 34 ]
                     }
         ]
 
@@ -93,8 +102,13 @@ canParseTest =
                     { internal = []
                     , external =
                         Dict.empty
-                            |> Dict.insert [ "Expect" ] [ Reference "equal" ]
-                            |> Dict.insert [ "Test" ] [ Reference "Test", Reference "test", Reference "describe" ]
+                            |> Dict.insert [ "Expect" ]
+                                [ Types.Reference.make "equal" 11 20 11 32 ]
+                            |> Dict.insert [ "Test" ]
+                                [ Types.Reference.make "Test" 5 7 5 11
+                                , Types.Reference.make "test" 9 12 9 16
+                                , Types.Reference.make "describe" 7 4 7 12
+                                ]
                     }
         ]
 

@@ -71,7 +71,9 @@ reference =
             \_ ->
                 let
                     orig =
-                        Reference "blarg"
+                        Reference
+                            "blarg"
+                            { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
 
                     encoded =
                         Types.Reference.encoder orig
@@ -85,9 +87,9 @@ reference =
             \_ ->
                 let
                     orig =
-                        [ Reference "blarg"
-                        , Reference "frangle"
-                        , Reference "blargargle"
+                        [ Types.Reference.make "blarg" 1 2 3 4
+                        , Types.Reference.make "frangle" 5 6 7 8
+                        , Types.Reference.make "blargargle" 11 12 13 14
                         ]
 
                     encoded =
@@ -109,10 +111,18 @@ references =
                 let
                     orig =
                         References
-                            [ Reference "abc", Reference "def" ]
+                            [ Types.Reference.make "abc" 1 2 3 4
+                            , Types.Reference.make "def" 5 6 7 8
+                            ]
                             (Dict.empty
-                                |> Dict.insert [ "ab", "cd", "de" ] [ Reference "ghi", Reference "klm" ]
-                                |> Dict.insert [ "ed", "fg" ] [ Reference "no", Reference "pq" ]
+                                |> Dict.insert [ "ab", "cd", "de" ]
+                                    [ Types.Reference.make "ghi" 1 2 3 4
+                                    , Types.Reference.make "klm" 5 6 7 8
+                                    ]
+                                |> Dict.insert [ "ed", "fg" ]
+                                    [ Types.Reference.make "no" 1 2 3 4
+                                    , Types.Reference.make "pq" 5 6 7 8
+                                    ]
                             )
 
                     encoded =
@@ -146,10 +156,18 @@ report =
                                 (Set.singleton "mom")
                             )
                             (References
-                                [ Reference "dgsklh", Reference "sdfljk" ]
+                                [ Reference "dgsklh" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
+                                , Reference "sdfljk" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } }
+                                ]
                                 (Dict.empty
-                                    |> Dict.insert [ "fds", "xcv", "qwe" ] [ Reference "hj", Reference "io" ]
-                                    |> Dict.insert [ "gyu", "xsq" ] [ Reference "tuyi", Reference "fas" ]
+                                    |> Dict.insert [ "fds", "xcv", "qwe" ]
+                                        [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
+                                        , Reference "io" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } }
+                                        ]
+                                    |> Dict.insert [ "gyu", "xsq" ]
+                                        [ Reference "tuyi" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
+                                        , Reference "fas" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } }
+                                        ]
                                 )
                             )
 

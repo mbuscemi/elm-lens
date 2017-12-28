@@ -52,7 +52,7 @@ canParse =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "$$" ]
+                        [ Types.Reference.make "$$" 8 4 8 23 ]
                     , external =
                         Dict.empty
                     }

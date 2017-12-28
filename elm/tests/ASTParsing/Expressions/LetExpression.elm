@@ -49,10 +49,10 @@ canParseFromLet =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "reference2"
-                        , Reference "first"
-                        , Reference "reference1"
-                        , Reference "incremented"
+                        [ Types.Reference.make "reference2" 22 12 22 22
+                        , Types.Reference.make "first" 24 4 24 9
+                        , Types.Reference.make "reference1" 14 12 14 22
+                        , Types.Reference.make "incremented" 16 4 16 15
                         ]
                     , external = Dict.empty
                     }

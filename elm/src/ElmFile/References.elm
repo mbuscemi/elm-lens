@@ -4,6 +4,7 @@ import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
 import Elm.Syntax.File exposing (File)
 import Elm.Syntax.Pattern exposing (Pattern)
+import Elm.Syntax.Range as Range exposing (Range)
 import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.Type exposing (ValueConstructor)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
@@ -56,10 +57,10 @@ refsInExpression arguments imports expression references =
             List.foldl (refsInExpression arguments imports) references exps
 
         ( range, Elm.Syntax.Expression.OperatorApplication name _ exp1 exp2 ) ->
-            List.foldl (refsInExpression arguments imports) (addReference name arguments imports references) [ exp1, exp2 ]
+            List.foldl (refsInExpression arguments imports) (addReference name range arguments imports references) [ exp1, exp2 ]
 
         ( range, Elm.Syntax.Expression.FunctionOrValue name ) ->
-            addReference name arguments imports references
+            addReference name range arguments imports references
 
         ( range, Elm.Syntax.Expression.IfBlock exp1 exp2 exp3 ) ->
             List.foldl (refsInExpression arguments imports) references [ exp1, exp2, exp3 ]
@@ -104,7 +105,7 @@ refsInExpression arguments imports expression references =
             List.foldl (refsInExpression arguments imports) references exps
 
         ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
-            Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name) references
+            Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name range) references
 
         ( range, Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ) ->
             List.foldl (refsInExpression arguments imports) references (List.map Tuple.second recordUpdate.updates)
@@ -113,8 +114,8 @@ refsInExpression arguments imports expression references =
             references
 
 
-addReference : String -> Set String -> Imports -> References -> References
-addReference name arguments imports references =
+addReference : String -> Range -> Set String -> Imports -> References -> References
+addReference name range arguments imports references =
     case ( Set.member name arguments, Set.member name coreExpressions, Types.Imports.moduleNameForDirectEntry name imports ) of
         ( True, _, _ ) ->
             references
@@ -123,26 +124,26 @@ addReference name arguments imports references =
             references
 
         ( _, _, Just moduleName ) ->
-            Types.References.addExternal moduleName (Reference name) references
+            Types.References.addExternal moduleName (Reference name range) references
 
         _ ->
-            Types.References.addInternal (Reference name) references
+            Types.References.addInternal (Reference name range) references
 
 
-addTypeReference : String -> List String -> Imports -> References -> References
-addTypeReference name moduleName imports references =
+addTypeReference : String -> Range -> List String -> Imports -> References -> References
+addTypeReference name range moduleName imports references =
     case ( Set.member name coreExpressions, Types.Imports.moduleNameForDirectEntry name imports, moduleName ) of
         ( True, _, _ ) ->
             references
 
         ( _, Just externalModule, _ ) ->
-            Types.References.addExternal externalModule (Reference name) references
+            Types.References.addExternal externalModule (Reference name range) references
 
         ( _, _, [] ) ->
-            Types.References.addInternal (Reference name) references
+            Types.References.addInternal (Reference name range) references
 
         ( _, _, externalModule ) ->
-            Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name) references
+            Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name range) references
 
 
 coreExpressions : Set String
@@ -183,7 +184,7 @@ refsInTypeAnnotation : Imports -> Ranged TypeAnnotation -> References -> Referen
 refsInTypeAnnotation imports typeAnnotation references =
     case typeAnnotation of
         ( range, Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations ) ->
-            List.foldl (refsInTypeAnnotation imports) (addTypeReference name moduleName imports references) typeAnnotations
+            List.foldl (refsInTypeAnnotation imports) (addTypeReference name range moduleName imports references) typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
             List.foldl (refsInTypeAnnotation imports) references typeAnnotations
