@@ -58,3 +58,9 @@ unreferenced in other modules. Such functions are typically executed by a comman
 [Node Test Runner](https://github.com/rtfeldman/node-test-runner), or in Atom with
 [Elm Test Runner](https://github.com/mbuscemi/elm-test-runner). Elm Lens will hide reference information and show a special
 tag for any function with a type signature of `Test`.
+
+## Roadmap
+ 
+* 0.3.0 Display test references separately from internal/external
+* 0.2.0 Visualization of References
+* 0.1.0 Initial Release
