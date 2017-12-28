@@ -3,10 +3,12 @@ port module Main exposing (main)
 import And
 import And.FileMarkup
 import Dict exposing (Dict)
+import Html exposing (Html)
 import Json.Encode exposing (Value)
 import Model.ProjectFileData
 import Set exposing (Set)
 import Types.ProjectFileData exposing (ProjectFileData)
+import View
 
 
 type alias Model =
@@ -29,9 +31,10 @@ type Message
 
 main : Program Never Model Message
 main =
-    Platform.program
+    Html.program
         { init = init
         , update = update
+        , view = view
         , subscriptions = subscriptions
         }
 
@@ -71,6 +74,11 @@ update message model =
         MarkAsReprocessing filePath ->
             { model | fileBeingReprocessed = Just filePath }
                 |> And.FileMarkup.transmitTo filePath
+
+
+view : Model -> Html Message
+view model =
+    View.render
 
 
 subscriptions : Model -> Sub Message
