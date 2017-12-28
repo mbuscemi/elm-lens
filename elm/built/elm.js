@@ -14975,7 +14975,7 @@ var _user$project$ElmFile_References$letDeclarationExpressions = F2(
 			return {ctor: '::', _0: _p1._1._1, _1: expressions};
 		}
 	});
-var _user$project$ElmFile_References$coreTypes = _elm_lang$core$Set$fromList(
+var _user$project$ElmFile_References$coreExpressions = _elm_lang$core$Set$fromList(
 	{
 		ctor: '::',
 		_0: 'String',
@@ -15012,7 +15012,51 @@ var _user$project$ElmFile_References$coreTypes = _elm_lang$core$Set$fromList(
 												_1: {
 													ctor: '::',
 													_0: 'Never',
-													_1: {ctor: '[]'}
+													_1: {
+														ctor: '::',
+														_0: '+',
+														_1: {
+															ctor: '::',
+															_0: '-',
+															_1: {
+																ctor: '::',
+																_0: '*',
+																_1: {
+																	ctor: '::',
+																	_0: '/',
+																	_1: {
+																		ctor: '::',
+																		_0: '//',
+																		_1: {
+																			ctor: '::',
+																			_0: '==',
+																			_1: {
+																				ctor: '::',
+																				_0: '++',
+																				_1: {
+																					ctor: '::',
+																					_0: '<|',
+																					_1: {
+																						ctor: '::',
+																						_0: '|>',
+																						_1: {
+																							ctor: '::',
+																							_0: '<<',
+																							_1: {
+																								ctor: '::',
+																								_0: '>>',
+																								_1: {ctor: '[]'}
+																							}
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+															}
+														}
+													}
 												}
 											}
 										}
@@ -15029,7 +15073,7 @@ var _user$project$ElmFile_References$addTypeReference = F4(
 	function (name, moduleName, imports, references) {
 		var _p2 = {
 			ctor: '_Tuple3',
-			_0: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreTypes),
+			_0: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreExpressions),
 			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports),
 			_2: moduleName
 		};
@@ -15139,7 +15183,7 @@ var _user$project$ElmFile_References$addReference = F4(
 		var _p7 = {
 			ctor: '_Tuple3',
 			_0: A2(_elm_lang$core$Set$member, name, $arguments),
-			_1: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreTypes),
+			_1: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreExpressions),
 			_2: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports)
 		};
 		_v6_3:
@@ -15190,7 +15234,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 							return A3(
 								_elm_lang$core$List$foldl,
 								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
-								references,
+								A4(_user$project$ElmFile_References$addReference, _p8._1._0, $arguments, imports, references),
 								{
 									ctor: '::',
 									_0: _p8._1._2,

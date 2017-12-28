@@ -55,8 +55,8 @@ refsInExpression arguments imports expression references =
         ( range, Elm.Syntax.Expression.Application exps ) ->
             List.foldl (refsInExpression arguments imports) references exps
 
-        ( range, Elm.Syntax.Expression.OperatorApplication _ _ exp1 exp2 ) ->
-            List.foldl (refsInExpression arguments imports) references [ exp1, exp2 ]
+        ( range, Elm.Syntax.Expression.OperatorApplication name _ exp1 exp2 ) ->
+            List.foldl (refsInExpression arguments imports) (addReference name arguments imports references) [ exp1, exp2 ]
 
         ( range, Elm.Syntax.Expression.FunctionOrValue name ) ->
             addReference name arguments imports references
@@ -115,7 +115,7 @@ refsInExpression arguments imports expression references =
 
 addReference : String -> Set String -> Imports -> References -> References
 addReference name arguments imports references =
-    case ( Set.member name arguments, Set.member name coreTypes, Types.Imports.moduleNameForDirectEntry name imports ) of
+    case ( Set.member name arguments, Set.member name coreExpressions, Types.Imports.moduleNameForDirectEntry name imports ) of
         ( True, _, _ ) ->
             references
 
@@ -131,7 +131,7 @@ addReference name arguments imports references =
 
 addTypeReference : String -> List String -> Imports -> References -> References
 addTypeReference name moduleName imports references =
-    case ( Set.member name coreTypes, Types.Imports.moduleNameForDirectEntry name imports, moduleName ) of
+    case ( Set.member name coreExpressions, Types.Imports.moduleNameForDirectEntry name imports, moduleName ) of
         ( True, _, _ ) ->
             references
 
@@ -145,9 +145,33 @@ addTypeReference name moduleName imports references =
             Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name) references
 
 
-coreTypes : Set String
-coreTypes =
-    Set.fromList [ "String", "Int", "Float", "Bool", "True", "False", "Char", "List", "Set", "Dict", "Task", "Never" ]
+coreExpressions : Set String
+coreExpressions =
+    Set.fromList
+        [ "String"
+        , "Int"
+        , "Float"
+        , "Bool"
+        , "True"
+        , "False"
+        , "Char"
+        , "List"
+        , "Set"
+        , "Dict"
+        , "Task"
+        , "Never"
+        , "+"
+        , "-"
+        , "*"
+        , "/"
+        , "//"
+        , "=="
+        , "++"
+        , "<|"
+        , "|>"
+        , "<<"
+        , ">>"
+        ]
 
 
 refsInValueConstructor : Imports -> ValueConstructor -> References -> References

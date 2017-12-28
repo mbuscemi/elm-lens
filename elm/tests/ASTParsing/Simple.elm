@@ -47,9 +47,8 @@ canParseSimple =
                             |> Dict.insert "frangle" (Types.Expression.standardExpression 21)
                             |> Dict.insert "blargargle" (Types.Expression.standardExpression 24)
                             |> Dict.insert "toStringCanMakeNumberText" (Types.Expression.standardExpression 28)
-                            |> Dict.insert "$$" (Types.Expression.standardExpression 32)
-                            |> Dict.insert "tupled" (Types.Expression.standardExpression 38)
-                            |> Dict.insert "value" (Types.Expression.standardExpression 45)
+                            |> Dict.insert "tupled" (Types.Expression.standardExpression 32)
+                            |> Dict.insert "value" (Types.Expression.standardExpression 39)
                     , types =
                         Dict.empty
                             |> Dict.insert "UnaryThing" (Types.Expression.standardExpression 9)
@@ -63,7 +62,6 @@ canParseSimple =
                 Expect.equal elmFile.exposings
                     { functions =
                         Set.empty
-                            |> Set.insert "$$"
                             |> Set.insert "blarg"
                             |> Set.insert "frangle"
                     , types =
@@ -98,7 +96,7 @@ canParseSimple =
 
 simpleDotElm : String
 simpleDotElm =
-    """module Simple exposing (blarg, frangle, UnaryThing, BinaryThing(One, Another), Other, ($$))
+    """module Simple exposing (blarg, frangle, UnaryThing, BinaryThing(One, Another), Other)
 
 import Basics exposing ((==), toString)
 import Dict exposing (Dict, empty)
@@ -129,12 +127,6 @@ blargargle num text =
 toStringCanMakeNumberText : Bool
 toStringCanMakeNumberText =
     blargargle blarg frangle
-
-($$) : String -> String -> String
-($$) a b =
-    a ++ " $$ " ++ b
-
-infix 9 $$
 
 tupled : (UnaryThing, BinaryThing)
 tupled =
