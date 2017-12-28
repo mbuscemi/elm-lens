@@ -8,6 +8,7 @@ import Json.Encode exposing (Value)
 import Model.ProjectFileData
 import Set exposing (Set)
 import Types.ProjectFileData exposing (ProjectFileData)
+import Types.ReferencePanelState exposing (ReferencePanelState)
 import View
 
 
@@ -18,6 +19,7 @@ type alias Model =
     , lastUpdatedFile : Maybe String
     , fileBeingReprocessed : Maybe String
     , batchUpdateSent : Bool
+    , referencePanelState : ReferencePanelState
     }
 
 
@@ -27,6 +29,7 @@ type Message
     | UnregisterTextEditor String
     | AddFileData Value
     | MarkAsReprocessing String
+    | SetReferencePanel ( String, String )
 
 
 main : Program Never Model Message
@@ -47,6 +50,7 @@ init =
     , lastUpdatedFile = Nothing
     , fileBeingReprocessed = Nothing
     , batchUpdateSent = False
+    , referencePanelState = Nothing
     }
         |> And.doNothing
 
@@ -75,10 +79,15 @@ update message model =
             { model | fileBeingReprocessed = Just filePath }
                 |> And.FileMarkup.transmitTo filePath
 
+        SetReferencePanel ( fileName, expressionName ) ->
+            { model | referencePanelState = Types.ReferencePanelState.make fileName expressionName }
+                |> And.doNothing
+
 
 view : Model -> Html Message
 view model =
     View.render
+        { referencePanelState = model.referencePanelState }
 
 
 subscriptions : Model -> Sub Message
@@ -89,6 +98,7 @@ subscriptions model =
         , unregisterTextEditor UnregisterTextEditor
         , processReport AddFileData
         , notifyReprocessingFile MarkAsReprocessing
+        , setReferencePanel SetReferencePanel
         ]
 
 
@@ -105,3 +115,6 @@ port unregisterTextEditor : (String -> message) -> Sub message
 
 
 port processReport : (Value -> message) -> Sub message
+
+
+port setReferencePanel : (( String, String ) -> message) -> Sub message

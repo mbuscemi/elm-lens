@@ -17613,13 +17613,69 @@ var _user$project$Model_ProjectFileData$add = F2(
 			model);
 	});
 
-var _user$project$View$render = A2(
-	_elm_lang$html$Html$div,
-	{ctor: '[]'},
-	{ctor: '[]'});
+var _user$project$Types_ReferencePanelState$Data = F2(
+	function (a, b) {
+		return {fileName: a, expressionName: b};
+	});
+var _user$project$Types_ReferencePanelState$make = F2(
+	function (fileName, expressionName) {
+		return _elm_lang$core$Maybe$Just(
+			A2(_user$project$Types_ReferencePanelState$Data, fileName, expressionName));
+	});
+
+var _user$project$View$render = function (data) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: function () {
+				var _p0 = data.referencePanelState;
+				if (_p0.ctor === 'Just') {
+					var _p1 = _p0._0;
+					return A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(_p1.fileName),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(_p1.expressionName),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						});
+				} else {
+					return A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{ctor: '[]'});
+				}
+			}(),
+			_1: {ctor: '[]'}
+		});
+};
+var _user$project$View$Data = function (a) {
+	return {referencePanelState: a};
+};
 
 var _user$project$Main$view = function (model) {
-	return _user$project$View$render;
+	return _user$project$View$render(
+		{referencePanelState: model.referencePanelState});
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
@@ -17649,7 +17705,7 @@ var _user$project$Main$update = F2(
 			case 'AddFileData':
 				return _user$project$And_FileMarkup$transmit(
 					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
-			default:
+			case 'MarkAsReprocessing':
 				var _p1 = _p0._0;
 				return A2(
 					_user$project$And_FileMarkup$transmitTo,
@@ -17659,10 +17715,17 @@ var _user$project$Main$update = F2(
 						{
 							fileBeingReprocessed: _elm_lang$core$Maybe$Just(_p1)
 						}));
+			default:
+				return _user$project$And$doNothing(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							referencePanelState: A2(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1)
+						}));
 		}
 	});
 var _user$project$Main$init = _user$project$And$doNothing(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false});
+	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false, referencePanelState: _elm_lang$core$Maybe$Nothing});
 var _user$project$Main$notifyReprocessingFile = _elm_lang$core$Native_Platform.incomingPort('notifyReprocessingFile', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
@@ -17670,10 +17733,27 @@ var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.inc
 var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d, fileBeingReprocessed: e, batchUpdateSent: f};
+var _user$project$Main$setReferencePanel = _elm_lang$core$Native_Platform.incomingPort(
+	'setReferencePanel',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (x0) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (x1) {
+					return _elm_lang$core$Json_Decode$succeed(
+						{ctor: '_Tuple2', _0: x0, _1: x1});
+				},
+				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
+		},
+		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
+var _user$project$Main$Model = F7(
+	function (a, b, c, d, e, f, g) {
+		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d, fileBeingReprocessed: e, batchUpdateSent: f, referencePanelState: g};
 	});
+var _user$project$Main$SetReferencePanel = function (a) {
+	return {ctor: 'SetReferencePanel', _0: a};
+};
 var _user$project$Main$MarkAsReprocessing = function (a) {
 	return {ctor: 'MarkAsReprocessing', _0: a};
 };
@@ -17706,7 +17786,11 @@ var _user$project$Main$subscriptions = function (model) {
 						_1: {
 							ctor: '::',
 							_0: _user$project$Main$notifyReprocessingFile(_user$project$Main$MarkAsReprocessing),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: _user$project$Main$setReferencePanel(_user$project$Main$SetReferencePanel),
+								_1: {ctor: '[]'}
+							}
 						}
 					}
 				}
