@@ -46,7 +46,7 @@ decoder : Decoder Report
 decoder =
     JD.map5 Report
         (JD.field "fileName" JD.string)
-        (JD.field "moduleName" (JD.list JD.string))
+        (JD.field "moduleName" <| JD.list JD.string)
         (JD.field "topLevelExpressions" Types.TopLevelExpressions.decoder)
         (JD.field "exposings" Types.Exposings.decoder)
         (JD.field "references" Types.References.decoder)

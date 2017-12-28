@@ -29,7 +29,7 @@ type Message
     | UnregisterTextEditor String
     | AddFileData Value
     | MarkAsReprocessing String
-    | SetReferencePanel ( String, String )
+    | SetReferencePanel ( String, String, Bool )
 
 
 main : Program Never Model Message
@@ -79,15 +79,17 @@ update message model =
             { model | fileBeingReprocessed = Just filePath }
                 |> And.FileMarkup.transmitTo filePath
 
-        SetReferencePanel ( fileName, expressionName ) ->
-            { model | referencePanelState = Types.ReferencePanelState.make fileName expressionName }
+        SetReferencePanel ( fileName, expressionName, isExternal ) ->
+            { model | referencePanelState = Types.ReferencePanelState.make fileName expressionName isExternal }
                 |> And.doNothing
 
 
 view : Model -> Html Message
 view model =
     View.render
-        { referencePanelState = model.referencePanelState }
+        { referencePanelState = model.referencePanelState
+        , projectFileData = model.projectFileData
+        }
 
 
 subscriptions : Model -> Sub Message
@@ -117,4 +119,4 @@ port unregisterTextEditor : (String -> message) -> Sub message
 port processReport : (Value -> message) -> Sub message
 
 
-port setReferencePanel : (( String, String ) -> message) -> Sub message
+port setReferencePanel : (( String, String, Bool ) -> message) -> Sub message

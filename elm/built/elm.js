@@ -17633,14 +17633,31 @@ var _user$project$Model_ProjectFileData$add = F2(
 			model);
 	});
 
-var _user$project$Types_ReferencePanelState$Data = F2(
-	function (a, b) {
-		return {fileName: a, expressionName: b};
+var _user$project$Types_ReferencePanelState$type_ = function (data) {
+	var _p0 = data.type_;
+	if (_p0.ctor === 'Internal') {
+		return 'internal';
+	} else {
+		return 'external';
+	}
+};
+var _user$project$Types_ReferencePanelState$Data = F3(
+	function (a, b, c) {
+		return {fileName: a, expressionName: b, type_: c};
 	});
-var _user$project$Types_ReferencePanelState$make = F2(
-	function (fileName, expressionName) {
+var _user$project$Types_ReferencePanelState$External = {ctor: 'External'};
+var _user$project$Types_ReferencePanelState$Internal = {ctor: 'Internal'};
+var _user$project$Types_ReferencePanelState$toType = function (isExternal) {
+	return isExternal ? _user$project$Types_ReferencePanelState$External : _user$project$Types_ReferencePanelState$Internal;
+};
+var _user$project$Types_ReferencePanelState$make = F3(
+	function (fileName, expressionName, isExternal) {
 		return _elm_lang$core$Maybe$Just(
-			A2(_user$project$Types_ReferencePanelState$Data, fileName, expressionName));
+			A3(
+				_user$project$Types_ReferencePanelState$Data,
+				fileName,
+				expressionName,
+				_user$project$Types_ReferencePanelState$toType(isExternal)));
 	});
 
 var _user$project$View$render = function (data) {
@@ -17676,7 +17693,19 @@ var _user$project$View$render = function (data) {
 										_0: _elm_lang$html$Html$text(_p1.expressionName),
 										_1: {ctor: '[]'}
 									}),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(
+												_user$project$Types_ReferencePanelState$type_(_p1)),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
 						});
 				} else {
@@ -17689,13 +17718,14 @@ var _user$project$View$render = function (data) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$View$Data = function (a) {
-	return {referencePanelState: a};
-};
+var _user$project$View$Data = F2(
+	function (a, b) {
+		return {referencePanelState: a, projectFileData: b};
+	});
 
 var _user$project$Main$view = function (model) {
 	return _user$project$View$render(
-		{referencePanelState: model.referencePanelState});
+		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData});
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
@@ -17740,7 +17770,7 @@ var _user$project$Main$update = F2(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
-							referencePanelState: A2(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1)
+							referencePanelState: A3(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1, _p0._0._2)
 						}));
 		}
 	});
@@ -17761,8 +17791,13 @@ var _user$project$Main$setReferencePanel = _elm_lang$core$Native_Platform.incomi
 			return A2(
 				_elm_lang$core$Json_Decode$andThen,
 				function (x1) {
-					return _elm_lang$core$Json_Decode$succeed(
-						{ctor: '_Tuple2', _0: x0, _1: x1});
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (x2) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{ctor: '_Tuple3', _0: x0, _1: x1, _2: x2});
+						},
+						A2(_elm_lang$core$Json_Decode$index, 2, _elm_lang$core$Json_Decode$bool));
 				},
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
