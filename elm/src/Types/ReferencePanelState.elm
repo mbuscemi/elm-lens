@@ -1,4 +1,4 @@
-module Types.ReferencePanelState exposing (ReferencePanelState, make, type_)
+module Types.ReferencePanelState exposing (Data, ReferencePanelState, Type(External, Internal), make)
 
 
 type alias ReferencePanelState =
@@ -28,13 +28,3 @@ toType isExternal =
         External
     else
         Internal
-
-
-type_ : Data -> String
-type_ data =
-    case data.type_ of
-        Internal ->
-            "internal"
-
-        External ->
-            "external"

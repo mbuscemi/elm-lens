@@ -17633,14 +17633,6 @@ var _user$project$Model_ProjectFileData$add = F2(
 			model);
 	});
 
-var _user$project$Types_ReferencePanelState$type_ = function (data) {
-	var _p0 = data.type_;
-	if (_p0.ctor === 'Internal') {
-		return 'internal';
-	} else {
-		return 'external';
-	}
-};
 var _user$project$Types_ReferencePanelState$Data = F3(
 	function (a, b, c) {
 		return {fileName: a, expressionName: b, type_: c};
@@ -17660,6 +17652,139 @@ var _user$project$Types_ReferencePanelState$make = F3(
 				_user$project$Types_ReferencePanelState$toType(isExternal)));
 	});
 
+var _user$project$View$referenceRow = F2(
+	function (fileName, reference) {
+		return A2(
+			_elm_lang$html$Html$tr,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$td,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(fileName),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$td,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(
+								_elm_lang$core$Basics$toString(reference.range.start.row)),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$td,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(''),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	});
+var _user$project$View$referenceTable = F2(
+	function (referencePanelData, projectFileData) {
+		return A2(
+			_elm_lang$html$Html$table,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$thead,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$tr,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$th,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('File'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$th,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Line #'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$th,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Code'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$tbody,
+						{ctor: '[]'},
+						function () {
+							var _p0 = referencePanelData.type_;
+							if (_p0.ctor === 'Internal') {
+								return A2(
+									_elm_lang$core$List$map,
+									_user$project$View$referenceRow(referencePanelData.fileName),
+									A2(
+										_elm_lang$core$List$filter,
+										function (ref) {
+											return _elm_lang$core$Native_Utils.eq(ref.name, referencePanelData.expressionName);
+										},
+										function (_) {
+											return _.internal;
+										}(
+											function (_) {
+												return _.references;
+											}(
+												A2(
+													_elm_lang$core$Maybe$withDefault,
+													_user$project$Types_FileData$default,
+													A2(_elm_lang$core$Dict$get, referencePanelData.fileName, projectFileData))))));
+							} else {
+								return {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$tr,
+										{ctor: '[]'},
+										{ctor: '[]'}),
+									_1: {ctor: '[]'}
+								};
+							}
+						}()),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
 var _user$project$View$render = function (data) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -17667,46 +17792,15 @@ var _user$project$View$render = function (data) {
 		{
 			ctor: '::',
 			_0: function () {
-				var _p0 = data.referencePanelState;
-				if (_p0.ctor === 'Just') {
-					var _p1 = _p0._0;
+				var _p1 = data.referencePanelState;
+				if (_p1.ctor === 'Just') {
 					return A2(
 						_elm_lang$html$Html$div,
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(_p1.fileName),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{ctor: '[]'},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text(_p1.expressionName),
-										_1: {ctor: '[]'}
-									}),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(
-												_user$project$Types_ReferencePanelState$type_(_p1)),
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}
-							}
+							_0: A2(_user$project$View$referenceTable, _p1._0, data.projectFileData),
+							_1: {ctor: '[]'}
 						});
 				} else {
 					return A2(
