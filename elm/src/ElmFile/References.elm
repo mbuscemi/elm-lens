@@ -106,6 +106,9 @@ refsInExpression arguments imports expression references =
         ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
             Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name) references
 
+        ( range, Elm.Syntax.Expression.RecordAccess exp _ ) ->
+            refsInExpression arguments imports exp references
+
         ( range, Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ) ->
             List.foldl (refsInExpression arguments imports) references (List.map Tuple.second recordUpdate.updates)
 

@@ -15220,7 +15220,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 		refsInExpression:
 		while (true) {
 			var _p8 = expression;
-			_v7_14:
+			_v7_15:
 			do {
 				if (_p8.ctor === '_Tuple2') {
 					switch (_p8._1.ctor) {
@@ -15351,6 +15351,16 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 								A2(_user$project$Types_Imports$unaliasedModuleName, _p8._1._0, imports),
 								_user$project$Types_Reference$Reference(_p8._1._1),
 								references);
+						case 'RecordAccess':
+							var _v20 = $arguments,
+								_v21 = imports,
+								_v22 = _p8._1._0,
+								_v23 = references;
+							$arguments = _v20;
+							imports = _v21;
+							expression = _v22;
+							references = _v23;
+							continue refsInExpression;
 						case 'RecordUpdateExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
@@ -15358,10 +15368,10 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 								references,
 								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p8._1._0.updates));
 						default:
-							break _v7_14;
+							break _v7_15;
 					}
 				} else {
-					break _v7_14;
+					break _v7_15;
 				}
 			} while(false);
 			return references;
@@ -15370,7 +15380,7 @@ var _user$project$ElmFile_References$refsInExpression = F4(
 var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 	function (imports, declaration, references) {
 		var _p12 = declaration;
-		_v20_5:
+		_v24_5:
 		do {
 			if (_p12.ctor === '_Tuple2') {
 				switch (_p12._1.ctor) {
@@ -15397,10 +15407,10 @@ var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
 					case 'Destructuring':
 						return A4(_user$project$ElmFile_References$refsInExpression, _elm_lang$core$Set$empty, imports, _p12._1._1, references);
 					default:
-						break _v20_5;
+						break _v24_5;
 				}
 			} else {
-				break _v20_5;
+				break _v24_5;
 			}
 		} while(false);
 		return references;
