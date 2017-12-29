@@ -61,7 +61,10 @@ tag for any function with a type signature of `Test`.
 
 ## Roadmap
 
-* 0.4.0 Differentiate Test References
-* 0.3.0 Handle Zero-Reference Exposed Functions in `exposed-modules`
+* 0.5.0 Differentiate Test References
+* 0.4.0 Handle Zero-Reference Exposed Functions in `exposed-modules`
+  * Functions that are exposed and unreferenced in modules listed in `exposed-modules` should be handled differently.
+* 0.3.0 Configurability Upgrade
+  * Will be able to toggle off parts of the metadata or entire metadata via command keys and plugin options.
 * 0.2.0 Visualization of References
-* 0.1.0 Initial Release
+* ~0.1.0 Initial Release~
