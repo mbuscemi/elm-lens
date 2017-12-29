@@ -40,22 +40,24 @@
     color: @warning-color;
 }
 
+.elm-lens {
+    padding: 0 5px;
+}
+
 .elm-lens table {
     width: 100%;
-    margin: 5px;
+    margin: 5px 0;
 }
 
-.elm-lens table thead {
-    border-bottom-width: 1px;
-    border-bottom-color: black;
-}
-
-.elm-lens table tr {
-    margin: 2px 0;
-    border-color: black;
+.elm-lens table td,
+.elm-lens table th {
+    padding: 3px 5px;
     border-width: 1px 0;
+    border-color: @tool-panel-border-color;
+    border-style: solid;
 }
 
-.elm-lens table td {
-    padding: 0 5px;
+.elm-lens table th {
+    background-color: @inset-panel-background-color;
+    border-bottom-width: 2px;
 }
