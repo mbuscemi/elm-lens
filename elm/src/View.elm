@@ -2,6 +2,7 @@ module View exposing (render)
 
 import Dict
 import Html exposing (Html, div, table, tbody, td, text, th, thead, tr)
+import Set exposing (Set)
 import Types.FileData
 import Types.ProjectFileData exposing (ProjectFileData)
 import Types.Reference exposing (Reference)
@@ -11,6 +12,7 @@ import Types.ReferencePanelState exposing (ReferencePanelState)
 type alias Data =
     { referencePanelState : ReferencePanelState
     , projectFileData : ProjectFileData
+    , projectPathRegistry : Set String
     }
 
 
@@ -20,7 +22,7 @@ render data =
         [ case data.referencePanelState of
             Just referencePanelState ->
                 div []
-                    [ referenceTable referencePanelState data.projectFileData
+                    [ referenceTable referencePanelState data.projectFileData data.projectPathRegistry
                     ]
 
             Nothing ->
@@ -28,8 +30,8 @@ render data =
         ]
 
 
-referenceTable : Types.ReferencePanelState.Data -> ProjectFileData -> Html message
-referenceTable referencePanelData projectFileData =
+referenceTable : Types.ReferencePanelState.Data -> ProjectFileData -> Set String -> Html message
+referenceTable referencePanelData projectFileData projectPathRegistry =
     table []
         [ thead []
             [ tr []
@@ -46,12 +48,25 @@ referenceTable referencePanelData projectFileData =
                         |> .references
                         |> .internal
                         |> List.filter (\ref -> ref.name == referencePanelData.expressionName)
-                        |> List.map (referenceRow referencePanelData.fileName)
+                        |> List.map (referenceRow <| truncatedFileName referencePanelData.fileName projectPathRegistry)
 
                 _ ->
                     [ tr [] [] ]
             )
         ]
+
+
+truncatedFileName : String -> Set String -> String
+truncatedFileName fileName projectPathRegistry =
+    Set.foldl
+        (\projectPath fileName ->
+            if String.contains projectPath fileName then
+                String.dropLeft (String.length projectPath) fileName
+            else
+                fileName
+        )
+        fileName
+        projectPathRegistry
 
 
 referenceRow : String -> Reference -> Html message

@@ -15,6 +15,7 @@ import View
 type alias Model =
     { projectFileData : ProjectFileData
     , projectFileRegistry : Set String
+    , projectPathRegistry : Set String
     , activeTextEditors : Set String
     , lastUpdatedFile : Maybe String
     , fileBeingReprocessed : Maybe String
@@ -25,6 +26,7 @@ type alias Model =
 
 type Message
     = RegisterProjectFiles (List String)
+    | RegisterProjectPaths (List String)
     | RegisterTextEditor String
     | UnregisterTextEditor String
     | AddFileData Value
@@ -46,6 +48,7 @@ init : ( Model, Cmd Message )
 init =
     { projectFileData = Dict.empty
     , projectFileRegistry = Set.empty
+    , projectPathRegistry = Set.empty
     , activeTextEditors = Set.empty
     , lastUpdatedFile = Nothing
     , fileBeingReprocessed = Nothing
@@ -60,6 +63,10 @@ update message model =
     case message of
         RegisterProjectFiles filePaths ->
             { model | projectFileRegistry = Set.fromList filePaths }
+                |> And.doNothing
+
+        RegisterProjectPaths projectPaths ->
+            { model | projectPathRegistry = Set.fromList projectPaths }
                 |> And.doNothing
 
         RegisterTextEditor filePath ->
@@ -89,6 +96,7 @@ view model =
     View.render
         { referencePanelState = model.referencePanelState
         , projectFileData = model.projectFileData
+        , projectPathRegistry = model.projectPathRegistry
         }
 
 
@@ -96,6 +104,7 @@ subscriptions : Model -> Sub Message
 subscriptions model =
     Sub.batch
         [ registerProjectFiles RegisterProjectFiles
+        , registerProjectPaths RegisterProjectPaths
         , registerTextEditor RegisterTextEditor
         , unregisterTextEditor UnregisterTextEditor
         , processReport AddFileData
@@ -108,6 +117,9 @@ port notifyReprocessingFile : (String -> message) -> Sub message
 
 
 port registerProjectFiles : (List String -> message) -> Sub message
+
+
+port registerProjectPaths : (List String -> message) -> Sub message
 
 
 port registerTextEditor : (String -> message) -> Sub message

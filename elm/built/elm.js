@@ -17703,8 +17703,22 @@ var _user$project$View$referenceRow = F2(
 				}
 			});
 	});
-var _user$project$View$referenceTable = F2(
-	function (referencePanelData, projectFileData) {
+var _user$project$View$truncatedFileName = F2(
+	function (fileName, projectPathRegistry) {
+		return A3(
+			_elm_lang$core$Set$foldl,
+			F2(
+				function (projectPath, fileName) {
+					return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
+						_elm_lang$core$String$dropLeft,
+						_elm_lang$core$String$length(projectPath),
+						fileName) : fileName;
+				}),
+			fileName,
+			projectPathRegistry);
+	});
+var _user$project$View$referenceTable = F3(
+	function (referencePanelData, projectFileData, projectPathRegistry) {
 		return A2(
 			_elm_lang$html$Html$table,
 			{ctor: '[]'},
@@ -17764,7 +17778,8 @@ var _user$project$View$referenceTable = F2(
 							if (_p0.ctor === 'Internal') {
 								return A2(
 									_elm_lang$core$List$map,
-									_user$project$View$referenceRow(referencePanelData.fileName),
+									_user$project$View$referenceRow(
+										A2(_user$project$View$truncatedFileName, referencePanelData.fileName, projectPathRegistry)),
 									A2(
 										_elm_lang$core$List$filter,
 										function (ref) {
@@ -17809,7 +17824,7 @@ var _user$project$View$render = function (data) {
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: A2(_user$project$View$referenceTable, _p1._0, data.projectFileData),
+							_0: A3(_user$project$View$referenceTable, _p1._0, data.projectFileData, data.projectPathRegistry),
 							_1: {ctor: '[]'}
 						});
 				} else {
@@ -17822,14 +17837,14 @@ var _user$project$View$render = function (data) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$View$Data = F2(
-	function (a, b) {
-		return {referencePanelState: a, projectFileData: b};
+var _user$project$View$Data = F3(
+	function (a, b, c) {
+		return {referencePanelState: a, projectFileData: b, projectPathRegistry: c};
 	});
 
 var _user$project$Main$view = function (model) {
 	return _user$project$View$render(
-		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData});
+		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData, projectPathRegistry: model.projectPathRegistry});
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
@@ -17841,6 +17856,13 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							projectFileRegistry: _elm_lang$core$Set$fromList(_p0._0)
+						}));
+			case 'RegisterProjectPaths':
+				return _user$project$And$doNothing(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							projectPathRegistry: _elm_lang$core$Set$fromList(_p0._0)
 						}));
 			case 'RegisterTextEditor':
 				return _user$project$And$doNothing(
@@ -17879,10 +17901,13 @@ var _user$project$Main$update = F2(
 		}
 	});
 var _user$project$Main$init = _user$project$And$doNothing(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false, referencePanelState: _elm_lang$core$Maybe$Nothing});
+	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, projectPathRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false, referencePanelState: _elm_lang$core$Maybe$Nothing});
 var _user$project$Main$notifyReprocessingFile = _elm_lang$core$Native_Platform.incomingPort('notifyReprocessingFile', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
+	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
+var _user$project$Main$registerProjectPaths = _elm_lang$core$Native_Platform.incomingPort(
+	'registerProjectPaths',
 	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
 var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
@@ -17906,9 +17931,9 @@ var _user$project$Main$setReferencePanel = _elm_lang$core$Native_Platform.incomi
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Main$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d, fileBeingReprocessed: e, batchUpdateSent: f, referencePanelState: g};
+var _user$project$Main$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {projectFileData: a, projectFileRegistry: b, projectPathRegistry: c, activeTextEditors: d, lastUpdatedFile: e, fileBeingReprocessed: f, batchUpdateSent: g, referencePanelState: h};
 	});
 var _user$project$Main$SetReferencePanel = function (a) {
 	return {ctor: 'SetReferencePanel', _0: a};
@@ -17925,6 +17950,9 @@ var _user$project$Main$UnregisterTextEditor = function (a) {
 var _user$project$Main$RegisterTextEditor = function (a) {
 	return {ctor: 'RegisterTextEditor', _0: a};
 };
+var _user$project$Main$RegisterProjectPaths = function (a) {
+	return {ctor: 'RegisterProjectPaths', _0: a};
+};
 var _user$project$Main$RegisterProjectFiles = function (a) {
 	return {ctor: 'RegisterProjectFiles', _0: a};
 };
@@ -17935,20 +17963,24 @@ var _user$project$Main$subscriptions = function (model) {
 			_0: _user$project$Main$registerProjectFiles(_user$project$Main$RegisterProjectFiles),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$registerTextEditor(_user$project$Main$RegisterTextEditor),
+				_0: _user$project$Main$registerProjectPaths(_user$project$Main$RegisterProjectPaths),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Main$unregisterTextEditor(_user$project$Main$UnregisterTextEditor),
+					_0: _user$project$Main$registerTextEditor(_user$project$Main$RegisterTextEditor),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
+						_0: _user$project$Main$unregisterTextEditor(_user$project$Main$UnregisterTextEditor),
 						_1: {
 							ctor: '::',
-							_0: _user$project$Main$notifyReprocessingFile(_user$project$Main$MarkAsReprocessing),
+							_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
 							_1: {
 								ctor: '::',
-								_0: _user$project$Main$setReferencePanel(_user$project$Main$SetReferencePanel),
-								_1: {ctor: '[]'}
+								_0: _user$project$Main$notifyReprocessingFile(_user$project$Main$MarkAsReprocessing),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Main$setReferencePanel(_user$project$Main$SetReferencePanel),
+									_1: {ctor: '[]'}
+								}
 							}
 						}
 					}
