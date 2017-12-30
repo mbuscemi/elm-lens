@@ -1,4 +1,4 @@
-module Types.ReferencePanelState exposing (Data, ReferencePanelState, Type(External, Internal), make)
+module Types.ReferencePanelState exposing (ReferencePanelState, Type(External, Internal), fileName, make)
 
 
 type alias ReferencePanelState =
@@ -20,6 +20,16 @@ type alias Data =
 make : String -> String -> Bool -> ReferencePanelState
 make fileName expressionName isExternal =
     Just <| Data fileName expressionName (toType isExternal)
+
+
+fileName : ReferencePanelState -> String
+fileName referencePanelState =
+    case referencePanelState of
+        Just data ->
+            data.fileName
+
+        Nothing ->
+            ""
 
 
 toType : Bool -> Type

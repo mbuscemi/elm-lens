@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import And
+import And.FileLines
 import And.FileMarkup
 import Dict exposing (Dict)
 import Html exposing (Html)
@@ -88,7 +89,7 @@ update message model =
 
         SetReferencePanel ( fileName, expressionName, isExternal ) ->
             { model | referencePanelState = Types.ReferencePanelState.make fileName expressionName isExternal }
-                |> And.doNothing
+                |> And.FileLines.request
 
 
 view : Model -> Html Message

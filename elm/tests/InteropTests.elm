@@ -1,4 +1,4 @@
-module InteropTests exposing (exposings, imports, reference, references, report, topLevelExpressions)
+module InteropTests exposing (exposings, fileLineRequest, imports, reference, references, report, topLevelExpressions)
 
 import Dict
 import Expect
@@ -7,6 +7,7 @@ import Set
 import Test exposing (Test, describe, test)
 import Types.Exposings exposing (Exposings)
 import Types.Expression exposing (Expression)
+import Types.FileLineRequest
 import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
 import Types.References exposing (References)
@@ -200,6 +201,28 @@ topLevelExpressions =
                     decoded =
                         decodeValue Types.TopLevelExpressions.decoder encoded
                             |> Result.withDefault Types.TopLevelExpressions.default
+                in
+                Expect.equal decoded orig
+        ]
+
+
+fileLineRequest : Test
+fileLineRequest =
+    describe "FileLineRequest" <|
+        [ test "can encode and decode" <|
+            \_ ->
+                let
+                    orig =
+                        Dict.empty
+                            |> Dict.insert "a" (Set.fromList [ 1, 2, 3 ])
+                            |> Dict.insert "b" (Set.fromList [ 4 ])
+
+                    encoded =
+                        Types.FileLineRequest.encoder orig
+
+                    decoded =
+                        decodeValue Types.FileLineRequest.decoder encoded
+                            |> Result.withDefault Types.FileLineRequest.default
                 in
                 Expect.equal decoded orig
         ]

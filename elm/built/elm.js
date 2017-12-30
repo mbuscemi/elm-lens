@@ -16554,6 +16554,132 @@ var _user$project$Types_ProjectFileData$insert = F2(
 			projectFileData);
 	});
 
+var _user$project$Types_ReferencePanelState$fileName = function (referencePanelState) {
+	var _p0 = referencePanelState;
+	if (_p0.ctor === 'Just') {
+		return _p0._0.fileName;
+	} else {
+		return '';
+	}
+};
+var _user$project$Types_ReferencePanelState$Data = F3(
+	function (a, b, c) {
+		return {fileName: a, expressionName: b, type_: c};
+	});
+var _user$project$Types_ReferencePanelState$External = {ctor: 'External'};
+var _user$project$Types_ReferencePanelState$Internal = {ctor: 'Internal'};
+var _user$project$Types_ReferencePanelState$toType = function (isExternal) {
+	return isExternal ? _user$project$Types_ReferencePanelState$External : _user$project$Types_ReferencePanelState$Internal;
+};
+var _user$project$Types_ReferencePanelState$make = F3(
+	function (fileName, expressionName, isExternal) {
+		return _elm_lang$core$Maybe$Just(
+			A3(
+				_user$project$Types_ReferencePanelState$Data,
+				fileName,
+				expressionName,
+				_user$project$Types_ReferencePanelState$toType(isExternal)));
+	});
+
+var _user$project$Model_ReferencePanelState$references = function (model) {
+	var _p0 = model.referencePanelState;
+	if (_p0.ctor === 'Just') {
+		var _p2 = _p0._0;
+		var _p1 = _p2.type_;
+		if (_p1.ctor === 'Internal') {
+			return A2(
+				_elm_lang$core$List$filter,
+				function (ref) {
+					return _elm_lang$core$Native_Utils.eq(ref.name, _p2.expressionName);
+				},
+				function (_) {
+					return _.internal;
+				}(
+					function (_) {
+						return _.references;
+					}(
+						A2(
+							_elm_lang$core$Maybe$withDefault,
+							_user$project$Types_FileData$default,
+							A2(_elm_lang$core$Dict$get, _p2.fileName, model.projectFileData)))));
+		} else {
+			return {ctor: '[]'};
+		}
+	} else {
+		return {ctor: '[]'};
+	}
+};
+
+var _user$project$Types_FileLineRequest$decoder = _elm_lang$core$Json_Decode$dict(
+	_elm_community$json_extra$Json_Decode_Extra$set(_elm_lang$core$Json_Decode$int));
+var _user$project$Types_FileLineRequest$encodeEntry = function (_p0) {
+	var _p1 = _p0;
+	return {
+		ctor: '_Tuple2',
+		_0: _p1._0,
+		_1: _elm_lang$core$Json_Encode$list(
+			A2(
+				_elm_lang$core$List$map,
+				_elm_lang$core$Json_Encode$int,
+				_elm_lang$core$Set$toList(_p1._1)))
+	};
+};
+var _user$project$Types_FileLineRequest$encoder = function (fileLineRequest) {
+	return _elm_lang$core$Json_Encode$object(
+		A2(
+			_elm_lang$core$List$map,
+			_user$project$Types_FileLineRequest$encodeEntry,
+			_elm_lang$core$Dict$toList(fileLineRequest)));
+};
+var _user$project$Types_FileLineRequest$default = _elm_lang$core$Dict$empty;
+
+var _user$project$And_FileLines$insertReferenceLine = F2(
+	function (original, $new) {
+		return A2(_elm_lang$core$Set$union, original, $new);
+	});
+var _user$project$And_FileLines$addLineRequest = F3(
+	function (fileName, reference, fileLineRequest) {
+		return A4(
+			_elm_community$dict_extra$Dict_Extra$insertDedupe,
+			_user$project$And_FileLines$insertReferenceLine,
+			fileName,
+			_elm_lang$core$Set$fromList(
+				{
+					ctor: '::',
+					_0: reference.range.start.row,
+					_1: {ctor: '[]'}
+				}),
+			fileLineRequest);
+	});
+var _user$project$And_FileLines$buildLinesFrom = F2(
+	function (model, fileLineRequest) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$And_FileLines$addLineRequest(
+				_user$project$Types_ReferencePanelState$fileName(model.referencePanelState)),
+			fileLineRequest,
+			_user$project$Model_ReferencePanelState$references(model));
+	});
+var _user$project$And_FileLines$buildLineRequest = function (model) {
+	return _user$project$Types_FileLineRequest$encoder(
+		A2(_user$project$And_FileLines$buildLinesFrom, model, _user$project$Types_FileLineRequest$default));
+};
+var _user$project$And_FileLines$fileLineRequest = _elm_lang$core$Native_Platform.outgoingPort(
+	'fileLineRequest',
+	function (v) {
+		return v;
+	});
+var _user$project$And_FileLines$makeRequest = function (model) {
+	return _user$project$And_FileLines$fileLineRequest(
+		_user$project$And_FileLines$buildLineRequest(model));
+};
+var _user$project$And_FileLines$request = function (model) {
+	return A2(
+		_user$project$And$execute,
+		model,
+		_user$project$And_FileLines$makeRequest(model));
+};
+
 var _user$project$Model_BatchProcess$isComplete = function (model) {
 	return _elm_lang$core$Native_Utils.cmp(
 		_elm_lang$core$Dict$size(model.projectFileData),
@@ -17643,25 +17769,6 @@ var _user$project$Model_ProjectFileData$add = F2(
 			model);
 	});
 
-var _user$project$Types_ReferencePanelState$Data = F3(
-	function (a, b, c) {
-		return {fileName: a, expressionName: b, type_: c};
-	});
-var _user$project$Types_ReferencePanelState$External = {ctor: 'External'};
-var _user$project$Types_ReferencePanelState$Internal = {ctor: 'Internal'};
-var _user$project$Types_ReferencePanelState$toType = function (isExternal) {
-	return isExternal ? _user$project$Types_ReferencePanelState$External : _user$project$Types_ReferencePanelState$Internal;
-};
-var _user$project$Types_ReferencePanelState$make = F3(
-	function (fileName, expressionName, isExternal) {
-		return _elm_lang$core$Maybe$Just(
-			A3(
-				_user$project$Types_ReferencePanelState$Data,
-				fileName,
-				expressionName,
-				_user$project$Types_ReferencePanelState$toType(isExternal)));
-	});
-
 var _user$project$View$referenceRow = F2(
 	function (fileName, reference) {
 		return A2(
@@ -17703,43 +17810,49 @@ var _user$project$View$referenceRow = F2(
 				}
 			});
 	});
-var _user$project$View$truncatedFileName = F2(
-	function (fileName, projectPathRegistry) {
-		return A3(
-			_elm_lang$core$Set$foldl,
-			F2(
-				function (projectPath, fileName) {
-					return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
-						_elm_lang$core$String$dropLeft,
-						_elm_lang$core$String$length(projectPath),
-						fileName) : fileName;
-				}),
-			fileName,
-			projectPathRegistry);
+var _user$project$View$stripProjectPath = F2(
+	function (projectPath, fileName) {
+		return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
+			_elm_lang$core$String$dropLeft,
+			_elm_lang$core$String$length(projectPath),
+			fileName) : fileName;
 	});
-var _user$project$View$referenceTable = F3(
-	function (referencePanelData, projectFileData, projectPathRegistry) {
-		return A2(
-			_elm_lang$html$Html$table,
-			{ctor: '[]'},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$thead,
-					{ctor: '[]'},
-					{
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$tr,
-							{ctor: '[]'},
-							{
+var _user$project$View$truncatedFileName = F2(
+	function (projectPathRegistry, fileName) {
+		return A3(_elm_lang$core$Set$foldl, _user$project$View$stripProjectPath, fileName, projectPathRegistry);
+	});
+var _user$project$View$render = function (data) {
+	return A2(
+		_elm_lang$html$Html$table,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$thead,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$tr,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$th,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('File'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$th,
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('File'),
+										_0: _elm_lang$html$Html$text('Line #'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -17749,92 +17862,30 @@ var _user$project$View$referenceTable = F3(
 										{ctor: '[]'},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('Line #'),
+											_0: _elm_lang$html$Html$text('Code'),
 											_1: {ctor: '[]'}
 										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$th,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('Code'),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}
-								}
-							}),
-						_1: {ctor: '[]'}
-					}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$tbody,
-						{ctor: '[]'},
-						function () {
-							var _p0 = referencePanelData.type_;
-							if (_p0.ctor === 'Internal') {
-								return A2(
-									_elm_lang$core$List$map,
-									_user$project$View$referenceRow(
-										A2(_user$project$View$truncatedFileName, referencePanelData.fileName, projectPathRegistry)),
-									A2(
-										_elm_lang$core$List$filter,
-										function (ref) {
-											return _elm_lang$core$Native_Utils.eq(ref.name, referencePanelData.expressionName);
-										},
-										function (_) {
-											return _.internal;
-										}(
-											function (_) {
-												return _.references;
-											}(
-												A2(
-													_elm_lang$core$Maybe$withDefault,
-													_user$project$Types_FileData$default,
-													A2(_elm_lang$core$Dict$get, referencePanelData.fileName, projectFileData))))));
-							} else {
-								return {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$tr,
-										{ctor: '[]'},
-										{ctor: '[]'}),
 									_1: {ctor: '[]'}
-								};
+								}
 							}
-						}()),
+						}),
 					_1: {ctor: '[]'}
-				}
-			});
-	});
-var _user$project$View$render = function (data) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: function () {
-				var _p1 = data.referencePanelState;
-				if (_p1.ctor === 'Just') {
-					return A2(
-						_elm_lang$html$Html$div,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: A3(_user$project$View$referenceTable, _p1._0, data.projectFileData, data.projectPathRegistry),
-							_1: {ctor: '[]'}
-						});
-				} else {
-					return A2(
-						_elm_lang$html$Html$div,
-						{ctor: '[]'},
-						{ctor: '[]'});
-				}
-			}(),
-			_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$tbody,
+					{ctor: '[]'},
+					A2(
+						_elm_lang$core$List$map,
+						_user$project$View$referenceRow(
+							A2(
+								_user$project$View$truncatedFileName,
+								data.projectPathRegistry,
+								_user$project$Types_ReferencePanelState$fileName(data.referencePanelState))),
+						_user$project$Model_ReferencePanelState$references(data))),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$View$Data = F3(
@@ -17892,7 +17943,7 @@ var _user$project$Main$update = F2(
 							fileBeingReprocessed: _elm_lang$core$Maybe$Just(_p1)
 						}));
 			default:
-				return _user$project$And$doNothing(
+				return _user$project$And_FileLines$request(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
