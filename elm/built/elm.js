@@ -17942,13 +17942,15 @@ var _user$project$Main$update = F2(
 						{
 							fileBeingReprocessed: _elm_lang$core$Maybe$Just(_p1)
 						}));
-			default:
+			case 'SetReferencePanel':
 				return _user$project$And_FileLines$request(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
 							referencePanelState: A3(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1, _p0._0._2)
 						}));
+			default:
+				return _user$project$And$doNothing(model);
 		}
 	});
 var _user$project$Main$init = _user$project$And$doNothing(
@@ -17982,10 +17984,14 @@ var _user$project$Main$setReferencePanel = _elm_lang$core$Native_Platform.incomi
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
+var _user$project$Main$reportFileLines = _elm_lang$core$Native_Platform.incomingPort('reportFileLines', _elm_lang$core$Json_Decode$value);
 var _user$project$Main$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {projectFileData: a, projectFileRegistry: b, projectPathRegistry: c, activeTextEditors: d, lastUpdatedFile: e, fileBeingReprocessed: f, batchUpdateSent: g, referencePanelState: h};
 	});
+var _user$project$Main$FileLinesReport = function (a) {
+	return {ctor: 'FileLinesReport', _0: a};
+};
 var _user$project$Main$SetReferencePanel = function (a) {
 	return {ctor: 'SetReferencePanel', _0: a};
 };
@@ -18030,7 +18036,11 @@ var _user$project$Main$subscriptions = function (model) {
 								_1: {
 									ctor: '::',
 									_0: _user$project$Main$setReferencePanel(_user$project$Main$SetReferencePanel),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _user$project$Main$reportFileLines(_user$project$Main$FileLinesReport),
+										_1: {ctor: '[]'}
+									}
 								}
 							}
 						}

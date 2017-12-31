@@ -33,6 +33,7 @@ type Message
     | AddFileData Value
     | MarkAsReprocessing String
     | SetReferencePanel ( String, String, Bool )
+    | FileLinesReport Value
 
 
 main : Program Never Model Message
@@ -91,6 +92,10 @@ update message model =
             { model | referencePanelState = Types.ReferencePanelState.make fileName expressionName isExternal }
                 |> And.FileLines.request
 
+        FileLinesReport value ->
+            model
+                |> And.doNothing
+
 
 view : Model -> Html Message
 view model =
@@ -111,6 +116,7 @@ subscriptions model =
         , processReport AddFileData
         , notifyReprocessingFile MarkAsReprocessing
         , setReferencePanel SetReferencePanel
+        , reportFileLines FileLinesReport
         ]
 
 
@@ -133,3 +139,6 @@ port processReport : (Value -> message) -> Sub message
 
 
 port setReferencePanel : (( String, String, Bool ) -> message) -> Sub message
+
+
+port reportFileLines : (Value -> message) -> Sub message
