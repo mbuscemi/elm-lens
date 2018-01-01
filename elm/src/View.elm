@@ -1,6 +1,7 @@
 module View exposing (render)
 
 import Html exposing (Html, div, strong, table, tbody, td, text, th, thead, tr)
+import Html.Events exposing (onClick)
 import Model.ReferencePanelState
 import Set exposing (Set)
 import Types.ProjectFileData exposing (ProjectFileData)
@@ -17,8 +18,12 @@ type alias Data =
     }
 
 
-render : Data -> Html message
-render data =
+type alias Messages message =
+    { requestOpenFileAtLine : String -> Int -> Int -> message }
+
+
+render : Data -> Messages message -> Html message
+render data messages =
     table []
         [ thead []
             [ tr []
@@ -29,19 +34,19 @@ render data =
             ]
         , tbody []
             (List.map
-                (referenceRow data.projectPathRegistry data.projectFileLines)
+                (referenceRow data messages)
                 (Model.ReferencePanelState.references data)
             )
         ]
 
 
-referenceRow : Set String -> ProjectFileLines -> Reference -> Html message
-referenceRow projectPathRegistry projectFileLines reference =
-    tr []
-        [ td [] [ text <| truncatedFileName projectPathRegistry reference.sourceFilePath ]
+referenceRow : Data -> Messages message -> Reference -> Html message
+referenceRow data messages reference =
+    tr [ onClick <| messages.requestOpenFileAtLine reference.sourceFilePath reference.range.start.row reference.range.start.column ]
+        [ td [] [ text <| truncatedFileName data.projectPathRegistry reference.sourceFilePath ]
         , td [] [ text <| toString <| reference.range.start.row + 1 ]
         , td []
-            (Types.ProjectFileLines.getLine reference.sourceFilePath reference.range.start.row projectFileLines
+            (Types.ProjectFileLines.getLine reference.sourceFilePath reference.range.start.row data.projectFileLines
                 |> withEmboldenedReference reference
             )
         ]

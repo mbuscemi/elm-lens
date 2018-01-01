@@ -1,6 +1,7 @@
 port module Main exposing (main)
 
 import And
+import And.File
 import And.FileLines
 import And.FileMarkup
 import Html exposing (Html)
@@ -35,6 +36,7 @@ type Message
     | MarkAsReprocessing String
     | SetReferencePanel ( String, String, Bool )
     | FileLinesReport Value
+    | RequestOpenFileAtLine String Int Int
 
 
 main : Program Never Model Message
@@ -98,6 +100,10 @@ update message model =
             { model | projectFileLines = Types.ProjectFileLines.mergeIn value model.projectFileLines }
                 |> And.doNothing
 
+        RequestOpenFileAtLine filePath row column ->
+            model
+                |> And.File.requestOpen filePath row column
+
 
 view : Model -> Html Message
 view model =
@@ -107,6 +113,7 @@ view model =
         , projectPathRegistry = model.projectPathRegistry
         , projectFileLines = model.projectFileLines
         }
+        { requestOpenFileAtLine = RequestOpenFileAtLine }
 
 
 subscriptions : Model -> Sub Message

@@ -11327,6 +11327,121 @@ var _elm_lang$html$Html$summary = _elm_lang$html$Html$node('summary');
 var _elm_lang$html$Html$menuitem = _elm_lang$html$Html$node('menuitem');
 var _elm_lang$html$Html$menu = _elm_lang$html$Html$node('menu');
 
+var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$html$Html_Events$targetChecked = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'checked',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$bool);
+var _elm_lang$html$Html_Events$targetValue = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'value',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
+var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
+var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
+var _elm_lang$html$Html_Events$onFocus = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'focus',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onBlur = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'blur',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
+	_elm_lang$html$Html_Events$defaultOptions,
+	{preventDefault: true});
+var _elm_lang$html$Html_Events$onSubmit = function (msg) {
+	return A3(
+		_elm_lang$html$Html_Events$onWithOptions,
+		'submit',
+		_elm_lang$html$Html_Events$onSubmitOptions,
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onCheck = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
+};
+var _elm_lang$html$Html_Events$onInput = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'input',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
+};
+var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseout',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseover',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseleave',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseenter',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseup',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mousedown',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'dblclick',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'click',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$Options = F2(
+	function (a, b) {
+		return {stopPropagation: a, preventDefault: b};
+	});
+
 var _rtfeldman$hex$Hex$toString = function (num) {
 	return _elm_lang$core$String$fromList(
 		(_elm_lang$core$Native_Utils.cmp(num, 0) < 0) ? {
@@ -16125,6 +16240,20 @@ var _user$project$And$doNothing = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
+var _user$project$And_File$fileOpenRequest = _elm_lang$core$Native_Platform.outgoingPort(
+	'fileOpenRequest',
+	function (v) {
+		return [v._0, v._1, v._2];
+	});
+var _user$project$And_File$requestOpen = F4(
+	function (filePath, row, column, model) {
+		return A2(
+			_user$project$And$execute,
+			model,
+			_user$project$And_File$fileOpenRequest(
+				{ctor: '_Tuple3', _0: filePath, _1: row, _2: column}));
+	});
+
 var _user$project$Types_Exposings$encoder = function (exposings) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -17905,10 +18034,15 @@ var _user$project$View$truncatedFileName = F2(
 		return A3(_elm_lang$core$Set$foldl, _user$project$View$stripProjectPath, fileName, projectPathRegistry);
 	});
 var _user$project$View$referenceRow = F3(
-	function (projectPathRegistry, projectFileLines, reference) {
+	function (data, messages, reference) {
 		return A2(
 			_elm_lang$html$Html$tr,
-			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(
+					A3(messages.requestOpenFileAtLine, reference.sourceFilePath, reference.range.start.row, reference.range.start.column)),
+				_1: {ctor: '[]'}
+			},
 			{
 				ctor: '::',
 				_0: A2(
@@ -17917,7 +18051,7 @@ var _user$project$View$referenceRow = F3(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html$text(
-							A2(_user$project$View$truncatedFileName, projectPathRegistry, reference.sourceFilePath)),
+							A2(_user$project$View$truncatedFileName, data.projectPathRegistry, reference.sourceFilePath)),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -17939,44 +18073,35 @@ var _user$project$View$referenceRow = F3(
 							A2(
 								_user$project$View$withEmboldenedReference,
 								reference,
-								A3(_user$project$Types_ProjectFileLines$getLine, reference.sourceFilePath, reference.range.start.row, projectFileLines))),
+								A3(_user$project$Types_ProjectFileLines$getLine, reference.sourceFilePath, reference.range.start.row, data.projectFileLines))),
 						_1: {ctor: '[]'}
 					}
 				}
 			});
 	});
-var _user$project$View$render = function (data) {
-	return A2(
-		_elm_lang$html$Html$table,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$thead,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$tr,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$th,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('File'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
+var _user$project$View$render = F2(
+	function (data, messages) {
+		return A2(
+			_elm_lang$html$Html$table,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$thead,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$tr,
+							{ctor: '[]'},
+							{
 								ctor: '::',
 								_0: A2(
 									_elm_lang$html$Html$th,
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('Line #'),
+										_0: _elm_lang$html$Html$text('File'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
@@ -17986,37 +18111,46 @@ var _user$project$View$render = function (data) {
 										{ctor: '[]'},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('Code'),
+											_0: _elm_lang$html$Html$text('Line #'),
 											_1: {ctor: '[]'}
 										}),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$th,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Code'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
 								}
-							}
-						}),
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$tbody,
+						{ctor: '[]'},
+						A2(
+							_elm_lang$core$List$map,
+							A2(_user$project$View$referenceRow, data, messages),
+							_user$project$Model_ReferencePanelState$references(data))),
 					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$tbody,
-					{ctor: '[]'},
-					A2(
-						_elm_lang$core$List$map,
-						A2(_user$project$View$referenceRow, data.projectPathRegistry, data.projectFileLines),
-						_user$project$Model_ReferencePanelState$references(data))),
-				_1: {ctor: '[]'}
-			}
-		});
-};
+				}
+			});
+	});
 var _user$project$View$Data = F4(
 	function (a, b, c, d) {
 		return {referencePanelState: a, projectFileData: b, projectPathRegistry: c, projectFileLines: d};
 	});
-
-var _user$project$Main$view = function (model) {
-	return _user$project$View$render(
-		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData, projectPathRegistry: model.projectPathRegistry, projectFileLines: model.projectFileLines});
+var _user$project$View$Messages = function (a) {
+	return {requestOpenFileAtLine: a};
 };
+
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
@@ -18069,13 +18203,15 @@ var _user$project$Main$update = F2(
 						{
 							referencePanelState: A3(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1, _p0._0._2)
 						}));
-			default:
+			case 'FileLinesReport':
 				return _user$project$And$doNothing(
 					_elm_lang$core$Native_Utils.update(
 						model,
 						{
 							projectFileLines: A2(_user$project$Types_ProjectFileLines$mergeIn, _p0._0, model.projectFileLines)
 						}));
+			default:
+				return A4(_user$project$And_File$requestOpen, _p0._0, _p0._1, _p0._2, model);
 		}
 	});
 var _user$project$Main$init = _user$project$And$doNothing(
@@ -18114,6 +18250,16 @@ var _user$project$Main$Model = F9(
 	function (a, b, c, d, e, f, g, h, i) {
 		return {projectFileData: a, projectFileRegistry: b, projectPathRegistry: c, projectFileLines: d, activeTextEditors: e, lastUpdatedFile: f, fileBeingReprocessed: g, batchUpdateSent: h, referencePanelState: i};
 	});
+var _user$project$Main$RequestOpenFileAtLine = F3(
+	function (a, b, c) {
+		return {ctor: 'RequestOpenFileAtLine', _0: a, _1: b, _2: c};
+	});
+var _user$project$Main$view = function (model) {
+	return A2(
+		_user$project$View$render,
+		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData, projectPathRegistry: model.projectPathRegistry, projectFileLines: model.projectFileLines},
+		{requestOpenFileAtLine: _user$project$Main$RequestOpenFileAtLine});
+};
 var _user$project$Main$FileLinesReport = function (a) {
 	return {ctor: 'FileLinesReport', _0: a};
 };
