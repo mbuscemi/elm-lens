@@ -48,8 +48,8 @@ canParseFromList =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "reference2" 12 18 12 28
-                        , Types.Reference.make "reference1" 12 6 12 16
+                        [ Types.Reference.make "reference2" 12 18 12 28 "ListExpression.elm"
+                        , Types.Reference.make "reference1" 12 6 12 16 "ListExpression.elm"
                         ]
                     , external = Dict.empty
                     }

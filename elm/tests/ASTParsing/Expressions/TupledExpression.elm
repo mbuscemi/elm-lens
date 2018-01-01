@@ -48,8 +48,8 @@ canParseFromTupled =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "reference2" 12 18 12 28
-                        , Types.Reference.make "reference1" 12 6 12 16
+                        [ Types.Reference.make "reference2" 12 18 12 28 "TupledExpression.elm"
+                        , Types.Reference.make "reference1" 12 6 12 16 "TupledExpression.elm"
                         ]
                     , external = Dict.empty
                     }

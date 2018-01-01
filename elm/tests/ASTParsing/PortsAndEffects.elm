@@ -98,33 +98,33 @@ canParseEffects =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "SomeCmd" 32 34 32 43
-                        , Types.Reference.make "SomeCmd" 32 21 32 30
-                        , Types.Reference.make "NoOp" 34 4 34 8
-                        , Types.Reference.make "SomeTask" 27 81 27 93
-                        , Types.Reference.make "SomeState" 27 64 27 77
-                        , Types.Reference.make "SomeCmd" 27 49 27 60
-                        , Types.Reference.make "SomeCmd" 27 32 27 45
-                        , Types.Reference.make "State" 29 18 29 23
-                        , Types.Reference.make "SomeTask" 22 88 22 100
-                        , Types.Reference.make "SomeState" 22 71 22 84
-                        , Types.Reference.make "SomeCmd" 22 54 22 67
-                        , Types.Reference.make "SomeCmd" 22 32 22 45
-                        , Types.Reference.make "State" 24 18 24 23
-                        , Types.Reference.make "SomeTask" 17 7 17 19
-                        , Types.Reference.make "State" 19 18 19 23
-                        , Types.Reference.make "SomeState" 14 24 14 39
+                        [ Types.Reference.make "SomeCmd" 32 34 32 43 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeCmd" 32 21 32 30 "SimpleEffects.elm"
+                        , Types.Reference.make "NoOp" 34 4 34 8 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeTask" 27 81 27 93 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeState" 27 64 27 77 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeCmd" 27 49 27 60 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeCmd" 27 32 27 45 "SimpleEffects.elm"
+                        , Types.Reference.make "State" 29 18 29 23 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeTask" 22 88 22 100 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeState" 22 71 22 84 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeCmd" 22 54 22 67 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeCmd" 22 32 22 45 "SimpleEffects.elm"
+                        , Types.Reference.make "State" 24 18 24 23 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeTask" 17 7 17 19 "SimpleEffects.elm"
+                        , Types.Reference.make "State" 19 18 19 23 "SimpleEffects.elm"
+                        , Types.Reference.make "SomeState" 14 24 14 39 "SimpleEffects.elm"
                         ]
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Task" ]
-                                [ Types.Reference.make "succeed" 29 4 29 16
-                                , Types.Reference.make "succeed" 24 4 24 16
-                                , Types.Reference.make "succeed" 19 4 19 16
+                                [ Types.Reference.make "succeed" 29 4 29 16 "SimpleEffects.elm"
+                                , Types.Reference.make "succeed" 24 4 24 16 "SimpleEffects.elm"
+                                , Types.Reference.make "succeed" 19 4 19 16 "SimpleEffects.elm"
                                 ]
                             |> Dict.insert [ "Platform" ]
-                                [ Types.Reference.make "Router" 27 12 27 45
-                                , Types.Reference.make "Router" 22 12 22 45
+                                [ Types.Reference.make "Router" 27 12 27 45 "SimpleEffects.elm"
+                                , Types.Reference.make "Router" 22 12 22 45 "SimpleEffects.elm"
                                 ]
                     }
         ]

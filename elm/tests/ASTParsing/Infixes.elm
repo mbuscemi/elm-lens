@@ -14,7 +14,7 @@ canParse =
     describe "Infix Elm File" <|
         let
             elmFile =
-                ElmFile.fromString "Simple.elm" infixDotElm
+                ElmFile.fromString "Infix.elm" infixDotElm
         in
         [ test "has expected module name" <|
             \_ ->
@@ -52,7 +52,7 @@ canParse =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "$$" 8 4 8 23 ]
+                        [ Types.Reference.make "$$" 8 4 8 23 "Infix.elm" ]
                     , external =
                         Dict.empty
                     }

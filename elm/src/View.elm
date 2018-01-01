@@ -29,21 +29,19 @@ render data =
             ]
         , tbody []
             (List.map
-                (Types.ReferencePanelState.fileName data.referencePanelState
-                    |> referenceRow data.projectPathRegistry data.projectFileLines
-                )
+                (referenceRow data.projectPathRegistry data.projectFileLines)
                 (Model.ReferencePanelState.references data)
             )
         ]
 
 
-referenceRow : Set String -> ProjectFileLines -> String -> Reference -> Html message
-referenceRow projectPathRegistry projectFileLines fileName reference =
+referenceRow : Set String -> ProjectFileLines -> Reference -> Html message
+referenceRow projectPathRegistry projectFileLines reference =
     tr []
-        [ td [] [ text <| truncatedFileName projectPathRegistry fileName ]
+        [ td [] [ text <| truncatedFileName projectPathRegistry reference.sourceFilePath ]
         , td [] [ text <| toString <| reference.range.start.row + 1 ]
         , td []
-            (Types.ProjectFileLines.getLine fileName reference.range.start.row projectFileLines
+            (Types.ProjectFileLines.getLine reference.sourceFilePath reference.range.start.row projectFileLines
                 |> withEmboldenedReference reference
             )
         ]

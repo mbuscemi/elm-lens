@@ -47,7 +47,7 @@ canParseFromRecord =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Types.Reference.make "reference" 8 14 8 23 ]
+                    { internal = [ Types.Reference.make "reference" 8 14 8 23 "RecordExpression.elm" ]
                     , external = Dict.empty
                     }
         ]

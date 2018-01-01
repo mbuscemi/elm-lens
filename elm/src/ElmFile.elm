@@ -38,22 +38,22 @@ default =
 fromString : String -> String -> ElmFile
 fromString fileName fileText =
     Elm.Parser.parse fileText
-        |> make
+        |> make fileName
 
 
-make : Result (List String) RawFile -> ElmFile
-make result =
+make : String -> Result (List String) RawFile -> ElmFile
+make fileName result =
     case result of
         Ok rawFile ->
             process init rawFile
-                |> fromFile
+                |> fromFile fileName
 
         Err stringList ->
             default
 
 
-fromFile : File -> ElmFile
-fromFile file =
+fromFile : String -> File -> ElmFile
+fromFile fileName file =
     let
         imports =
             ElmFile.Imports.fromFile file
@@ -65,5 +65,5 @@ fromFile file =
     , imports = imports
     , topLevelExpressions = topLevelExpressions
     , exposings = ElmFile.Exposings.fromFile topLevelExpressions file
-    , references = ElmFile.References.fromFile imports file
+    , references = ElmFile.References.fromFile fileName imports file
     }

@@ -75,6 +75,7 @@ reference =
                         Reference
                             "blarg"
                             { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
+                            "file.elm"
 
                     encoded =
                         Types.Reference.encoder orig
@@ -88,9 +89,9 @@ reference =
             \_ ->
                 let
                     orig =
-                        [ Types.Reference.make "blarg" 1 2 3 4
-                        , Types.Reference.make "frangle" 5 6 7 8
-                        , Types.Reference.make "blargargle" 11 12 13 14
+                        [ Types.Reference.make "blarg" 1 2 3 4 "file1.elm"
+                        , Types.Reference.make "frangle" 5 6 7 8 "file2.elm"
+                        , Types.Reference.make "blargargle" 11 12 13 14 "file3.elm"
                         ]
 
                     encoded =
@@ -112,17 +113,17 @@ references =
                 let
                     orig =
                         References
-                            [ Types.Reference.make "abc" 1 2 3 4
-                            , Types.Reference.make "def" 5 6 7 8
+                            [ Types.Reference.make "abc" 1 2 3 4 "file1.elm"
+                            , Types.Reference.make "def" 5 6 7 8 "file2.elm"
                             ]
                             (Dict.empty
                                 |> Dict.insert [ "ab", "cd", "de" ]
-                                    [ Types.Reference.make "ghi" 1 2 3 4
-                                    , Types.Reference.make "klm" 5 6 7 8
+                                    [ Types.Reference.make "ghi" 1 2 3 4 "file2.elm"
+                                    , Types.Reference.make "klm" 5 6 7 8 "file3.elm"
                                     ]
                                 |> Dict.insert [ "ed", "fg" ]
-                                    [ Types.Reference.make "no" 1 2 3 4
-                                    , Types.Reference.make "pq" 5 6 7 8
+                                    [ Types.Reference.make "no" 1 2 3 4 "file3.elm"
+                                    , Types.Reference.make "pq" 5 6 7 8 "file4.elm"
                                     ]
                             )
 
@@ -157,17 +158,17 @@ report =
                                 (Set.singleton "mom")
                             )
                             (References
-                                [ Reference "dgsklh" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
-                                , Reference "sdfljk" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } }
+                                [ Reference "dgsklh" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"
+                                , Reference "sdfljk" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm"
                                 ]
                                 (Dict.empty
                                     |> Dict.insert [ "fds", "xcv", "qwe" ]
-                                        [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
-                                        , Reference "io" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } }
+                                        [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"
+                                        , Reference "io" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm"
                                         ]
                                     |> Dict.insert [ "gyu", "xsq" ]
-                                        [ Reference "tuyi" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
-                                        , Reference "fas" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } }
+                                        [ Reference "tuyi" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"
+                                        , Reference "fas" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm"
                                         ]
                                 )
                             )

@@ -13,8 +13,11 @@ canParseSimple : Test
 canParseSimple =
     describe "Simple Elm File" <|
         let
+            fileName =
+                "Simple.elm"
+
             elmFile =
-                ElmFile.fromString "Simple.elm" simpleDotElm
+                ElmFile.fromString fileName simpleDotElm
         in
         [ test "has expected module name" <|
             \_ ->
@@ -74,26 +77,26 @@ canParseSimple =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "Sub" 43 43 43 54
-                        , Types.Reference.make "tupled" 37 4 37 10
-                        , Types.Reference.make "BinaryThing" 32 22 32 33
-                        , Types.Reference.make "UnaryThing" 32 10 32 20
-                        , Types.Reference.make "One" 34 13 34 16
-                        , Types.Reference.make "Single" 34 5 34 11
-                        , Types.Reference.make "frangle" 30 21 30 28
-                        , Types.Reference.make "blarg" 30 15 30 20
-                        , Types.Reference.make "blargargle" 30 4 30 14
-                        , Types.Reference.make "BinaryThing" 16 4 16 15
-                        , Types.Reference.make "UnaryThing" 13 31 13 41
+                        [ Types.Reference.make "Sub" 43 43 43 54 fileName
+                        , Types.Reference.make "tupled" 37 4 37 10 fileName
+                        , Types.Reference.make "BinaryThing" 32 22 32 33 fileName
+                        , Types.Reference.make "UnaryThing" 32 10 32 20 fileName
+                        , Types.Reference.make "One" 34 13 34 16 fileName
+                        , Types.Reference.make "Single" 34 5 34 11 fileName
+                        , Types.Reference.make "frangle" 30 21 30 28 fileName
+                        , Types.Reference.make "blarg" 30 15 30 20 fileName
+                        , Types.Reference.make "blargargle" 30 4 30 14 fileName
+                        , Types.Reference.make "BinaryThing" 16 4 16 15 fileName
+                        , Types.Reference.make "UnaryThing" 13 31 13 41 fileName
                         ]
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Basics" ]
-                                [ Types.Reference.make "toString" 26 4 26 12 ]
+                                [ Types.Reference.make "toString" 26 4 26 12 fileName ]
                             |> Dict.insert [ "Json", "Encode" ]
-                                [ Types.Reference.make "Value" 43 22 43 28
-                                , Types.Reference.make "Value" 39 8 39 16
-                                , Types.Reference.make "encodeValue" 41 4 41 18
+                                [ Types.Reference.make "Value" 43 22 43 28 fileName
+                                , Types.Reference.make "Value" 39 8 39 16 fileName
+                                , Types.Reference.make "encodeValue" 41 4 41 18 fileName
                                 ]
                     }
         ]

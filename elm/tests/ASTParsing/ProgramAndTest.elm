@@ -44,20 +44,20 @@ canParseProgram =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "Message" 5 27 5 34
-                        , Types.Reference.make "Model" 5 21 5 34
-                        , Types.Reference.make "Program" 5 7 5 34
+                        [ Types.Reference.make "Message" 5 27 5 34 "Main.elm"
+                        , Types.Reference.make "Model" 5 21 5 34 "Main.elm"
+                        , Types.Reference.make "Program" 5 7 5 34 "Main.elm"
                         ]
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Cmd" ]
-                                [ Types.Reference.make "none" 9 33 9 41
-                                , Types.Reference.make "none" 8 22 8 30
+                                [ Types.Reference.make "none" 9 33 9 41 "Main.elm"
+                                , Types.Reference.make "none" 8 22 8 30 "Main.elm"
                                 ]
                             |> Dict.insert [ "Platform" ]
-                                [ Types.Reference.make "program" 7 4 7 20 ]
+                                [ Types.Reference.make "program" 7 4 7 20 "Main.elm" ]
                             |> Dict.insert [ "Sub" ]
-                                [ Types.Reference.make "none" 10 26 10 34 ]
+                                [ Types.Reference.make "none" 10 26 10 34 "Main.elm" ]
                     }
         ]
 
@@ -103,11 +103,11 @@ canParseTest =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Expect" ]
-                                [ Types.Reference.make "equal" 11 20 11 32 ]
+                                [ Types.Reference.make "equal" 11 20 11 32 "TruthTest.elm" ]
                             |> Dict.insert [ "Test" ]
-                                [ Types.Reference.make "Test" 5 7 5 11
-                                , Types.Reference.make "test" 9 12 9 16
-                                , Types.Reference.make "describe" 7 4 7 12
+                                [ Types.Reference.make "Test" 5 7 5 11 "TruthTest.elm"
+                                , Types.Reference.make "test" 9 12 9 16 "TruthTest.elm"
+                                , Types.Reference.make "describe" 7 4 7 12 "TruthTest.elm"
                                 ]
                     }
         ]

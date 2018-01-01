@@ -46,7 +46,7 @@ canParseFromNegation =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Types.Reference.make "reference" 8 5 8 14 ]
+                    { internal = [ Types.Reference.make "reference" 8 5 8 14 "NegationExpression.elm" ]
                     , external = Dict.empty
                     }
         ]
