@@ -1,7 +1,8 @@
 module Model.ReferencePanelState exposing (references)
 
 import Dict
-import Types.FileData
+import Elm.Syntax.Base exposing (ModuleName)
+import Types.FileData exposing (FileData)
 import Types.ProjectFileData exposing (ProjectFileData)
 import Types.Reference exposing (Reference)
 import Types.ReferencePanelState exposing (ReferencePanelState)
@@ -26,8 +27,25 @@ references model =
                         |> .internal
                         |> List.filter (\ref -> ref.name == data.expressionName)
 
-                _ ->
-                    []
+                Types.ReferencePanelState.External ->
+                    collectExternalReferences
+                        data.expressionName
+                        data.fileName
+                        (Types.ProjectFileData.moduleName data.fileName model.projectFileData)
+                        model.projectFileData
 
         _ ->
             []
+
+
+collectExternalReferences : String -> String -> ModuleName -> ProjectFileData -> List Reference
+collectExternalReferences expName fileName moduleName projectFileData =
+    Dict.foldl (externalRefsFor expName moduleName) [] projectFileData
+
+
+externalRefsFor : String -> ModuleName -> String -> FileData -> List Reference -> List Reference
+externalRefsFor expName moduleName fileName fileData references =
+    Dict.get moduleName fileData.references.external
+        |> Maybe.withDefault []
+        |> List.filter (\ref -> ref.name == expName)
+        |> List.append references

@@ -66,13 +66,25 @@ withEmboldenedReference reference line =
         lineLength =
             String.length line
 
+        startCol =
+            reference.range.start.column
+
+        endCol =
+            if reference.range.end.column <= startCol then
+                lineLength - 1
+            else
+                reference.range.end.column
+
         beforeReference =
-            String.dropRight (lineLength - reference.range.start.column) line
+            String.dropRight (lineLength - startCol) line
+
+        fullReference =
+            String.slice startCol endCol line
 
         afterReference =
-            String.dropLeft reference.range.end.column line
+            String.dropLeft endCol line
     in
     [ text beforeReference
-    , strong [] [ text reference.name ]
+    , strong [] [ text fullReference ]
     , text afterReference
     ]

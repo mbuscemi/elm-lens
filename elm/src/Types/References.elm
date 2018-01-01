@@ -17,7 +17,9 @@ type alias References =
 
 default : References
 default =
-    { internal = [], external = Dict.empty }
+    { internal = []
+    , external = Dict.empty
+    }
 
 
 encoder : References -> Value

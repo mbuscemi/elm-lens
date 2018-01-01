@@ -39,14 +39,14 @@ buildLineRequest model =
 buildLinesFrom : Model model -> FileLineRequest -> FileLineRequest
 buildLinesFrom model fileLineRequest =
     List.foldl
-        (addLineRequest <| Types.ReferencePanelState.fileName model.referencePanelState)
+        addLineRequest
         fileLineRequest
         (Model.ReferencePanelState.references model)
 
 
-addLineRequest : String -> Reference -> FileLineRequest -> FileLineRequest
-addLineRequest fileName reference fileLineRequest =
-    Dict.insertDedupe insertReferenceLine fileName (Set.fromList [ reference.range.start.row ]) fileLineRequest
+addLineRequest : Reference -> FileLineRequest -> FileLineRequest
+addLineRequest reference fileLineRequest =
+    Dict.insertDedupe insertReferenceLine reference.sourceFilePath (Set.fromList [ reference.range.start.row ]) fileLineRequest
 
 
 insertReferenceLine : Set Int -> Set Int -> Set Int

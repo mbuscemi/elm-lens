@@ -16555,6 +16555,16 @@ var _user$project$Types_Report$fromValue = function (value) {
 		A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_Report$decoder, value));
 };
 
+var _user$project$Types_ProjectFileData$moduleName = F2(
+	function (fileName, projectFileData) {
+		return function (_) {
+			return _.moduleName;
+		}(
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				_user$project$Types_FileData$default,
+				A2(_elm_lang$core$Dict$get, fileName, projectFileData)));
+	});
 var _user$project$Types_ProjectFileData$insert = F2(
 	function (report, projectFileData) {
 		return A3(
@@ -16592,6 +16602,29 @@ var _user$project$Types_ReferencePanelState$make = F3(
 				_user$project$Types_ReferencePanelState$toType(isExternal)));
 	});
 
+var _user$project$Model_ReferencePanelState$externalRefsFor = F5(
+	function (expName, moduleName, fileName, fileData, references) {
+		return A2(
+			_elm_lang$core$List$append,
+			references,
+			A2(
+				_elm_lang$core$List$filter,
+				function (ref) {
+					return _elm_lang$core$Native_Utils.eq(ref.name, expName);
+				},
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '[]'},
+					A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external))));
+	});
+var _user$project$Model_ReferencePanelState$collectExternalReferences = F4(
+	function (expName, fileName, moduleName, projectFileData) {
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			A2(_user$project$Model_ReferencePanelState$externalRefsFor, expName, moduleName),
+			{ctor: '[]'},
+			projectFileData);
+	});
 var _user$project$Model_ReferencePanelState$references = function (model) {
 	var _p0 = model.referencePanelState;
 	if (_p0.ctor === 'Just') {
@@ -16614,7 +16647,12 @@ var _user$project$Model_ReferencePanelState$references = function (model) {
 							_user$project$Types_FileData$default,
 							A2(_elm_lang$core$Dict$get, _p2.fileName, model.projectFileData)))));
 		} else {
-			return {ctor: '[]'};
+			return A4(
+				_user$project$Model_ReferencePanelState$collectExternalReferences,
+				_p2.expressionName,
+				_p2.fileName,
+				A2(_user$project$Types_ProjectFileData$moduleName, _p2.fileName, model.projectFileData),
+				model.projectFileData);
 		}
 	} else {
 		return {ctor: '[]'};
@@ -16648,12 +16686,12 @@ var _user$project$And_FileLines$insertReferenceLine = F2(
 	function (original, $new) {
 		return A2(_elm_lang$core$Set$union, original, $new);
 	});
-var _user$project$And_FileLines$addLineRequest = F3(
-	function (fileName, reference, fileLineRequest) {
+var _user$project$And_FileLines$addLineRequest = F2(
+	function (reference, fileLineRequest) {
 		return A4(
 			_elm_community$dict_extra$Dict_Extra$insertDedupe,
 			_user$project$And_FileLines$insertReferenceLine,
-			fileName,
+			reference.sourceFilePath,
 			_elm_lang$core$Set$fromList(
 				{
 					ctor: '::',
@@ -16666,8 +16704,7 @@ var _user$project$And_FileLines$buildLinesFrom = F2(
 	function (model, fileLineRequest) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			_user$project$And_FileLines$addLineRequest(
-				_user$project$Types_ReferencePanelState$fileName(model.referencePanelState)),
+			_user$project$And_FileLines$addLineRequest,
 			fileLineRequest,
 			_user$project$Model_ReferencePanelState$references(model));
 	});
@@ -17829,9 +17866,12 @@ var _user$project$Types_ProjectFileLines$default = _elm_lang$core$Dict$empty;
 
 var _user$project$View$withEmboldenedReference = F2(
 	function (reference, line) {
-		var afterReference = A2(_elm_lang$core$String$dropLeft, reference.range.end.column, line);
+		var startCol = reference.range.start.column;
 		var lineLength = _elm_lang$core$String$length(line);
-		var beforeReference = A2(_elm_lang$core$String$dropRight, lineLength - reference.range.start.column, line);
+		var endCol = (_elm_lang$core$Native_Utils.cmp(reference.range.end.column, startCol) < 1) ? (lineLength - 1) : reference.range.end.column;
+		var fullReference = A3(_elm_lang$core$String$slice, startCol, endCol, line);
+		var afterReference = A2(_elm_lang$core$String$dropLeft, endCol, line);
+		var beforeReference = A2(_elm_lang$core$String$dropRight, lineLength - startCol, line);
 		return {
 			ctor: '::',
 			_0: _elm_lang$html$Html$text(beforeReference),
@@ -17842,7 +17882,7 @@ var _user$project$View$withEmboldenedReference = F2(
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(reference.name),
+						_0: _elm_lang$html$Html$text(fullReference),
 						_1: {ctor: '[]'}
 					}),
 				_1: {

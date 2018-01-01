@@ -1,6 +1,7 @@
-module Types.ProjectFileData exposing (ProjectFileData, default, insert)
+module Types.ProjectFileData exposing (ProjectFileData, default, insert, moduleName)
 
 import Dict exposing (Dict)
+import Elm.Syntax.Base exposing (ModuleName)
 import Types.FileData exposing (FileData)
 import Types.Report exposing (Report)
 
@@ -25,3 +26,10 @@ insert report projectFileData =
             report.references
         )
         projectFileData
+
+
+moduleName : String -> ProjectFileData -> ModuleName
+moduleName fileName projectFileData =
+    Dict.get fileName projectFileData
+        |> Maybe.withDefault Types.FileData.default
+        |> .moduleName
