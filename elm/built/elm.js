@@ -16553,6 +16553,7 @@ var _user$project$Types_ProjectFileData$insert = F2(
 			A4(_user$project$Types_FileData$FileData, report.moduleName, report.topLevelExpressions, report.exposings, report.references),
 			projectFileData);
 	});
+var _user$project$Types_ProjectFileData$default = _elm_lang$core$Dict$empty;
 
 var _user$project$Types_ReferencePanelState$fileName = function (referencePanelState) {
 	var _p0 = referencePanelState;
@@ -17769,8 +17770,50 @@ var _user$project$Model_ProjectFileData$add = F2(
 			model);
 	});
 
-var _user$project$View$referenceRow = F2(
-	function (fileName, reference) {
+var _user$project$Types_FileLineResponse$decoder = _elm_lang$core$Json_Decode$dict(
+	A2(_elm_community$json_extra$Json_Decode_Extra$dict2, _elm_lang$core$Json_Decode$int, _elm_lang$core$Json_Decode$string));
+var _user$project$Types_FileLineResponse$decode = function (value) {
+	return A2(
+		_elm_lang$core$Result$withDefault,
+		_elm_lang$core$Dict$empty,
+		A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_FileLineResponse$decoder, value));
+};
+
+var _user$project$Types_ProjectFileLines$getLine = F3(
+	function (fileName, lineNumber, projectFileLines) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			A2(
+				_elm_lang$core$Dict$get,
+				lineNumber,
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$core$Dict$empty,
+					A2(_elm_lang$core$Dict$get, fileName, projectFileLines))));
+	});
+var _user$project$Types_ProjectFileLines$mergeIn = F2(
+	function (newLines, projectFileLines) {
+		return A2(
+			_elm_lang$core$Dict$union,
+			_user$project$Types_FileLineResponse$decode(newLines),
+			projectFileLines);
+	});
+var _user$project$Types_ProjectFileLines$default = _elm_lang$core$Dict$empty;
+
+var _user$project$View$stripProjectPath = F2(
+	function (projectPath, fileName) {
+		return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
+			_elm_lang$core$String$dropLeft,
+			_elm_lang$core$String$length(projectPath),
+			fileName) : fileName;
+	});
+var _user$project$View$truncatedFileName = F2(
+	function (projectPathRegistry, fileName) {
+		return A3(_elm_lang$core$Set$foldl, _user$project$View$stripProjectPath, fileName, projectPathRegistry);
+	});
+var _user$project$View$referenceRow = F4(
+	function (projectPathRegistry, projectFileLines, fileName, reference) {
 		return A2(
 			_elm_lang$html$Html$tr,
 			{ctor: '[]'},
@@ -17781,7 +17824,8 @@ var _user$project$View$referenceRow = F2(
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(fileName),
+						_0: _elm_lang$html$Html$text(
+							A2(_user$project$View$truncatedFileName, projectPathRegistry, fileName)),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -17802,24 +17846,14 @@ var _user$project$View$referenceRow = F2(
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(''),
+								_0: _elm_lang$html$Html$text(
+									A3(_user$project$Types_ProjectFileLines$getLine, fileName, reference.range.start.row, projectFileLines)),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
 					}
 				}
 			});
-	});
-var _user$project$View$stripProjectPath = F2(
-	function (projectPath, fileName) {
-		return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
-			_elm_lang$core$String$dropLeft,
-			_elm_lang$core$String$length(projectPath),
-			fileName) : fileName;
-	});
-var _user$project$View$truncatedFileName = F2(
-	function (projectPathRegistry, fileName) {
-		return A3(_elm_lang$core$Set$foldl, _user$project$View$stripProjectPath, fileName, projectPathRegistry);
 	});
 var _user$project$View$render = function (data) {
 	return A2(
@@ -17878,24 +17912,24 @@ var _user$project$View$render = function (data) {
 					{ctor: '[]'},
 					A2(
 						_elm_lang$core$List$map,
-						_user$project$View$referenceRow(
-							A2(
-								_user$project$View$truncatedFileName,
-								data.projectPathRegistry,
-								_user$project$Types_ReferencePanelState$fileName(data.referencePanelState))),
+						A3(
+							_user$project$View$referenceRow,
+							data.projectPathRegistry,
+							data.projectFileLines,
+							_user$project$Types_ReferencePanelState$fileName(data.referencePanelState)),
 						_user$project$Model_ReferencePanelState$references(data))),
 				_1: {ctor: '[]'}
 			}
 		});
 };
-var _user$project$View$Data = F3(
-	function (a, b, c) {
-		return {referencePanelState: a, projectFileData: b, projectPathRegistry: c};
+var _user$project$View$Data = F4(
+	function (a, b, c, d) {
+		return {referencePanelState: a, projectFileData: b, projectPathRegistry: c, projectFileLines: d};
 	});
 
 var _user$project$Main$view = function (model) {
 	return _user$project$View$render(
-		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData, projectPathRegistry: model.projectPathRegistry});
+		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData, projectPathRegistry: model.projectPathRegistry, projectFileLines: model.projectFileLines});
 };
 var _user$project$Main$update = F2(
 	function (message, model) {
@@ -17950,11 +17984,16 @@ var _user$project$Main$update = F2(
 							referencePanelState: A3(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1, _p0._0._2)
 						}));
 			default:
-				return _user$project$And$doNothing(model);
+				return _user$project$And$doNothing(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							projectFileLines: A2(_user$project$Types_ProjectFileLines$mergeIn, _p0._0, model.projectFileLines)
+						}));
 		}
 	});
 var _user$project$Main$init = _user$project$And$doNothing(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, projectPathRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false, referencePanelState: _elm_lang$core$Maybe$Nothing});
+	{projectFileData: _user$project$Types_ProjectFileData$default, projectFileRegistry: _elm_lang$core$Set$empty, projectPathRegistry: _elm_lang$core$Set$empty, projectFileLines: _user$project$Types_ProjectFileLines$default, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false, referencePanelState: _elm_lang$core$Maybe$Nothing});
 var _user$project$Main$notifyReprocessingFile = _elm_lang$core$Native_Platform.incomingPort('notifyReprocessingFile', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
@@ -17985,9 +18024,9 @@ var _user$project$Main$setReferencePanel = _elm_lang$core$Native_Platform.incomi
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
 var _user$project$Main$reportFileLines = _elm_lang$core$Native_Platform.incomingPort('reportFileLines', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$Model = F8(
-	function (a, b, c, d, e, f, g, h) {
-		return {projectFileData: a, projectFileRegistry: b, projectPathRegistry: c, activeTextEditors: d, lastUpdatedFile: e, fileBeingReprocessed: f, batchUpdateSent: g, referencePanelState: h};
+var _user$project$Main$Model = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {projectFileData: a, projectFileRegistry: b, projectPathRegistry: c, projectFileLines: d, activeTextEditors: e, lastUpdatedFile: f, fileBeingReprocessed: g, batchUpdateSent: h, referencePanelState: i};
 	});
 var _user$project$Main$FileLinesReport = function (a) {
 	return {ctor: 'FileLinesReport', _0: a};

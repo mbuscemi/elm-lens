@@ -4,6 +4,7 @@ import Html exposing (Html, div, table, tbody, td, text, th, thead, tr)
 import Model.ReferencePanelState
 import Set exposing (Set)
 import Types.ProjectFileData exposing (ProjectFileData)
+import Types.ProjectFileLines exposing (ProjectFileLines)
 import Types.Reference exposing (Reference)
 import Types.ReferencePanelState exposing (ReferencePanelState)
 
@@ -12,6 +13,7 @@ type alias Data =
     { referencePanelState : ReferencePanelState
     , projectFileData : ProjectFileData
     , projectPathRegistry : Set String
+    , projectFileLines : ProjectFileLines
     }
 
 
@@ -28,11 +30,19 @@ render data =
         , tbody []
             (List.map
                 (Types.ReferencePanelState.fileName data.referencePanelState
-                    |> truncatedFileName data.projectPathRegistry
-                    |> referenceRow
+                    |> referenceRow data.projectPathRegistry data.projectFileLines
                 )
                 (Model.ReferencePanelState.references data)
             )
+        ]
+
+
+referenceRow : Set String -> ProjectFileLines -> String -> Reference -> Html message
+referenceRow projectPathRegistry projectFileLines fileName reference =
+    tr []
+        [ td [] [ text <| truncatedFileName projectPathRegistry fileName ]
+        , td [] [ text <| toString reference.range.start.row ]
+        , td [] [ text <| Types.ProjectFileLines.getLine fileName reference.range.start.row projectFileLines ]
         ]
 
 
@@ -47,12 +57,3 @@ stripProjectPath projectPath fileName =
         String.dropLeft (String.length projectPath) fileName
     else
         fileName
-
-
-referenceRow : String -> Reference -> Html message
-referenceRow fileName reference =
-    tr []
-        [ td [] [ text fileName ]
-        , td [] [ text <| toString reference.range.start.row ]
-        , td [] [ text "" ]
-        ]

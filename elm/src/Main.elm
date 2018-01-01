@@ -3,12 +3,12 @@ port module Main exposing (main)
 import And
 import And.FileLines
 import And.FileMarkup
-import Dict exposing (Dict)
 import Html exposing (Html)
 import Json.Encode exposing (Value)
 import Model.ProjectFileData
 import Set exposing (Set)
 import Types.ProjectFileData exposing (ProjectFileData)
+import Types.ProjectFileLines exposing (ProjectFileLines)
 import Types.ReferencePanelState exposing (ReferencePanelState)
 import View
 
@@ -17,6 +17,7 @@ type alias Model =
     { projectFileData : ProjectFileData
     , projectFileRegistry : Set String
     , projectPathRegistry : Set String
+    , projectFileLines : ProjectFileLines
     , activeTextEditors : Set String
     , lastUpdatedFile : Maybe String
     , fileBeingReprocessed : Maybe String
@@ -48,9 +49,10 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { projectFileData = Dict.empty
+    { projectFileData = Types.ProjectFileData.default
     , projectFileRegistry = Set.empty
     , projectPathRegistry = Set.empty
+    , projectFileLines = Types.ProjectFileLines.default
     , activeTextEditors = Set.empty
     , lastUpdatedFile = Nothing
     , fileBeingReprocessed = Nothing
@@ -93,7 +95,7 @@ update message model =
                 |> And.FileLines.request
 
         FileLinesReport value ->
-            model
+            { model | projectFileLines = Types.ProjectFileLines.mergeIn value model.projectFileLines }
                 |> And.doNothing
 
 
@@ -103,6 +105,7 @@ view model =
         { referencePanelState = model.referencePanelState
         , projectFileData = model.projectFileData
         , projectPathRegistry = model.projectPathRegistry
+        , projectFileLines = model.projectFileLines
         }
 
 
