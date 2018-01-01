@@ -16750,6 +16750,33 @@ var _user$project$Types_ReferencePanelState$make = F3(
 				_user$project$Types_ReferencePanelState$toType(isExternal)));
 	});
 
+var _user$project$Model_ReferencePanelState$referenceSorter = F2(
+	function (ref1, ref2) {
+		var _p0 = {
+			ctor: '_Tuple4',
+			_0: _elm_lang$core$Native_Utils.cmp(ref1.sourceFilePath, ref2.sourceFilePath) < 0,
+			_1: _elm_lang$core$Native_Utils.cmp(ref1.sourceFilePath, ref2.sourceFilePath) > 0,
+			_2: _elm_lang$core$Native_Utils.eq(ref1.sourceFilePath, ref2.sourceFilePath),
+			_3: _elm_lang$core$Native_Utils.cmp(ref1.range.start.row, ref2.range.start.row) < 0
+		};
+		if (_p0._0 === true) {
+			return _elm_lang$core$Basics$LT;
+		} else {
+			if (_p0._1 === true) {
+				return _elm_lang$core$Basics$GT;
+			} else {
+				if (_p0._2 === true) {
+					if (_p0._3 === true) {
+						return _elm_lang$core$Basics$LT;
+					} else {
+						return _elm_lang$core$Basics$GT;
+					}
+				} else {
+					return _elm_lang$core$Basics$EQ;
+				}
+			}
+		}
+	});
 var _user$project$Model_ReferencePanelState$externalRefsFor = F5(
 	function (expName, moduleName, fileName, fileData, references) {
 		return A2(
@@ -16774,33 +16801,39 @@ var _user$project$Model_ReferencePanelState$collectExternalReferences = F4(
 			projectFileData);
 	});
 var _user$project$Model_ReferencePanelState$references = function (model) {
-	var _p0 = model.referencePanelState;
-	if (_p0.ctor === 'Just') {
-		var _p2 = _p0._0;
-		var _p1 = _p2.type_;
-		if (_p1.ctor === 'Internal') {
+	var _p1 = model.referencePanelState;
+	if (_p1.ctor === 'Just') {
+		var _p3 = _p1._0;
+		var _p2 = _p3.type_;
+		if (_p2.ctor === 'Internal') {
 			return A2(
-				_elm_lang$core$List$filter,
-				function (ref) {
-					return _elm_lang$core$Native_Utils.eq(ref.name, _p2.expressionName);
-				},
-				function (_) {
-					return _.internal;
-				}(
+				_elm_lang$core$List$sortWith,
+				_user$project$Model_ReferencePanelState$referenceSorter,
+				A2(
+					_elm_lang$core$List$filter,
+					function (ref) {
+						return _elm_lang$core$Native_Utils.eq(ref.name, _p3.expressionName);
+					},
 					function (_) {
-						return _.references;
+						return _.internal;
 					}(
-						A2(
-							_elm_lang$core$Maybe$withDefault,
-							_user$project$Types_FileData$default,
-							A2(_elm_lang$core$Dict$get, _p2.fileName, model.projectFileData)))));
+						function (_) {
+							return _.references;
+						}(
+							A2(
+								_elm_lang$core$Maybe$withDefault,
+								_user$project$Types_FileData$default,
+								A2(_elm_lang$core$Dict$get, _p3.fileName, model.projectFileData))))));
 		} else {
-			return A4(
-				_user$project$Model_ReferencePanelState$collectExternalReferences,
-				_p2.expressionName,
-				_p2.fileName,
-				A2(_user$project$Types_ProjectFileData$moduleName, _p2.fileName, model.projectFileData),
-				model.projectFileData);
+			return A2(
+				_elm_lang$core$List$sortWith,
+				_user$project$Model_ReferencePanelState$referenceSorter,
+				A4(
+					_user$project$Model_ReferencePanelState$collectExternalReferences,
+					_p3.expressionName,
+					_p3.fileName,
+					A2(_user$project$Types_ProjectFileData$moduleName, _p3.fileName, model.projectFileData),
+					model.projectFileData));
 		}
 	} else {
 		return {ctor: '[]'};

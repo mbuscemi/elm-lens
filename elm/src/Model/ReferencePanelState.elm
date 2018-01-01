@@ -26,6 +26,7 @@ references model =
                         |> .references
                         |> .internal
                         |> List.filter (\ref -> ref.name == data.expressionName)
+                        |> List.sortWith referenceSorter
 
                 Types.ReferencePanelState.External ->
                     collectExternalReferences
@@ -33,6 +34,7 @@ references model =
                         data.fileName
                         (Types.ProjectFileData.moduleName data.fileName model.projectFileData)
                         model.projectFileData
+                        |> List.sortWith referenceSorter
 
         _ ->
             []
@@ -49,3 +51,28 @@ externalRefsFor expName moduleName fileName fileData references =
         |> Maybe.withDefault []
         |> List.filter (\ref -> ref.name == expName)
         |> List.append references
+
+
+referenceSorter : Reference -> Reference -> Order
+referenceSorter ref1 ref2 =
+    case
+        ( ref1.sourceFilePath < ref2.sourceFilePath
+        , ref1.sourceFilePath > ref2.sourceFilePath
+        , ref1.sourceFilePath == ref2.sourceFilePath
+        , ref1.range.start.row < ref2.range.start.row
+        )
+    of
+        ( True, _, _, _ ) ->
+            LT
+
+        ( False, True, _, _ ) ->
+            GT
+
+        ( False, False, True, True ) ->
+            LT
+
+        ( False, False, True, False ) ->
+            GT
+
+        ( False, False, False, _ ) ->
+            EQ
