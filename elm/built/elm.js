@@ -17801,6 +17801,32 @@ var _user$project$Types_ProjectFileLines$mergeIn = F2(
 	});
 var _user$project$Types_ProjectFileLines$default = _elm_lang$core$Dict$empty;
 
+var _user$project$View$withEmboldenedReference = F2(
+	function (reference, line) {
+		var afterReference = A2(_elm_lang$core$String$dropLeft, reference.range.end.column, line);
+		var lineLength = _elm_lang$core$String$length(line);
+		var beforeReference = A2(_elm_lang$core$String$dropRight, lineLength - reference.range.start.column, line);
+		return {
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(beforeReference),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$strong,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(reference.name),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(afterReference),
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+	});
 var _user$project$View$stripProjectPath = F2(
 	function (projectPath, fileName) {
 		return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
@@ -17836,7 +17862,7 @@ var _user$project$View$referenceRow = F4(
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(reference.range.start.row)),
+								_elm_lang$core$Basics$toString(reference.range.start.row + 1)),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -17844,12 +17870,10 @@ var _user$project$View$referenceRow = F4(
 						_0: A2(
 							_elm_lang$html$Html$td,
 							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(
-									A3(_user$project$Types_ProjectFileLines$getLine, fileName, reference.range.start.row, projectFileLines)),
-								_1: {ctor: '[]'}
-							}),
+							A2(
+								_user$project$View$withEmboldenedReference,
+								reference,
+								A3(_user$project$Types_ProjectFileLines$getLine, fileName, reference.range.start.row, projectFileLines))),
 						_1: {ctor: '[]'}
 					}
 				}

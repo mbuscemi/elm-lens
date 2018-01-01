@@ -1,6 +1,6 @@
 module View exposing (render)
 
-import Html exposing (Html, div, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, div, strong, table, tbody, td, text, th, thead, tr)
 import Model.ReferencePanelState
 import Set exposing (Set)
 import Types.ProjectFileData exposing (ProjectFileData)
@@ -41,8 +41,11 @@ referenceRow : Set String -> ProjectFileLines -> String -> Reference -> Html mes
 referenceRow projectPathRegistry projectFileLines fileName reference =
     tr []
         [ td [] [ text <| truncatedFileName projectPathRegistry fileName ]
-        , td [] [ text <| toString reference.range.start.row ]
-        , td [] [ text <| Types.ProjectFileLines.getLine fileName reference.range.start.row projectFileLines ]
+        , td [] [ text <| toString <| reference.range.start.row + 1 ]
+        , td []
+            (Types.ProjectFileLines.getLine fileName reference.range.start.row projectFileLines
+                |> withEmboldenedReference reference
+            )
         ]
 
 
@@ -57,3 +60,21 @@ stripProjectPath projectPath fileName =
         String.dropLeft (String.length projectPath) fileName
     else
         fileName
+
+
+withEmboldenedReference : Reference -> String -> List (Html message)
+withEmboldenedReference reference line =
+    let
+        lineLength =
+            String.length line
+
+        beforeReference =
+            String.dropRight (lineLength - reference.range.start.column) line
+
+        afterReference =
+            String.dropLeft reference.range.end.column line
+    in
+    [ text beforeReference
+    , strong [] [ text reference.name ]
+    , text afterReference
+    ]
