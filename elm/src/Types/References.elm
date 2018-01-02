@@ -15,6 +15,10 @@ type alias References =
     }
 
 
+type alias Dehasher comparable =
+    String -> comparable
+
+
 default : References
 default =
     { internal = Dict.empty
@@ -30,6 +34,23 @@ encoder references =
         ]
 
 
+decoder : Decoder References
+decoder =
+    JD.map2 References
+        (JD.field "internal" decodeInternalsDict)
+        (JD.field "external" decodeExternalsDict)
+
+
+addInternal : Reference -> References -> References
+addInternal reference references =
+    { references | internal = add reference.name reference references.internal }
+
+
+addExternal : ModuleName -> Reference -> References -> References
+addExternal moduleName reference references =
+    { references | external = add moduleName reference references.external }
+
+
 encodeInternalsDict : Dict String (List Reference) -> List ( String, Value )
 encodeInternalsDict internals =
     Dict.toList internals
@@ -41,13 +62,6 @@ encodeExternalsDict externals =
     Dict.toList externals
         |> List.map (Tuple.mapFirst Util.ModuleName.toHashed)
         |> List.map (Tuple.mapSecond Types.Reference.listEncoder)
-
-
-decoder : Decoder References
-decoder =
-    JD.map2 References
-        (JD.field "internal" decodeInternalsDict)
-        (JD.field "external" decodeExternalsDict)
 
 
 decodeInternalsDict : Decoder (Dict String (List Reference))
@@ -65,24 +79,14 @@ tupleListDecoder =
     JD.keyValuePairs Types.Reference.listDecoder
 
 
-toDictionary : (String -> comparable) -> List ( String, List Reference ) -> Dict comparable (List Reference)
-toDictionary unhash dictList =
-    List.foldl (addEntry unhash) Dict.empty dictList
+toDictionary : Dehasher comparable -> List ( String, List Reference ) -> Dict comparable (List Reference)
+toDictionary dehash dictList =
+    List.foldl (addEntry dehash) Dict.empty dictList
 
 
-addEntry : (String -> comparable) -> ( String, List Reference ) -> Dict comparable (List Reference) -> Dict comparable (List Reference)
-addEntry unhash ( key, references ) dict =
-    Dict.insert (unhash key) references dict
-
-
-addInternal : Reference -> References -> References
-addInternal reference references =
-    { references | internal = add reference.name reference references.internal }
-
-
-addExternal : ModuleName -> Reference -> References -> References
-addExternal moduleName reference references =
-    { references | external = add moduleName reference references.external }
+addEntry : Dehasher comparable -> ( String, List Reference ) -> Dict comparable (List Reference) -> Dict comparable (List Reference)
+addEntry dehash ( key, references ) dict =
+    Dict.insert (dehash key) references dict
 
 
 add : comparable -> Reference -> Dict comparable (List Reference) -> Dict comparable (List Reference)

@@ -16409,36 +16409,20 @@ var _user$project$Types_References$add = F3(
 			},
 			references);
 	});
-var _user$project$Types_References$addExternal = F3(
-	function (moduleName, reference, references) {
-		return _elm_lang$core$Native_Utils.update(
-			references,
-			{
-				external: A3(_user$project$Types_References$add, moduleName, reference, references.external)
-			});
-	});
-var _user$project$Types_References$addInternal = F2(
-	function (reference, references) {
-		return _elm_lang$core$Native_Utils.update(
-			references,
-			{
-				internal: A3(_user$project$Types_References$add, reference.name, reference, references.internal)
-			});
-	});
 var _user$project$Types_References$addEntry = F3(
-	function (unhash, _p1, dict) {
+	function (dehash, _p1, dict) {
 		var _p2 = _p1;
 		return A3(
 			_elm_lang$core$Dict$insert,
-			unhash(_p2._0),
+			dehash(_p2._0),
 			_p2._1,
 			dict);
 	});
 var _user$project$Types_References$toDictionary = F2(
-	function (unhash, dictList) {
+	function (dehash, dictList) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			_user$project$Types_References$addEntry(unhash),
+			_user$project$Types_References$addEntry(dehash),
 			_elm_lang$core$Dict$empty,
 			dictList);
 	});
@@ -16466,6 +16450,22 @@ var _user$project$Types_References$encodeInternalsDict = function (internals) {
 		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
 		_elm_lang$core$Dict$toList(internals));
 };
+var _user$project$Types_References$addExternal = F3(
+	function (moduleName, reference, references) {
+		return _elm_lang$core$Native_Utils.update(
+			references,
+			{
+				external: A3(_user$project$Types_References$add, moduleName, reference, references.external)
+			});
+	});
+var _user$project$Types_References$addInternal = F2(
+	function (reference, references) {
+		return _elm_lang$core$Native_Utils.update(
+			references,
+			{
+				internal: A3(_user$project$Types_References$add, reference.name, reference, references.internal)
+			});
+	});
 var _user$project$Types_References$encoder = function (references) {
 	return _elm_lang$core$Json_Encode$object(
 		{
