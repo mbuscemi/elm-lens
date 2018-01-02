@@ -98,7 +98,8 @@ otherReferenceCounter moduleName funcName fileName curFileName fileData count =
         count
     else
         Dict.get moduleName fileData.references.external
+            |> Maybe.withDefault Dict.empty
+            |> Dict.get funcName
             |> Maybe.withDefault []
-            |> List.filter (\reference -> reference.name == funcName)
             |> List.length
             |> (+) count

@@ -49,8 +49,9 @@ collectExternalReferences expName fileName moduleName projectFileData =
 externalRefsFor : String -> ModuleName -> String -> FileData -> List Reference -> List Reference
 externalRefsFor expName moduleName fileName fileData references =
     Dict.get moduleName fileData.references.external
+        |> Maybe.withDefault Dict.empty
+        |> Dict.get expName
         |> Maybe.withDefault []
-        |> List.filter (\ref -> ref.name == expName)
         |> List.append references
 
 

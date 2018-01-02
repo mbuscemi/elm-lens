@@ -77,7 +77,8 @@ canMake =
                                 |> Dict.insert "UnaryThing" [ Types.Reference.make "UnaryThing" 10 4 10 14 fileName ]
                         , external =
                             Dict.empty
-                                |> Dict.insert [ "Basics" ] [ Types.Reference.make "toString" 20 4 20 12 fileName ]
+                                |> Dict.insert [ "Basics" ]
+                                    (Dict.singleton "toString" [ Types.Reference.make "toString" 20 4 20 12 fileName ])
                         }
                         report.references
             ]

@@ -127,14 +127,18 @@ canParseEffects =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Task" ]
-                                [ Types.Reference.make "succeed" 29 4 29 16 "SimpleEffects.elm"
-                                , Types.Reference.make "succeed" 24 4 24 16 "SimpleEffects.elm"
-                                , Types.Reference.make "succeed" 19 4 19 16 "SimpleEffects.elm"
-                                ]
+                                (Dict.singleton "succeed"
+                                    [ Types.Reference.make "succeed" 29 4 29 16 "SimpleEffects.elm"
+                                    , Types.Reference.make "succeed" 24 4 24 16 "SimpleEffects.elm"
+                                    , Types.Reference.make "succeed" 19 4 19 16 "SimpleEffects.elm"
+                                    ]
+                                )
                             |> Dict.insert [ "Platform" ]
-                                [ Types.Reference.make "Router" 27 12 27 45 "SimpleEffects.elm"
-                                , Types.Reference.make "Router" 22 12 22 45 "SimpleEffects.elm"
-                                ]
+                                (Dict.singleton "Router"
+                                    [ Types.Reference.make "Router" 27 12 27 45 "SimpleEffects.elm"
+                                    , Types.Reference.make "Router" 22 12 22 45 "SimpleEffects.elm"
+                                    ]
+                                )
                     }
         ]
 

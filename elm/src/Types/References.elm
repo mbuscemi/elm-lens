@@ -12,7 +12,7 @@ import Util.ModuleName
 
 type alias References =
     { internal : KeyedReferences
-    , external : Dict ModuleName (List Reference)
+    , external : Dict ModuleName KeyedReferences
     }
 
 
@@ -40,50 +40,36 @@ decoder =
 
 addInternal : Reference -> References -> References
 addInternal reference references =
-    { references | internal = Dict.insertDedupe referenceUpdate reference.name [ reference ] references.internal }
+    { references | internal = Dict.insertDedupe Types.Reference.listUpdate reference.name [ reference ] references.internal }
 
 
 addExternal : ModuleName -> Reference -> References -> References
 addExternal moduleName reference references =
-    { references | external = Dict.insertDedupe referenceUpdate moduleName [ reference ] references.external }
+    { references | external = Dict.insertDedupe Types.KeyedReferences.update moduleName (Dict.singleton reference.name [ reference ]) references.external }
 
 
-encodeExternalsDict : Dict ModuleName (List Reference) -> List ( String, Value )
+encodeExternalsDict : Dict ModuleName KeyedReferences -> List ( String, Value )
 encodeExternalsDict externals =
     Dict.toList externals
         |> List.map (Tuple.mapFirst Util.ModuleName.toHashed)
-        |> List.map (Tuple.mapSecond Types.Reference.listEncoder)
+        |> List.map (Tuple.mapSecond Types.KeyedReferences.encoder)
 
 
-decodeExternalsDict : Decoder (Dict ModuleName (List Reference))
+decodeExternalsDict : Decoder (Dict ModuleName KeyedReferences)
 decodeExternalsDict =
     JD.map toDictionary tupleListDecoder
 
 
-tupleListDecoder : Decoder (List ( String, List Reference ))
+tupleListDecoder : Decoder (List ( String, List ( String, List Reference ) ))
 tupleListDecoder =
-    JD.keyValuePairs Types.Reference.listDecoder
+    JD.keyValuePairs <| JD.keyValuePairs Types.Reference.listDecoder
 
 
-toDictionary : List ( String, List Reference ) -> Dict ModuleName (List Reference)
+toDictionary : List ( String, List ( String, List Reference ) ) -> Dict ModuleName KeyedReferences
 toDictionary dictList =
     List.foldl addEntry Dict.empty dictList
 
 
-addEntry : ( String, List Reference ) -> Dict ModuleName (List Reference) -> Dict ModuleName (List Reference)
-addEntry ( key, references ) dict =
-    Dict.insert (Util.ModuleName.fromHashed key) references dict
-
-
-referenceUpdate : List Reference -> List Reference -> List Reference
-referenceUpdate referencesA referencesB =
-    let
-        newReference =
-            List.head referencesB
-    in
-    case newReference of
-        Just reference ->
-            reference :: referencesA
-
-        Nothing ->
-            referencesB
+addEntry : ( String, List ( String, List Reference ) ) -> Dict ModuleName KeyedReferences -> Dict ModuleName KeyedReferences
+addEntry ( key, keyedReferences ) dict =
+    Dict.insert (Util.ModuleName.fromHashed key) (Types.KeyedReferences.toDictionary keyedReferences) dict

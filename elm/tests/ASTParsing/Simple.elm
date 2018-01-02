@@ -90,12 +90,12 @@ canParseSimple =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Basics" ]
-                                [ Types.Reference.make "toString" 26 4 26 12 fileName ]
+                                (Dict.singleton "toString" [ Types.Reference.make "toString" 26 4 26 12 fileName ])
                             |> Dict.insert [ "Json", "Encode" ]
-                                [ Types.Reference.make "Value" 43 22 43 28 fileName
-                                , Types.Reference.make "Value" 39 8 39 16 fileName
-                                , Types.Reference.make "encodeValue" 41 4 41 18 fileName
-                                ]
+                                (Dict.empty
+                                    |> Dict.insert "Value" [ Types.Reference.make "Value" 43 22 43 28 fileName, Types.Reference.make "Value" 39 8 39 16 fileName ]
+                                    |> Dict.insert "encodeValue" [ Types.Reference.make "encodeValue" 41 4 41 18 fileName ]
+                                )
                     }
         ]
 

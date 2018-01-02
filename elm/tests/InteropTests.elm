@@ -119,13 +119,15 @@ references =
                             )
                             (Dict.empty
                                 |> Dict.insert [ "ab", "cd", "de" ]
-                                    [ Types.Reference.make "ghi" 1 2 3 4 "file2.elm"
-                                    , Types.Reference.make "klm" 5 6 7 8 "file3.elm"
-                                    ]
+                                    (Dict.empty
+                                        |> Dict.insert "ghi" [ Types.Reference.make "ghi" 1 2 3 4 "file2.elm" ]
+                                        |> Dict.insert "klm" [ Types.Reference.make "klm" 5 6 7 8 "file3.elm" ]
+                                    )
                                 |> Dict.insert [ "ed", "fg" ]
-                                    [ Types.Reference.make "no" 1 2 3 4 "file3.elm"
-                                    , Types.Reference.make "pq" 5 6 7 8 "file4.elm"
-                                    ]
+                                    (Dict.empty
+                                        |> Dict.insert "no" [ Types.Reference.make "no" 1 2 3 4 "file3.elm" ]
+                                        |> Dict.insert "pq" [ Types.Reference.make "pq" 5 6 7 8 "file4.elm" ]
+                                    )
                             )
 
                     encoded =
@@ -165,13 +167,15 @@ report =
                                 )
                                 (Dict.empty
                                     |> Dict.insert [ "fds", "xcv", "qwe" ]
-                                        [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"
-                                        , Reference "io" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm"
-                                        ]
+                                        (Dict.empty
+                                            |> Dict.insert "hj" [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm" ]
+                                            |> Dict.insert "io" [ Reference "io" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm" ]
+                                        )
                                     |> Dict.insert [ "gyu", "xsq" ]
-                                        [ Reference "tuyi" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"
-                                        , Reference "fas" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm"
-                                        ]
+                                        (Dict.empty
+                                            |> Dict.insert "tuyi" [ Reference "tuyi" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm" ]
+                                            |> Dict.insert "fas" [ Reference "fas" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm" ]
+                                        )
                                 )
                             )
 

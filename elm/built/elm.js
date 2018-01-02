@@ -16318,6 +16318,16 @@ var _user$project$Types_Exposings$decoder = A3(
 		'types',
 		_elm_community$json_extra$Json_Decode_Extra$set(_elm_lang$core$Json_Decode$string)));
 
+var _user$project$Types_Reference$listUpdate = F2(
+	function (referencesA, referencesB) {
+		var newReference = _elm_lang$core$List$head(referencesB);
+		var _p0 = newReference;
+		if (_p0.ctor === 'Just') {
+			return {ctor: '::', _0: _p0._0, _1: referencesA};
+		} else {
+			return referencesB;
+		}
+	});
 var _user$project$Types_Reference$encoder = function (reference) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -16380,16 +16390,32 @@ var _user$project$Types_KeyedReferences$addEntry = F2(
 		var _p1 = _p0;
 		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, dict);
 	});
-var _user$project$Types_KeyedReferences$toDictionary = function (dictList) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Types_KeyedReferences$addEntry, _elm_lang$core$Dict$empty, dictList);
-};
-var _user$project$Types_KeyedReferences$decoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_KeyedReferences$toDictionary, _user$project$Types_KeyedReferences$tupleListDecoder);
 var _user$project$Types_KeyedReferences$encodeInternalsDict = function (internals) {
 	return A2(
 		_elm_lang$core$List$map,
 		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
 		_elm_lang$core$Dict$toList(internals));
 };
+var _user$project$Types_KeyedReferences$toDictionary = function (dictList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_KeyedReferences$addEntry, _elm_lang$core$Dict$empty, dictList);
+};
+var _user$project$Types_KeyedReferences$existsInBoth = F4(
+	function (name, list1, list2, dict) {
+		var newList = function () {
+			var _p2 = _elm_lang$core$List$head(list2);
+			if (_p2.ctor === 'Just') {
+				return {ctor: '::', _0: _p2._0, _1: list1};
+			} else {
+				return list1;
+			}
+		}();
+		return A3(_elm_lang$core$Dict$insert, name, newList, dict);
+	});
+var _user$project$Types_KeyedReferences$update = F2(
+	function (keyedRefs1, keyedRefs2) {
+		return A6(_elm_lang$core$Dict$merge, _elm_lang$core$Dict$insert, _user$project$Types_KeyedReferences$existsInBoth, _elm_lang$core$Dict$insert, keyedRefs1, keyedRefs2, _elm_lang$core$Dict$empty);
+	});
+var _user$project$Types_KeyedReferences$decoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_KeyedReferences$toDictionary, _user$project$Types_KeyedReferences$tupleListDecoder);
 var _user$project$Types_KeyedReferences$encoder = function (keyedReferences) {
 	return _elm_lang$core$Json_Encode$object(
 		_user$project$Types_KeyedReferences$encodeInternalsDict(keyedReferences));
@@ -16407,34 +16433,25 @@ var _user$project$Util_ModuleName$encoder = function (moduleName) {
 		A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, moduleName));
 };
 
-var _user$project$Types_References$referenceUpdate = F2(
-	function (referencesA, referencesB) {
-		var newReference = _elm_lang$core$List$head(referencesB);
-		var _p0 = newReference;
-		if (_p0.ctor === 'Just') {
-			return {ctor: '::', _0: _p0._0, _1: referencesA};
-		} else {
-			return referencesB;
-		}
-	});
 var _user$project$Types_References$addEntry = F2(
-	function (_p1, dict) {
-		var _p2 = _p1;
+	function (_p0, dict) {
+		var _p1 = _p0;
 		return A3(
 			_elm_lang$core$Dict$insert,
-			_user$project$Util_ModuleName$fromHashed(_p2._0),
-			_p2._1,
+			_user$project$Util_ModuleName$fromHashed(_p1._0),
+			_user$project$Types_KeyedReferences$toDictionary(_p1._1),
 			dict);
 	});
 var _user$project$Types_References$toDictionary = function (dictList) {
 	return A3(_elm_lang$core$List$foldl, _user$project$Types_References$addEntry, _elm_lang$core$Dict$empty, dictList);
 };
-var _user$project$Types_References$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder);
+var _user$project$Types_References$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(
+	_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder));
 var _user$project$Types_References$decodeExternalsDict = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_References$toDictionary, _user$project$Types_References$tupleListDecoder);
 var _user$project$Types_References$encodeExternalsDict = function (externals) {
 	return A2(
 		_elm_lang$core$List$map,
-		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
+		_elm_lang$core$Tuple$mapSecond(_user$project$Types_KeyedReferences$encoder),
 		A2(
 			_elm_lang$core$List$map,
 			_elm_lang$core$Tuple$mapFirst(_user$project$Util_ModuleName$toHashed),
@@ -16447,13 +16464,16 @@ var _user$project$Types_References$addExternal = F3(
 			{
 				external: A4(
 					_elm_community$dict_extra$Dict_Extra$insertDedupe,
-					_user$project$Types_References$referenceUpdate,
+					_user$project$Types_KeyedReferences$update,
 					moduleName,
-					{
-						ctor: '::',
-						_0: reference,
-						_1: {ctor: '[]'}
-					},
+					A2(
+						_elm_lang$core$Dict$singleton,
+						reference.name,
+						{
+							ctor: '::',
+							_0: reference,
+							_1: {ctor: '[]'}
+						}),
 					references.external)
 			});
 	});
@@ -16464,7 +16484,7 @@ var _user$project$Types_References$addInternal = F2(
 			{
 				internal: A4(
 					_elm_community$dict_extra$Dict_Extra$insertDedupe,
-					_user$project$Types_References$referenceUpdate,
+					_user$project$Types_Reference$listUpdate,
 					reference.name,
 					{
 						ctor: '::',
@@ -16806,14 +16826,15 @@ var _user$project$Model_ReferencePanelState$externalRefsFor = F5(
 			_elm_lang$core$List$append,
 			references,
 			A2(
-				_elm_lang$core$List$filter,
-				function (ref) {
-					return _elm_lang$core$Native_Utils.eq(ref.name, expName);
-				},
+				_elm_lang$core$Maybe$withDefault,
+				{ctor: '[]'},
 				A2(
-					_elm_lang$core$Maybe$withDefault,
-					{ctor: '[]'},
-					A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external))));
+					_elm_lang$core$Dict$get,
+					expName,
+					A2(
+						_elm_lang$core$Maybe$withDefault,
+						_elm_lang$core$Dict$empty,
+						A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external)))));
 	});
 var _user$project$Model_ReferencePanelState$collectExternalReferences = F4(
 	function (expName, fileName, moduleName, projectFileData) {
@@ -16958,14 +16979,15 @@ var _user$project$Model_FileMarkup$otherReferenceCounter = F6(
 			count,
 			_elm_lang$core$List$length(
 				A2(
-					_elm_lang$core$List$filter,
-					function (reference) {
-						return _elm_lang$core$Native_Utils.eq(reference.name, funcName);
-					},
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '[]'},
 					A2(
-						_elm_lang$core$Maybe$withDefault,
-						{ctor: '[]'},
-						A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external)))));
+						_elm_lang$core$Dict$get,
+						funcName,
+						A2(
+							_elm_lang$core$Maybe$withDefault,
+							_elm_lang$core$Dict$empty,
+							A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external))))));
 	});
 var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F5(
 	function (fileIsExposed, moduleName, funcName, fileName, projectFileData) {

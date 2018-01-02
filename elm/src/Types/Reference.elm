@@ -1,4 +1,4 @@
-module Types.Reference exposing (Reference, decoder, default, encoder, listDecoder, listEncoder, make)
+module Types.Reference exposing (Reference, decoder, default, encoder, listDecoder, listEncoder, listUpdate, make)
 
 import Elm.Syntax.Range as Range exposing (Range, decode, emptyRange)
 import Json.Decode as JD exposing (Decoder)
@@ -54,3 +54,17 @@ decoder =
 listDecoder : Decoder (List Reference)
 listDecoder =
     JD.list decoder
+
+
+listUpdate : List Reference -> List Reference -> List Reference
+listUpdate referencesA referencesB =
+    let
+        newReference =
+            List.head referencesB
+    in
+    case newReference of
+        Just reference ->
+            reference :: referencesA
+
+        Nothing ->
+            referencesB
