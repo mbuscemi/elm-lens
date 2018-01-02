@@ -66,5 +66,6 @@ tag for any function with a type signature of `Test`.
   * Functions that are exposed and unreferenced in modules listed in `exposed-modules` should be handled differently.
 * 0.3.0 Configurability Upgrade
   * Will be able to toggle off parts of the metadata or entire metadata via command keys and plugin options.
+  * Will be able to configure markup text opacity.
 * 0.2.0 Visualization of References
 * ~0.1.0 Initial Release~
