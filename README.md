@@ -61,6 +61,7 @@ tag for any function with a type signature of `Test`.
 
 ## Roadmap
 
+* 0.7.0 Editor Dependency Abstraction
 * 0.6.0 Exposed/Local Upgrades
   * Clicking on "exposed/local" toggles the function between being exposed and local.
   * Add a menu option "Auto-Adjust Exports..." which updates all exposings to correspond to whether or not the function is used externally.
