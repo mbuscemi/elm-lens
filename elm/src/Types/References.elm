@@ -5,18 +5,15 @@ import Dict.Extra as Dict
 import Elm.Syntax.Base exposing (ModuleName)
 import Json.Decode as JD exposing (Decoder)
 import Json.Encode as JE exposing (Value)
+import Types.KeyedReferences exposing (KeyedReferences)
 import Types.Reference exposing (Reference)
 import Util.ModuleName
 
 
 type alias References =
-    { internal : Dict String (List Reference)
+    { internal : KeyedReferences
     , external : Dict ModuleName (List Reference)
     }
-
-
-type alias Dehasher comparable =
-    String -> comparable
 
 
 default : References
@@ -29,7 +26,7 @@ default =
 encoder : References -> Value
 encoder references =
     JE.object
-        [ ( "internal", JE.object <| encodeInternalsDict references.internal )
+        [ ( "internal", Types.KeyedReferences.encoder references.internal )
         , ( "external", JE.object <| encodeExternalsDict references.external )
         ]
 
@@ -37,24 +34,18 @@ encoder references =
 decoder : Decoder References
 decoder =
     JD.map2 References
-        (JD.field "internal" decodeInternalsDict)
+        (JD.field "internal" Types.KeyedReferences.decoder)
         (JD.field "external" decodeExternalsDict)
 
 
 addInternal : Reference -> References -> References
 addInternal reference references =
-    { references | internal = add reference.name reference references.internal }
+    { references | internal = Dict.insertDedupe referenceUpdate reference.name [ reference ] references.internal }
 
 
 addExternal : ModuleName -> Reference -> References -> References
 addExternal moduleName reference references =
-    { references | external = add moduleName reference references.external }
-
-
-encodeInternalsDict : Dict String (List Reference) -> List ( String, Value )
-encodeInternalsDict internals =
-    Dict.toList internals
-        |> List.map (Tuple.mapSecond Types.Reference.listEncoder)
+    { references | external = Dict.insertDedupe referenceUpdate moduleName [ reference ] references.external }
 
 
 encodeExternalsDict : Dict ModuleName (List Reference) -> List ( String, Value )
@@ -64,14 +55,9 @@ encodeExternalsDict externals =
         |> List.map (Tuple.mapSecond Types.Reference.listEncoder)
 
 
-decodeInternalsDict : Decoder (Dict String (List Reference))
-decodeInternalsDict =
-    JD.map (toDictionary identity) tupleListDecoder
-
-
 decodeExternalsDict : Decoder (Dict ModuleName (List Reference))
 decodeExternalsDict =
-    JD.map (toDictionary Util.ModuleName.fromHashed) tupleListDecoder
+    JD.map toDictionary tupleListDecoder
 
 
 tupleListDecoder : Decoder (List ( String, List Reference ))
@@ -79,19 +65,14 @@ tupleListDecoder =
     JD.keyValuePairs Types.Reference.listDecoder
 
 
-toDictionary : Dehasher comparable -> List ( String, List Reference ) -> Dict comparable (List Reference)
-toDictionary dehash dictList =
-    List.foldl (addEntry dehash) Dict.empty dictList
+toDictionary : List ( String, List Reference ) -> Dict ModuleName (List Reference)
+toDictionary dictList =
+    List.foldl addEntry Dict.empty dictList
 
 
-addEntry : Dehasher comparable -> ( String, List Reference ) -> Dict comparable (List Reference) -> Dict comparable (List Reference)
-addEntry dehash ( key, references ) dict =
-    Dict.insert (dehash key) references dict
-
-
-add : comparable -> Reference -> Dict comparable (List Reference) -> Dict comparable (List Reference)
-add key reference references =
-    Dict.insertDedupe referenceUpdate key [ reference ] references
+addEntry : ( String, List Reference ) -> Dict ModuleName (List Reference) -> Dict ModuleName (List Reference)
+addEntry ( key, references ) dict =
+    Dict.insert (Util.ModuleName.fromHashed key) references dict
 
 
 referenceUpdate : List Reference -> List Reference -> List Reference

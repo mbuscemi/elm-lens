@@ -16374,6 +16374,27 @@ var _user$project$Types_Reference$decoder = A4(
 	A2(_elm_lang$core$Json_Decode$field, 'sourceFilePath', _elm_lang$core$Json_Decode$string));
 var _user$project$Types_Reference$listDecoder = _elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder);
 
+var _user$project$Types_KeyedReferences$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder);
+var _user$project$Types_KeyedReferences$addEntry = F2(
+	function (_p0, dict) {
+		var _p1 = _p0;
+		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, dict);
+	});
+var _user$project$Types_KeyedReferences$toDictionary = function (dictList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_KeyedReferences$addEntry, _elm_lang$core$Dict$empty, dictList);
+};
+var _user$project$Types_KeyedReferences$decoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_KeyedReferences$toDictionary, _user$project$Types_KeyedReferences$tupleListDecoder);
+var _user$project$Types_KeyedReferences$encodeInternalsDict = function (internals) {
+	return A2(
+		_elm_lang$core$List$map,
+		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
+		_elm_lang$core$Dict$toList(internals));
+};
+var _user$project$Types_KeyedReferences$encoder = function (keyedReferences) {
+	return _elm_lang$core$Json_Encode$object(
+		_user$project$Types_KeyedReferences$encodeInternalsDict(keyedReferences));
+};
+
 var _user$project$Util_ModuleName$fromHashed = function (encodedModuleName) {
 	return A2(_elm_lang$core$String$split, '|', encodedModuleName);
 };
@@ -16396,45 +16417,20 @@ var _user$project$Types_References$referenceUpdate = F2(
 			return referencesB;
 		}
 	});
-var _user$project$Types_References$add = F3(
-	function (key, reference, references) {
-		return A4(
-			_elm_community$dict_extra$Dict_Extra$insertDedupe,
-			_user$project$Types_References$referenceUpdate,
-			key,
-			{
-				ctor: '::',
-				_0: reference,
-				_1: {ctor: '[]'}
-			},
-			references);
-	});
-var _user$project$Types_References$addEntry = F3(
-	function (dehash, _p1, dict) {
+var _user$project$Types_References$addEntry = F2(
+	function (_p1, dict) {
 		var _p2 = _p1;
 		return A3(
 			_elm_lang$core$Dict$insert,
-			dehash(_p2._0),
+			_user$project$Util_ModuleName$fromHashed(_p2._0),
 			_p2._1,
 			dict);
 	});
-var _user$project$Types_References$toDictionary = F2(
-	function (dehash, dictList) {
-		return A3(
-			_elm_lang$core$List$foldl,
-			_user$project$Types_References$addEntry(dehash),
-			_elm_lang$core$Dict$empty,
-			dictList);
-	});
+var _user$project$Types_References$toDictionary = function (dictList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_References$addEntry, _elm_lang$core$Dict$empty, dictList);
+};
 var _user$project$Types_References$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder);
-var _user$project$Types_References$decodeExternalsDict = A2(
-	_elm_lang$core$Json_Decode$map,
-	_user$project$Types_References$toDictionary(_user$project$Util_ModuleName$fromHashed),
-	_user$project$Types_References$tupleListDecoder);
-var _user$project$Types_References$decodeInternalsDict = A2(
-	_elm_lang$core$Json_Decode$map,
-	_user$project$Types_References$toDictionary(_elm_lang$core$Basics$identity),
-	_user$project$Types_References$tupleListDecoder);
+var _user$project$Types_References$decodeExternalsDict = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_References$toDictionary, _user$project$Types_References$tupleListDecoder);
 var _user$project$Types_References$encodeExternalsDict = function (externals) {
 	return A2(
 		_elm_lang$core$List$map,
@@ -16444,18 +16440,21 @@ var _user$project$Types_References$encodeExternalsDict = function (externals) {
 			_elm_lang$core$Tuple$mapFirst(_user$project$Util_ModuleName$toHashed),
 			_elm_lang$core$Dict$toList(externals)));
 };
-var _user$project$Types_References$encodeInternalsDict = function (internals) {
-	return A2(
-		_elm_lang$core$List$map,
-		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
-		_elm_lang$core$Dict$toList(internals));
-};
 var _user$project$Types_References$addExternal = F3(
 	function (moduleName, reference, references) {
 		return _elm_lang$core$Native_Utils.update(
 			references,
 			{
-				external: A3(_user$project$Types_References$add, moduleName, reference, references.external)
+				external: A4(
+					_elm_community$dict_extra$Dict_Extra$insertDedupe,
+					_user$project$Types_References$referenceUpdate,
+					moduleName,
+					{
+						ctor: '::',
+						_0: reference,
+						_1: {ctor: '[]'}
+					},
+					references.external)
 			});
 	});
 var _user$project$Types_References$addInternal = F2(
@@ -16463,7 +16462,16 @@ var _user$project$Types_References$addInternal = F2(
 		return _elm_lang$core$Native_Utils.update(
 			references,
 			{
-				internal: A3(_user$project$Types_References$add, reference.name, reference, references.internal)
+				internal: A4(
+					_elm_community$dict_extra$Dict_Extra$insertDedupe,
+					_user$project$Types_References$referenceUpdate,
+					reference.name,
+					{
+						ctor: '::',
+						_0: reference,
+						_1: {ctor: '[]'}
+					},
+					references.internal)
 			});
 	});
 var _user$project$Types_References$encoder = function (references) {
@@ -16473,8 +16481,7 @@ var _user$project$Types_References$encoder = function (references) {
 			_0: {
 				ctor: '_Tuple2',
 				_0: 'internal',
-				_1: _elm_lang$core$Json_Encode$object(
-					_user$project$Types_References$encodeInternalsDict(references.internal))
+				_1: _user$project$Types_KeyedReferences$encoder(references.internal)
 			},
 			_1: {
 				ctor: '::',
@@ -16496,7 +16503,7 @@ var _user$project$Types_References$References = F2(
 var _user$project$Types_References$decoder = A3(
 	_elm_lang$core$Json_Decode$map2,
 	_user$project$Types_References$References,
-	A2(_elm_lang$core$Json_Decode$field, 'internal', _user$project$Types_References$decodeInternalsDict),
+	A2(_elm_lang$core$Json_Decode$field, 'internal', _user$project$Types_KeyedReferences$decoder),
 	A2(_elm_lang$core$Json_Decode$field, 'external', _user$project$Types_References$decodeExternalsDict));
 
 var _user$project$Types_SpecialType$toString = function (specialType) {
