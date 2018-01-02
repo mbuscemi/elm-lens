@@ -25,7 +25,8 @@ references model =
                         |> Maybe.withDefault Types.FileData.default
                         |> .references
                         |> .internal
-                        |> List.filter (\ref -> ref.name == data.expressionName)
+                        |> Dict.get data.expressionName
+                        |> Maybe.withDefault []
                         |> List.sortWith referenceSorter
 
                 Types.ReferencePanelState.External ->

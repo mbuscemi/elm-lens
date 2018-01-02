@@ -113,9 +113,10 @@ references =
                 let
                     orig =
                         References
-                            [ Types.Reference.make "abc" 1 2 3 4 "file1.elm"
-                            , Types.Reference.make "def" 5 6 7 8 "file2.elm"
-                            ]
+                            (Dict.empty
+                                |> Dict.insert "abc" [ Types.Reference.make "abc" 1 2 3 4 "file1.elm" ]
+                                |> Dict.insert "def" [ Types.Reference.make "def" 5 6 7 8 "file2.elm" ]
+                            )
                             (Dict.empty
                                 |> Dict.insert [ "ab", "cd", "de" ]
                                     [ Types.Reference.make "ghi" 1 2 3 4 "file2.elm"
@@ -158,9 +159,10 @@ report =
                                 (Set.singleton "mom")
                             )
                             (References
-                                [ Reference "dgsklh" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"
-                                , Reference "sdfljk" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm"
-                                ]
+                                (Dict.empty
+                                    |> Dict.insert "dgsklh" [ Reference "dgsklh" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm" ]
+                                    |> Dict.insert "sdfljk" [ Reference "sdfljk" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm" ]
+                                )
                                 (Dict.empty
                                     |> Dict.insert [ "fds", "xcv", "qwe" ]
                                         [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm"

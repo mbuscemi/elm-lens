@@ -49,11 +49,11 @@ canParseFromLet =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "reference2" 22 12 22 22 "LetExpression.elm"
-                        , Types.Reference.make "first" 24 4 24 9 "LetExpression.elm"
-                        , Types.Reference.make "reference1" 14 12 14 22 "LetExpression.elm"
-                        , Types.Reference.make "incremented" 16 4 16 15 "LetExpression.elm"
-                        ]
+                        Dict.empty
+                            |> Dict.insert "reference2" [ Types.Reference.make "reference2" 22 12 22 22 "LetExpression.elm" ]
+                            |> Dict.insert "first" [ Types.Reference.make "first" 24 4 24 9 "LetExpression.elm" ]
+                            |> Dict.insert "reference1" [ Types.Reference.make "reference1" 14 12 14 22 "LetExpression.elm" ]
+                            |> Dict.insert "incremented" [ Types.Reference.make "incremented" 16 4 16 15 "LetExpression.elm" ]
                     , external = Dict.empty
                     }
         ]

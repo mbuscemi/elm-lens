@@ -77,18 +77,16 @@ canParseSimple =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "Sub" 43 43 43 54 fileName
-                        , Types.Reference.make "tupled" 37 4 37 10 fileName
-                        , Types.Reference.make "BinaryThing" 32 22 32 33 fileName
-                        , Types.Reference.make "UnaryThing" 32 10 32 20 fileName
-                        , Types.Reference.make "One" 34 13 34 16 fileName
-                        , Types.Reference.make "Single" 34 5 34 11 fileName
-                        , Types.Reference.make "frangle" 30 21 30 28 fileName
-                        , Types.Reference.make "blarg" 30 15 30 20 fileName
-                        , Types.Reference.make "blargargle" 30 4 30 14 fileName
-                        , Types.Reference.make "BinaryThing" 16 4 16 15 fileName
-                        , Types.Reference.make "UnaryThing" 13 31 13 41 fileName
-                        ]
+                        Dict.empty
+                            |> Dict.insert "Sub" [ Types.Reference.make "Sub" 43 43 43 54 fileName ]
+                            |> Dict.insert "tupled" [ Types.Reference.make "tupled" 37 4 37 10 fileName ]
+                            |> Dict.insert "BinaryThing" [ Types.Reference.make "BinaryThing" 32 22 32 33 fileName, Types.Reference.make "BinaryThing" 16 4 16 15 fileName ]
+                            |> Dict.insert "UnaryThing" [ Types.Reference.make "UnaryThing" 32 10 32 20 fileName, Types.Reference.make "UnaryThing" 13 31 13 41 fileName ]
+                            |> Dict.insert "One" [ Types.Reference.make "One" 34 13 34 16 fileName ]
+                            |> Dict.insert "Single" [ Types.Reference.make "Single" 34 5 34 11 fileName ]
+                            |> Dict.insert "frangle" [ Types.Reference.make "frangle" 30 21 30 28 fileName ]
+                            |> Dict.insert "blarg" [ Types.Reference.make "blarg" 30 15 30 20 fileName ]
+                            |> Dict.insert "blargargle" [ Types.Reference.make "blargargle" 30 4 30 14 fileName ]
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Basics" ]

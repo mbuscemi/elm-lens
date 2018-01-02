@@ -70,11 +70,11 @@ canMake =
                 \_ ->
                     Expect.equal
                         { internal =
-                            [ Types.Reference.make "frangle" 24 21 24 28 fileName
-                            , Types.Reference.make "blarg" 24 15 24 20 fileName
-                            , Types.Reference.make "blargargle" 24 4 24 14 fileName
-                            , Types.Reference.make "UnaryThing" 10 4 10 14 fileName
-                            ]
+                            Dict.empty
+                                |> Dict.insert "frangle" [ Types.Reference.make "frangle" 24 21 24 28 fileName ]
+                                |> Dict.insert "blarg" [ Types.Reference.make "blarg" 24 15 24 20 fileName ]
+                                |> Dict.insert "blargargle" [ Types.Reference.make "blargargle" 24 4 24 14 fileName ]
+                                |> Dict.insert "UnaryThing" [ Types.Reference.make "UnaryThing" 10 4 10 14 fileName ]
                         , external =
                             Dict.empty
                                 |> Dict.insert [ "Basics" ] [ Types.Reference.make "toString" 20 4 20 12 fileName ]

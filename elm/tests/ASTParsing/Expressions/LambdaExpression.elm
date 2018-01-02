@@ -46,7 +46,7 @@ canParseFromLambda =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Types.Reference.make "reference" 8 11 8 20 "LambdaExpression.elm" ]
+                    { internal = Dict.singleton "reference" [ Types.Reference.make "reference" 8 11 8 20 "LambdaExpression.elm" ]
                     , external = Dict.empty
                     }
         ]

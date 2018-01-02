@@ -1,7 +1,6 @@
 port module And.FileLines exposing (request)
 
 import And
-import Dict
 import Dict.Extra as Dict
 import Json.Encode exposing (Value)
 import Model.ReferencePanelState

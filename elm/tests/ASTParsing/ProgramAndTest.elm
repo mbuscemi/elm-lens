@@ -44,10 +44,10 @@ canParseProgram =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "Message" 5 27 5 34 "Main.elm"
-                        , Types.Reference.make "Model" 5 21 5 34 "Main.elm"
-                        , Types.Reference.make "Program" 5 7 5 34 "Main.elm"
-                        ]
+                        Dict.empty
+                            |> Dict.insert "Message" [ Types.Reference.make "Message" 5 27 5 34 "Main.elm" ]
+                            |> Dict.insert "Model" [ Types.Reference.make "Model" 5 21 5 34 "Main.elm" ]
+                            |> Dict.insert "Program" [ Types.Reference.make "Program" 5 7 5 34 "Main.elm" ]
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Cmd" ]
@@ -99,7 +99,7 @@ canParseTest =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = []
+                    { internal = Dict.empty
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Expect" ]

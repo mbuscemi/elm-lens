@@ -52,7 +52,7 @@ canParse =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Types.Reference.make "someRecord" 8 4 8 14 "NestedRecord.elm" ]
+                        Dict.singleton "someRecord" [ Types.Reference.make "someRecord" 8 4 8 14 "NestedRecord.elm" ]
                     , external =
                         Dict.empty
                     }

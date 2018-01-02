@@ -8,7 +8,6 @@ import Types.Expression exposing (Expression)
 import Types.FileData exposing (FileData)
 import Types.FileMarkup exposing (ExpressionData, FileMarkup)
 import Types.ProjectFileData exposing (ProjectFileData)
-import Types.Reference exposing (Reference)
 import Types.SpecialType
 
 
@@ -80,15 +79,9 @@ isExposed expName fileData =
 
 numOccurencesInOwnReferences : String -> FileData -> Int
 numOccurencesInOwnReferences funcName fileData =
-    List.foldl (referenceCounter funcName) 0 fileData.references.internal
-
-
-referenceCounter : String -> Reference -> Int -> Int
-referenceCounter funcName reference count =
-    if reference.name == funcName then
-        count + 1
-    else
-        count
+    Dict.get funcName fileData.references.internal
+        |> Maybe.withDefault []
+        |> List.length
 
 
 numOccurencesInOtherReferences : Bool -> ModuleName -> String -> String -> ProjectFileData -> Int

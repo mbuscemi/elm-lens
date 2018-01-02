@@ -10,14 +10,14 @@ import Util.ModuleName
 
 
 type alias References =
-    { internal : List Reference
+    { internal : Dict String (List Reference)
     , external : Dict ModuleName (List Reference)
     }
 
 
 default : References
 default =
-    { internal = []
+    { internal = Dict.empty
     , external = Dict.empty
     }
 
@@ -25,9 +25,15 @@ default =
 encoder : References -> Value
 encoder references =
     JE.object
-        [ ( "internal", JE.list (List.map Types.Reference.encoder references.internal) )
-        , ( "external", JE.object (encodeExternalsDict references.external) )
+        [ ( "internal", JE.object <| encodeInternalsDict references.internal )
+        , ( "external", JE.object <| encodeExternalsDict references.external )
         ]
+
+
+encodeInternalsDict : Dict String (List Reference) -> List ( String, Value )
+encodeInternalsDict internals =
+    Dict.toList internals
+        |> List.map (Tuple.mapSecond Types.Reference.listEncoder)
 
 
 encodeExternalsDict : Dict ModuleName (List Reference) -> List ( String, Value )
@@ -40,13 +46,18 @@ encodeExternalsDict externals =
 decoder : Decoder References
 decoder =
     JD.map2 References
-        (JD.field "internal" <| JD.list Types.Reference.decoder)
+        (JD.field "internal" decodeInternalsDict)
         (JD.field "external" decodeExternalsDict)
+
+
+decodeInternalsDict : Decoder (Dict String (List Reference))
+decodeInternalsDict =
+    JD.map (toDictionary identity) tupleListDecoder
 
 
 decodeExternalsDict : Decoder (Dict ModuleName (List Reference))
 decodeExternalsDict =
-    JD.map toDictionary tupleListDecoder
+    JD.map (toDictionary Util.ModuleName.fromHashed) tupleListDecoder
 
 
 tupleListDecoder : Decoder (List ( String, List Reference ))
@@ -54,28 +65,33 @@ tupleListDecoder =
     JD.keyValuePairs Types.Reference.listDecoder
 
 
-toDictionary : List ( String, List Reference ) -> Dict ModuleName (List Reference)
-toDictionary dictList =
-    List.foldl addEntry Dict.empty dictList
+toDictionary : (String -> comparable) -> List ( String, List Reference ) -> Dict comparable (List Reference)
+toDictionary unhash dictList =
+    List.foldl (addEntry unhash) Dict.empty dictList
 
 
-addEntry : ( String, List Reference ) -> Dict ModuleName (List Reference) -> Dict ModuleName (List Reference)
-addEntry ( encodedModuleName, references ) dict =
-    Dict.insert (Util.ModuleName.fromHashed encodedModuleName) references dict
+addEntry : (String -> comparable) -> ( String, List Reference ) -> Dict comparable (List Reference) -> Dict comparable (List Reference)
+addEntry unhash ( key, references ) dict =
+    Dict.insert (unhash key) references dict
 
 
 addInternal : Reference -> References -> References
 addInternal reference references =
-    { references | internal = reference :: references.internal }
+    { references | internal = add reference.name reference references.internal }
 
 
 addExternal : ModuleName -> Reference -> References -> References
 addExternal moduleName reference references =
-    { references | external = Dict.insertDedupe externalReferenceUpdate moduleName [ reference ] references.external }
+    { references | external = add moduleName reference references.external }
 
 
-externalReferenceUpdate : List Reference -> List Reference -> List Reference
-externalReferenceUpdate referencesA referencesB =
+add : comparable -> Reference -> Dict comparable (List Reference) -> Dict comparable (List Reference)
+add key reference references =
+    Dict.insertDedupe referenceUpdate key [ reference ] references
+
+
+referenceUpdate : List Reference -> List Reference -> List Reference
+referenceUpdate referencesA referencesB =
     let
         newReference =
             List.head referencesB
