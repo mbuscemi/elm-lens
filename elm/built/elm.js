@@ -17430,130 +17430,31 @@ var _user$project$ElmFile_References$letDeclarationExpressions = F2(
 			return {ctor: '::', _0: _p1._1._1, _1: expressions};
 		}
 	});
-var _user$project$ElmFile_References$coreExpressions = _elm_lang$core$Set$fromList(
-	{
-		ctor: '::',
-		_0: 'String',
-		_1: {
-			ctor: '::',
-			_0: 'Int',
-			_1: {
-				ctor: '::',
-				_0: 'Float',
-				_1: {
-					ctor: '::',
-					_0: 'Bool',
-					_1: {
-						ctor: '::',
-						_0: 'True',
-						_1: {
-							ctor: '::',
-							_0: 'False',
-							_1: {
-								ctor: '::',
-								_0: 'Char',
-								_1: {
-									ctor: '::',
-									_0: 'List',
-									_1: {
-										ctor: '::',
-										_0: 'Set',
-										_1: {
-											ctor: '::',
-											_0: 'Dict',
-											_1: {
-												ctor: '::',
-												_0: 'Task',
-												_1: {
-													ctor: '::',
-													_0: 'Never',
-													_1: {
-														ctor: '::',
-														_0: '+',
-														_1: {
-															ctor: '::',
-															_0: '-',
-															_1: {
-																ctor: '::',
-																_0: '*',
-																_1: {
-																	ctor: '::',
-																	_0: '/',
-																	_1: {
-																		ctor: '::',
-																		_0: '//',
-																		_1: {
-																			ctor: '::',
-																			_0: '==',
-																			_1: {
-																				ctor: '::',
-																				_0: '++',
-																				_1: {
-																					ctor: '::',
-																					_0: '<|',
-																					_1: {
-																						ctor: '::',
-																						_0: '|>',
-																						_1: {
-																							ctor: '::',
-																							_0: '<<',
-																							_1: {
-																								ctor: '::',
-																								_0: '>>',
-																								_1: {ctor: '[]'}
-																							}
-																						}
-																					}
-																				}
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	});
 var _user$project$ElmFile_References$addTypeReference = F6(
 	function (typeName, fileName, range, moduleName, imports, references) {
 		var _p2 = {
-			ctor: '_Tuple3',
-			_0: A2(_elm_lang$core$Set$member, typeName, _user$project$ElmFile_References$coreExpressions),
-			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, typeName, imports),
-			_2: moduleName
+			ctor: '_Tuple2',
+			_0: A2(_user$project$Types_Imports$moduleNameForDirectEntry, typeName, imports),
+			_1: moduleName
 		};
-		if (_p2._0 === true) {
-			return references;
+		if (_p2._0.ctor === 'Just') {
+			return A3(
+				_user$project$Types_References$addExternal,
+				_p2._0._0,
+				A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
+				references);
 		} else {
-			if (_p2._1.ctor === 'Just') {
-				return A3(
-					_user$project$Types_References$addExternal,
-					_p2._1._0,
+			if (_p2._1.ctor === '[]') {
+				return A2(
+					_user$project$Types_References$addInternal,
 					A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
 					references);
 			} else {
-				if (_p2._2.ctor === '[]') {
-					return A2(
-						_user$project$Types_References$addInternal,
-						A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
-						references);
-				} else {
-					return A3(
-						_user$project$Types_References$addExternal,
-						A2(_user$project$Types_Imports$unaliasedModuleName, moduleName, imports),
-						A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
-						references);
-				}
+				return A3(
+					_user$project$Types_References$addExternal,
+					A2(_user$project$Types_Imports$unaliasedModuleName, moduleName, imports),
+					A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
+					references);
 			}
 		}
 	});
@@ -17636,33 +17537,28 @@ var _user$project$ElmFile_References$appendSignatureReferences = F4(
 var _user$project$ElmFile_References$addReference = F6(
 	function (expName, fileName, range, $arguments, imports, references) {
 		var _p7 = {
-			ctor: '_Tuple3',
+			ctor: '_Tuple2',
 			_0: A2(_elm_lang$core$Set$member, expName, $arguments),
-			_1: A2(_elm_lang$core$Set$member, expName, _user$project$ElmFile_References$coreExpressions),
-			_2: A2(_user$project$Types_Imports$moduleNameForDirectEntry, expName, imports)
+			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, expName, imports)
 		};
-		_v6_3:
+		_v6_2:
 		do {
-			if (_p7.ctor === '_Tuple3') {
+			if (_p7.ctor === '_Tuple2') {
 				if (_p7._0 === true) {
 					return references;
 				} else {
-					if (_p7._1 === true) {
-						return references;
+					if (_p7._1.ctor === 'Just') {
+						return A3(
+							_user$project$Types_References$addExternal,
+							_p7._1._0,
+							A3(_user$project$Types_Reference$Reference, expName, range, fileName),
+							references);
 					} else {
-						if (_p7._2.ctor === 'Just') {
-							return A3(
-								_user$project$Types_References$addExternal,
-								_p7._2._0,
-								A3(_user$project$Types_Reference$Reference, expName, range, fileName),
-								references);
-						} else {
-							break _v6_3;
-						}
+						break _v6_2;
 					}
 				}
 			} else {
-				break _v6_3;
+				break _v6_2;
 			}
 		} while(false);
 		return A2(

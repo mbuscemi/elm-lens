@@ -47,7 +47,15 @@ canParseFromRecord =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = Dict.singleton "reference" [ Types.Reference.make "reference" 8 14 8 23 "RecordExpression.elm" ]
+                    { internal =
+                        Dict.empty
+                            |> Dict.insert "Int"
+                                [ Types.Reference.make "Int" 10 52 10 55 "RecordExpression.elm"
+                                , Types.Reference.make "Int" 10 43 10 47 "RecordExpression.elm"
+                                , Types.Reference.make "Int" 6 28 6 32 "RecordExpression.elm"
+                                , Types.Reference.make "Int" 2 12 2 15 "RecordExpression.elm"
+                                ]
+                            |> Dict.insert "reference" [ Types.Reference.make "reference" 8 14 8 23 "RecordExpression.elm" ]
                     , external = Dict.empty
                     }
         ]

@@ -79,9 +79,21 @@ canParseSimple =
                     { internal =
                         Dict.empty
                             |> Dict.insert "Sub" [ Types.Reference.make "Sub" 43 43 43 54 fileName ]
+                            |> Dict.insert "String" [ Types.Reference.make "String" 24 20 24 27 fileName ]
+                            |> Dict.insert "Int" [ Types.Reference.make "Int" 24 13 24 17 fileName ]
                             |> Dict.insert "tupled" [ Types.Reference.make "tupled" 37 4 37 10 fileName ]
-                            |> Dict.insert "BinaryThing" [ Types.Reference.make "BinaryThing" 32 22 32 33 fileName, Types.Reference.make "BinaryThing" 16 4 16 15 fileName ]
-                            |> Dict.insert "UnaryThing" [ Types.Reference.make "UnaryThing" 32 10 32 20 fileName, Types.Reference.make "UnaryThing" 13 31 13 41 fileName ]
+                            |> Dict.insert "BinaryThing"
+                                [ Types.Reference.make "BinaryThing" 32 22 32 33 fileName
+                                , Types.Reference.make "BinaryThing" 16 4 16 15 fileName
+                                ]
+                            |> Dict.insert "Bool"
+                                [ Types.Reference.make "Bool" 28 28 28 32 fileName
+                                , Types.Reference.make "Bool" 24 30 24 34 fileName
+                                ]
+                            |> Dict.insert "UnaryThing"
+                                [ Types.Reference.make "UnaryThing" 32 10 32 20 fileName
+                                , Types.Reference.make "UnaryThing" 13 31 13 41 fileName
+                                ]
                             |> Dict.insert "One" [ Types.Reference.make "One" 34 13 34 16 fileName ]
                             |> Dict.insert "Single" [ Types.Reference.make "Single" 34 5 34 11 fileName ]
                             |> Dict.insert "frangle" [ Types.Reference.make "frangle" 30 21 30 28 fileName ]
@@ -90,10 +102,16 @@ canParseSimple =
                     , external =
                         Dict.empty
                             |> Dict.insert [ "Basics" ]
-                                (Dict.singleton "toString" [ Types.Reference.make "toString" 26 4 26 12 fileName ])
+                                (Dict.empty
+                                    |> Dict.insert "==" [ Types.Reference.make "==" 26 4 26 24 fileName ]
+                                    |> Dict.insert "toString" [ Types.Reference.make "toString" 26 4 26 12 fileName ]
+                                )
                             |> Dict.insert [ "Json", "Encode" ]
                                 (Dict.empty
-                                    |> Dict.insert "Value" [ Types.Reference.make "Value" 43 22 43 28 fileName, Types.Reference.make "Value" 39 8 39 16 fileName ]
+                                    |> Dict.insert "Value"
+                                        [ Types.Reference.make "Value" 43 22 43 28 fileName
+                                        , Types.Reference.make "Value" 39 8 39 16 fileName
+                                        ]
                                     |> Dict.insert "encodeValue" [ Types.Reference.make "encodeValue" 41 4 41 18 fileName ]
                                 )
                     }

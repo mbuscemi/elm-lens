@@ -49,6 +49,8 @@ canParseFromList =
                 Expect.equal elmFile.references
                     { internal =
                         Dict.empty
+                            |> Dict.insert "Int" [ Types.Reference.make "Int" 10 17 10 20 "ListExpression.elm" ]
+                            |> Dict.insert "String" [ Types.Reference.make "String" 6 13 6 19 "ListExpression.elm", Types.Reference.make "String" 2 13 2 19 "ListExpression.elm" ]
                             |> Dict.insert "reference2" [ Types.Reference.make "reference2" 12 18 12 28 "ListExpression.elm" ]
                             |> Dict.insert "reference1" [ Types.Reference.make "reference1" 12 6 12 16 "ListExpression.elm" ]
                     , external = Dict.empty

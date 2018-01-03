@@ -71,6 +71,12 @@ canMake =
                     Expect.equal
                         { internal =
                             Dict.empty
+                                |> Dict.insert "Bool"
+                                    [ Types.Reference.make "Bool" 22 28 22 32 fileName
+                                    , Types.Reference.make "Bool" 18 30 18 34 fileName
+                                    ]
+                                |> Dict.insert "Int" [ Types.Reference.make "Int" 18 13 18 17 fileName ]
+                                |> Dict.insert "String" [ Types.Reference.make "String" 18 20 18 27 fileName ]
                                 |> Dict.insert "frangle" [ Types.Reference.make "frangle" 24 21 24 28 fileName ]
                                 |> Dict.insert "blarg" [ Types.Reference.make "blarg" 24 15 24 20 fileName ]
                                 |> Dict.insert "blargargle" [ Types.Reference.make "blargargle" 24 4 24 14 fileName ]
@@ -78,7 +84,10 @@ canMake =
                         , external =
                             Dict.empty
                                 |> Dict.insert [ "Basics" ]
-                                    (Dict.singleton "toString" [ Types.Reference.make "toString" 20 4 20 12 fileName ])
+                                    (Dict.empty
+                                        |> Dict.insert "==" [ Types.Reference.make "==" 20 4 20 24 fileName ]
+                                        |> Dict.insert "toString" [ Types.Reference.make "toString" 20 4 20 12 fileName ]
+                                    )
                         }
                         report.references
             ]

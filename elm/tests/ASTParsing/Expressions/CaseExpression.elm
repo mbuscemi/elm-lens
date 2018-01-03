@@ -52,6 +52,12 @@ canParseFromCase =
                 Expect.equal elmFile.references
                     { internal =
                         Dict.empty
+                            |> Dict.insert "Int"
+                                [ Types.Reference.make "Int" 16 27 16 30 "CaseExpression.elm"
+                                , Types.Reference.make "Int" 12 13 12 16 "CaseExpression.elm"
+                                , Types.Reference.make "Int" 8 13 8 16 "CaseExpression.elm"
+                                , Types.Reference.make "Int" 4 13 4 16 "CaseExpression.elm"
+                                ]
                             |> Dict.insert "Triple" [ Types.Reference.make "Triple" 16 17 16 24 "CaseExpression.elm" ]
                             |> Dict.insert "reference3" [ Types.Reference.make "reference3" 21 13 21 23 "CaseExpression.elm" ]
                             |> Dict.insert "reference2" [ Types.Reference.make "reference2" 20 13 20 23 "CaseExpression.elm" ]

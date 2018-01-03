@@ -52,7 +52,19 @@ canParse =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        Dict.singleton "$$" [ Types.Reference.make "$$" 8 4 8 23 "Infix.elm" ]
+                        Dict.empty
+                            |> Dict.insert "$$" [ Types.Reference.make "$$" 8 4 8 23 "Infix.elm" ]
+                            |> Dict.insert "++"
+                                [ Types.Reference.make "++" 4 9 4 20 "Infix.elm"
+                                , Types.Reference.make "++" 4 4 4 20 "Infix.elm"
+                                ]
+                            |> Dict.insert "String"
+                                [ Types.Reference.make "String" 6 18 6 24 "Infix.elm"
+                                , Types.Reference.make "String" 6 8 6 15 "Infix.elm"
+                                , Types.Reference.make "String" 2 27 2 33 "Infix.elm"
+                                , Types.Reference.make "String" 2 17 2 24 "Infix.elm"
+                                , Types.Reference.make "String" 2 7 2 14 "Infix.elm"
+                                ]
                     , external =
                         Dict.empty
                     }

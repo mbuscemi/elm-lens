@@ -43,8 +43,11 @@ canParsePort =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = Dict.empty
-                    , external = Dict.empty
+                    { internal =
+                        Dict.empty
+                            |> Dict.insert "Int" [ Types.Reference.make "Int" 2 8 2 11 "SimplePort.elm" ]
+                    , external =
+                        Dict.empty
                     }
         ]
 
@@ -99,6 +102,10 @@ canParseEffects =
                 Expect.equal elmFile.references
                     { internal =
                         Dict.empty
+                            |> Dict.insert "List"
+                                [ Types.Reference.make "List" 22 49 22 67 "SimpleEffects.elm" ]
+                            |> Dict.insert "Never"
+                                [ Types.Reference.make "Never" 14 18 14 39 "SimpleEffects.elm" ]
                             |> Dict.insert "SomeCmd"
                                 [ Types.Reference.make "SomeCmd" 32 34 32 43 "SimpleEffects.elm"
                                 , Types.Reference.make "SomeCmd" 32 21 32 30 "SimpleEffects.elm"
@@ -134,10 +141,13 @@ canParseEffects =
                                     ]
                                 )
                             |> Dict.insert [ "Platform" ]
-                                (Dict.singleton "Router"
-                                    [ Types.Reference.make "Router" 27 12 27 45 "SimpleEffects.elm"
-                                    , Types.Reference.make "Router" 22 12 22 45 "SimpleEffects.elm"
-                                    ]
+                                (Dict.empty
+                                    |> Dict.insert "Router"
+                                        [ Types.Reference.make "Router" 27 12 27 45 "SimpleEffects.elm"
+                                        , Types.Reference.make "Router" 22 12 22 45 "SimpleEffects.elm"
+                                        ]
+                                    |> Dict.insert "Task"
+                                        [ Types.Reference.make "Task" 14 4 14 39 "SimpleEffects.elm" ]
                                 )
                     }
         ]

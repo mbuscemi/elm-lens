@@ -56,6 +56,10 @@ canParseSimpleExposingAll =
                 Expect.equal elmFile.references
                     { internal =
                         Dict.empty
+                            |> Dict.insert "==" [ Types.Reference.make "==" 12 4 12 24 "Simple.elm" ]
+                            |> Dict.insert "Bool" [ Types.Reference.make "Bool" 14 28 14 32 "Simple.elm", Types.Reference.make "Bool" 10 30 10 34 "Simple.elm" ]
+                            |> Dict.insert "Int" [ Types.Reference.make "Int" 10 13 10 17 "Simple.elm", Types.Reference.make "Int" 2 8 2 11 "Simple.elm" ]
+                            |> Dict.insert "String" [ Types.Reference.make "String" 10 20 10 27 "Simple.elm", Types.Reference.make "String" 6 10 6 16 "Simple.elm" ]
                             |> Dict.insert "frangle" [ Types.Reference.make "frangle" 16 21 16 28 "Simple.elm" ]
                             |> Dict.insert "blarg" [ Types.Reference.make "blarg" 16 15 16 20 "Simple.elm" ]
                             |> Dict.insert "blargargle" [ Types.Reference.make "blargargle" 16 4 16 14 "Simple.elm" ]

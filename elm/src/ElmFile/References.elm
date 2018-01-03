@@ -119,14 +119,11 @@ refsInExpression fileName arguments imports expression references =
 
 addReference : String -> String -> Range -> Set String -> Imports -> References -> References
 addReference expName fileName range arguments imports references =
-    case ( Set.member expName arguments, Set.member expName coreExpressions, Types.Imports.moduleNameForDirectEntry expName imports ) of
-        ( True, _, _ ) ->
+    case ( Set.member expName arguments, Types.Imports.moduleNameForDirectEntry expName imports ) of
+        ( True, _ ) ->
             references
 
-        ( _, True, _ ) ->
-            references
-
-        ( _, _, Just moduleName ) ->
+        ( _, Just moduleName ) ->
             Types.References.addExternal moduleName (Reference expName range fileName) references
 
         _ ->
@@ -135,47 +132,15 @@ addReference expName fileName range arguments imports references =
 
 addTypeReference : String -> String -> Range -> List String -> Imports -> References -> References
 addTypeReference typeName fileName range moduleName imports references =
-    case ( Set.member typeName coreExpressions, Types.Imports.moduleNameForDirectEntry typeName imports, moduleName ) of
-        ( True, _, _ ) ->
-            references
-
-        ( _, Just externalModule, _ ) ->
+    case ( Types.Imports.moduleNameForDirectEntry typeName imports, moduleName ) of
+        ( Just externalModule, _ ) ->
             Types.References.addExternal externalModule (Reference typeName range fileName) references
 
-        ( _, _, [] ) ->
+        ( _, [] ) ->
             Types.References.addInternal (Reference typeName range fileName) references
 
-        ( _, _, externalModule ) ->
+        ( _, externalModule ) ->
             Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference typeName range fileName) references
-
-
-coreExpressions : Set String
-coreExpressions =
-    Set.fromList
-        [ "String"
-        , "Int"
-        , "Float"
-        , "Bool"
-        , "True"
-        , "False"
-        , "Char"
-        , "List"
-        , "Set"
-        , "Dict"
-        , "Task"
-        , "Never"
-        , "+"
-        , "-"
-        , "*"
-        , "/"
-        , "//"
-        , "=="
-        , "++"
-        , "<|"
-        , "|>"
-        , "<<"
-        , ">>"
-        ]
 
 
 refsInValueConstructor : String -> Imports -> ValueConstructor -> References -> References
