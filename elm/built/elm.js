@@ -17186,23 +17186,12 @@ var _user$project$ElmFile_Exposings$gatherExposings = F2(
 			return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_Exposings$processExposing, _user$project$Types_Exposings$default, _p1._0);
 		}
 	});
-var _user$project$ElmFile_Exposings$exposingListFromModule = function (module_) {
-	var _p2 = module_;
-	switch (_p2.ctor) {
-		case 'NormalModule':
-			return _p2._0.exposingList;
-		case 'PortModule':
-			return _p2._0.exposingList;
-		default:
-			return _p2._0.exposingList;
-	}
-};
 var _user$project$ElmFile_Exposings$fromFile = F2(
 	function (topLevelExpressions, file) {
 		return A2(
 			_user$project$ElmFile_Exposings$gatherExposings,
 			topLevelExpressions,
-			_user$project$ElmFile_Exposings$exposingListFromModule(
+			_stil4m$elm_syntax$Elm_Syntax_Module$exposingList(
 				function (_) {
 					return _.moduleDefinition;
 				}(file)));
@@ -17380,22 +17369,14 @@ var _user$project$ElmFile_Imports$fromFile = function (file) {
 		}(file));
 };
 
-var _user$project$ElmFile_ModuleName$toModuleName = function (module_) {
-	var _p0 = module_;
-	switch (_p0.ctor) {
-		case 'NormalModule':
-			return _p0._0.moduleName;
-		case 'PortModule':
-			return _p0._0.moduleName;
-		default:
-			return _p0._0.moduleName;
-	}
-};
 var _user$project$ElmFile_ModuleName$fromFile = function (file) {
-	return _user$project$ElmFile_ModuleName$toModuleName(
-		function (_) {
-			return _.moduleDefinition;
-		}(file));
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		{ctor: '[]'},
+		_stil4m$elm_syntax$Elm_Syntax_Module$moduleName(
+			function (_) {
+				return _.moduleDefinition;
+			}(file)));
 };
 
 var _user$project$ElmFile_References$argumentsFromPattern = F2(
