@@ -3,7 +3,7 @@ module ElmFile.Exposings exposing (fromFile)
 import Dict
 import Elm.Syntax.Exposing exposing (Exposing, TopLevelExpose)
 import Elm.Syntax.File exposing (File)
-import Elm.Syntax.Module exposing (Module(EffectModule, NormalModule, PortModule))
+import Elm.Syntax.Module
 import Elm.Syntax.Ranged exposing (Ranged)
 import Set exposing (Set)
 import Types.Exposings exposing (Exposings)
@@ -14,21 +14,8 @@ fromFile : TopLevelExpressions -> File -> Exposings
 fromFile topLevelExpressions file =
     file
         |> .moduleDefinition
-        |> exposingListFromModule
+        |> Elm.Syntax.Module.exposingList
         |> gatherExposings topLevelExpressions
-
-
-exposingListFromModule : Module -> Exposing (Ranged TopLevelExpose)
-exposingListFromModule module_ =
-    case module_ of
-        NormalModule data ->
-            data.exposingList
-
-        PortModule data ->
-            data.exposingList
-
-        EffectModule data ->
-            data.exposingList
 
 
 gatherExposings : TopLevelExpressions -> Exposing (Ranged TopLevelExpose) -> Exposings
