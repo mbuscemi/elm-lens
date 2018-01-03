@@ -25,6 +25,17 @@ counts are also displayed.
 Elm Lens runs parallel background processes in order to gather its data, so you aren't blocked from working on your project
 while Elm Lens does its work.
 
+### The Reference Panel
+
+![The Reference Panel](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/reference-panel.png?raw=true)
+
+Clicking on the "n internal references" or "n external references" markup for a function will display a detailed list of all
+associated references in the reference panel. You can then click on a reference in the reference panel to navigate to the
+document and location of that reference.
+
+Clicking the same markup element a second time will close the reference panel. (Of course, the reference panel can also be
+closed with the standard Atom interface elements.)
+
 ### Unused Local Functions
 
 ![Unused Exposed Function Warning](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/local-no-references-warning.png?raw=true)
