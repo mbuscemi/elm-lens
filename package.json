@@ -15,7 +15,7 @@
     "repository": "https://github.com/mbuscemi/elm-lens",
     "license": "MIT",
     "engines": {
-      "atom": ">=1.0.0 <2.0.0"
+        "atom": ">=1.0.0 <2.0.0"
     },
     "dependencies": {
         "jquery": "^3.2.1"
