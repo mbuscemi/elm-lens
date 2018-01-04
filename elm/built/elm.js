@@ -4320,6 +4320,25 @@ var _elm_community$dict_extra$Dict_Extra$removeWhen = F2(
 				}),
 			dict);
 	});
+var _elm_community$dict_extra$Dict_Extra$frequencies = function (list) {
+	return A3(
+		_elm_lang$core$List$foldl,
+		F2(
+			function (el, counter) {
+				return function (count) {
+					return A3(_elm_lang$core$Dict$insert, el, count, counter);
+				}(
+					function (count) {
+						return count + 1;
+					}(
+						A2(
+							_elm_lang$core$Maybe$withDefault,
+							0,
+							A2(_elm_lang$core$Dict$get, el, counter))));
+			}),
+		_elm_lang$core$Dict$empty,
+		list);
+};
 var _elm_community$dict_extra$Dict_Extra$fromListDedupeBy = F3(
 	function (combine, keyfn, xs) {
 		return A3(
@@ -9289,6 +9308,2159 @@ var _elm_community$parser_combinators$Combine_Num$float = A2(
 			_elm_community$parser_combinators$Combine$regex('(0|[1-9][0-9]*)(\\.[0-9]+)')),
 		'expected a float'));
 
+var _elm_lang$virtual_dom$VirtualDom_Debug$wrap;
+var _elm_lang$virtual_dom$VirtualDom_Debug$wrapWithFlags;
+
+var _elm_lang$virtual_dom$Native_VirtualDom = function() {
+
+var STYLE_KEY = 'STYLE';
+var EVENT_KEY = 'EVENT';
+var ATTR_KEY = 'ATTR';
+var ATTR_NS_KEY = 'ATTR_NS';
+
+var localDoc = typeof document !== 'undefined' ? document : {};
+
+
+////////////  VIRTUAL DOM NODES  ////////////
+
+
+function text(string)
+{
+	return {
+		type: 'text',
+		text: string
+	};
+}
+
+
+function node(tag)
+{
+	return F2(function(factList, kidList) {
+		return nodeHelp(tag, factList, kidList);
+	});
+}
+
+
+function nodeHelp(tag, factList, kidList)
+{
+	var organized = organizeFacts(factList);
+	var namespace = organized.namespace;
+	var facts = organized.facts;
+
+	var children = [];
+	var descendantsCount = 0;
+	while (kidList.ctor !== '[]')
+	{
+		var kid = kidList._0;
+		descendantsCount += (kid.descendantsCount || 0);
+		children.push(kid);
+		kidList = kidList._1;
+	}
+	descendantsCount += children.length;
+
+	return {
+		type: 'node',
+		tag: tag,
+		facts: facts,
+		children: children,
+		namespace: namespace,
+		descendantsCount: descendantsCount
+	};
+}
+
+
+function keyedNode(tag, factList, kidList)
+{
+	var organized = organizeFacts(factList);
+	var namespace = organized.namespace;
+	var facts = organized.facts;
+
+	var children = [];
+	var descendantsCount = 0;
+	while (kidList.ctor !== '[]')
+	{
+		var kid = kidList._0;
+		descendantsCount += (kid._1.descendantsCount || 0);
+		children.push(kid);
+		kidList = kidList._1;
+	}
+	descendantsCount += children.length;
+
+	return {
+		type: 'keyed-node',
+		tag: tag,
+		facts: facts,
+		children: children,
+		namespace: namespace,
+		descendantsCount: descendantsCount
+	};
+}
+
+
+function custom(factList, model, impl)
+{
+	var facts = organizeFacts(factList).facts;
+
+	return {
+		type: 'custom',
+		facts: facts,
+		model: model,
+		impl: impl
+	};
+}
+
+
+function map(tagger, node)
+{
+	return {
+		type: 'tagger',
+		tagger: tagger,
+		node: node,
+		descendantsCount: 1 + (node.descendantsCount || 0)
+	};
+}
+
+
+function thunk(func, args, thunk)
+{
+	return {
+		type: 'thunk',
+		func: func,
+		args: args,
+		thunk: thunk,
+		node: undefined
+	};
+}
+
+function lazy(fn, a)
+{
+	return thunk(fn, [a], function() {
+		return fn(a);
+	});
+}
+
+function lazy2(fn, a, b)
+{
+	return thunk(fn, [a,b], function() {
+		return A2(fn, a, b);
+	});
+}
+
+function lazy3(fn, a, b, c)
+{
+	return thunk(fn, [a,b,c], function() {
+		return A3(fn, a, b, c);
+	});
+}
+
+
+
+// FACTS
+
+
+function organizeFacts(factList)
+{
+	var namespace, facts = {};
+
+	while (factList.ctor !== '[]')
+	{
+		var entry = factList._0;
+		var key = entry.key;
+
+		if (key === ATTR_KEY || key === ATTR_NS_KEY || key === EVENT_KEY)
+		{
+			var subFacts = facts[key] || {};
+			subFacts[entry.realKey] = entry.value;
+			facts[key] = subFacts;
+		}
+		else if (key === STYLE_KEY)
+		{
+			var styles = facts[key] || {};
+			var styleList = entry.value;
+			while (styleList.ctor !== '[]')
+			{
+				var style = styleList._0;
+				styles[style._0] = style._1;
+				styleList = styleList._1;
+			}
+			facts[key] = styles;
+		}
+		else if (key === 'namespace')
+		{
+			namespace = entry.value;
+		}
+		else if (key === 'className')
+		{
+			var classes = facts[key];
+			facts[key] = typeof classes === 'undefined'
+				? entry.value
+				: classes + ' ' + entry.value;
+		}
+ 		else
+		{
+			facts[key] = entry.value;
+		}
+		factList = factList._1;
+	}
+
+	return {
+		facts: facts,
+		namespace: namespace
+	};
+}
+
+
+
+////////////  PROPERTIES AND ATTRIBUTES  ////////////
+
+
+function style(value)
+{
+	return {
+		key: STYLE_KEY,
+		value: value
+	};
+}
+
+
+function property(key, value)
+{
+	return {
+		key: key,
+		value: value
+	};
+}
+
+
+function attribute(key, value)
+{
+	return {
+		key: ATTR_KEY,
+		realKey: key,
+		value: value
+	};
+}
+
+
+function attributeNS(namespace, key, value)
+{
+	return {
+		key: ATTR_NS_KEY,
+		realKey: key,
+		value: {
+			value: value,
+			namespace: namespace
+		}
+	};
+}
+
+
+function on(name, options, decoder)
+{
+	return {
+		key: EVENT_KEY,
+		realKey: name,
+		value: {
+			options: options,
+			decoder: decoder
+		}
+	};
+}
+
+
+function equalEvents(a, b)
+{
+	if (a.options !== b.options)
+	{
+		if (a.options.stopPropagation !== b.options.stopPropagation || a.options.preventDefault !== b.options.preventDefault)
+		{
+			return false;
+		}
+	}
+	return _elm_lang$core$Native_Json.equality(a.decoder, b.decoder);
+}
+
+
+function mapProperty(func, property)
+{
+	if (property.key !== EVENT_KEY)
+	{
+		return property;
+	}
+	return on(
+		property.realKey,
+		property.value.options,
+		A2(_elm_lang$core$Json_Decode$map, func, property.value.decoder)
+	);
+}
+
+
+////////////  RENDER  ////////////
+
+
+function render(vNode, eventNode)
+{
+	switch (vNode.type)
+	{
+		case 'thunk':
+			if (!vNode.node)
+			{
+				vNode.node = vNode.thunk();
+			}
+			return render(vNode.node, eventNode);
+
+		case 'tagger':
+			var subNode = vNode.node;
+			var tagger = vNode.tagger;
+
+			while (subNode.type === 'tagger')
+			{
+				typeof tagger !== 'object'
+					? tagger = [tagger, subNode.tagger]
+					: tagger.push(subNode.tagger);
+
+				subNode = subNode.node;
+			}
+
+			var subEventRoot = { tagger: tagger, parent: eventNode };
+			var domNode = render(subNode, subEventRoot);
+			domNode.elm_event_node_ref = subEventRoot;
+			return domNode;
+
+		case 'text':
+			return localDoc.createTextNode(vNode.text);
+
+		case 'node':
+			var domNode = vNode.namespace
+				? localDoc.createElementNS(vNode.namespace, vNode.tag)
+				: localDoc.createElement(vNode.tag);
+
+			applyFacts(domNode, eventNode, vNode.facts);
+
+			var children = vNode.children;
+
+			for (var i = 0; i < children.length; i++)
+			{
+				domNode.appendChild(render(children[i], eventNode));
+			}
+
+			return domNode;
+
+		case 'keyed-node':
+			var domNode = vNode.namespace
+				? localDoc.createElementNS(vNode.namespace, vNode.tag)
+				: localDoc.createElement(vNode.tag);
+
+			applyFacts(domNode, eventNode, vNode.facts);
+
+			var children = vNode.children;
+
+			for (var i = 0; i < children.length; i++)
+			{
+				domNode.appendChild(render(children[i]._1, eventNode));
+			}
+
+			return domNode;
+
+		case 'custom':
+			var domNode = vNode.impl.render(vNode.model);
+			applyFacts(domNode, eventNode, vNode.facts);
+			return domNode;
+	}
+}
+
+
+
+////////////  APPLY FACTS  ////////////
+
+
+function applyFacts(domNode, eventNode, facts)
+{
+	for (var key in facts)
+	{
+		var value = facts[key];
+
+		switch (key)
+		{
+			case STYLE_KEY:
+				applyStyles(domNode, value);
+				break;
+
+			case EVENT_KEY:
+				applyEvents(domNode, eventNode, value);
+				break;
+
+			case ATTR_KEY:
+				applyAttrs(domNode, value);
+				break;
+
+			case ATTR_NS_KEY:
+				applyAttrsNS(domNode, value);
+				break;
+
+			case 'value':
+				if (domNode[key] !== value)
+				{
+					domNode[key] = value;
+				}
+				break;
+
+			default:
+				domNode[key] = value;
+				break;
+		}
+	}
+}
+
+function applyStyles(domNode, styles)
+{
+	var domNodeStyle = domNode.style;
+
+	for (var key in styles)
+	{
+		domNodeStyle[key] = styles[key];
+	}
+}
+
+function applyEvents(domNode, eventNode, events)
+{
+	var allHandlers = domNode.elm_handlers || {};
+
+	for (var key in events)
+	{
+		var handler = allHandlers[key];
+		var value = events[key];
+
+		if (typeof value === 'undefined')
+		{
+			domNode.removeEventListener(key, handler);
+			allHandlers[key] = undefined;
+		}
+		else if (typeof handler === 'undefined')
+		{
+			var handler = makeEventHandler(eventNode, value);
+			domNode.addEventListener(key, handler);
+			allHandlers[key] = handler;
+		}
+		else
+		{
+			handler.info = value;
+		}
+	}
+
+	domNode.elm_handlers = allHandlers;
+}
+
+function makeEventHandler(eventNode, info)
+{
+	function eventHandler(event)
+	{
+		var info = eventHandler.info;
+
+		var value = A2(_elm_lang$core$Native_Json.run, info.decoder, event);
+
+		if (value.ctor === 'Ok')
+		{
+			var options = info.options;
+			if (options.stopPropagation)
+			{
+				event.stopPropagation();
+			}
+			if (options.preventDefault)
+			{
+				event.preventDefault();
+			}
+
+			var message = value._0;
+
+			var currentEventNode = eventNode;
+			while (currentEventNode)
+			{
+				var tagger = currentEventNode.tagger;
+				if (typeof tagger === 'function')
+				{
+					message = tagger(message);
+				}
+				else
+				{
+					for (var i = tagger.length; i--; )
+					{
+						message = tagger[i](message);
+					}
+				}
+				currentEventNode = currentEventNode.parent;
+			}
+		}
+	};
+
+	eventHandler.info = info;
+
+	return eventHandler;
+}
+
+function applyAttrs(domNode, attrs)
+{
+	for (var key in attrs)
+	{
+		var value = attrs[key];
+		if (typeof value === 'undefined')
+		{
+			domNode.removeAttribute(key);
+		}
+		else
+		{
+			domNode.setAttribute(key, value);
+		}
+	}
+}
+
+function applyAttrsNS(domNode, nsAttrs)
+{
+	for (var key in nsAttrs)
+	{
+		var pair = nsAttrs[key];
+		var namespace = pair.namespace;
+		var value = pair.value;
+
+		if (typeof value === 'undefined')
+		{
+			domNode.removeAttributeNS(namespace, key);
+		}
+		else
+		{
+			domNode.setAttributeNS(namespace, key, value);
+		}
+	}
+}
+
+
+
+////////////  DIFF  ////////////
+
+
+function diff(a, b)
+{
+	var patches = [];
+	diffHelp(a, b, patches, 0);
+	return patches;
+}
+
+
+function makePatch(type, index, data)
+{
+	return {
+		index: index,
+		type: type,
+		data: data,
+		domNode: undefined,
+		eventNode: undefined
+	};
+}
+
+
+function diffHelp(a, b, patches, index)
+{
+	if (a === b)
+	{
+		return;
+	}
+
+	var aType = a.type;
+	var bType = b.type;
+
+	// Bail if you run into different types of nodes. Implies that the
+	// structure has changed significantly and it's not worth a diff.
+	if (aType !== bType)
+	{
+		patches.push(makePatch('p-redraw', index, b));
+		return;
+	}
+
+	// Now we know that both nodes are the same type.
+	switch (bType)
+	{
+		case 'thunk':
+			var aArgs = a.args;
+			var bArgs = b.args;
+			var i = aArgs.length;
+			var same = a.func === b.func && i === bArgs.length;
+			while (same && i--)
+			{
+				same = aArgs[i] === bArgs[i];
+			}
+			if (same)
+			{
+				b.node = a.node;
+				return;
+			}
+			b.node = b.thunk();
+			var subPatches = [];
+			diffHelp(a.node, b.node, subPatches, 0);
+			if (subPatches.length > 0)
+			{
+				patches.push(makePatch('p-thunk', index, subPatches));
+			}
+			return;
+
+		case 'tagger':
+			// gather nested taggers
+			var aTaggers = a.tagger;
+			var bTaggers = b.tagger;
+			var nesting = false;
+
+			var aSubNode = a.node;
+			while (aSubNode.type === 'tagger')
+			{
+				nesting = true;
+
+				typeof aTaggers !== 'object'
+					? aTaggers = [aTaggers, aSubNode.tagger]
+					: aTaggers.push(aSubNode.tagger);
+
+				aSubNode = aSubNode.node;
+			}
+
+			var bSubNode = b.node;
+			while (bSubNode.type === 'tagger')
+			{
+				nesting = true;
+
+				typeof bTaggers !== 'object'
+					? bTaggers = [bTaggers, bSubNode.tagger]
+					: bTaggers.push(bSubNode.tagger);
+
+				bSubNode = bSubNode.node;
+			}
+
+			// Just bail if different numbers of taggers. This implies the
+			// structure of the virtual DOM has changed.
+			if (nesting && aTaggers.length !== bTaggers.length)
+			{
+				patches.push(makePatch('p-redraw', index, b));
+				return;
+			}
+
+			// check if taggers are "the same"
+			if (nesting ? !pairwiseRefEqual(aTaggers, bTaggers) : aTaggers !== bTaggers)
+			{
+				patches.push(makePatch('p-tagger', index, bTaggers));
+			}
+
+			// diff everything below the taggers
+			diffHelp(aSubNode, bSubNode, patches, index + 1);
+			return;
+
+		case 'text':
+			if (a.text !== b.text)
+			{
+				patches.push(makePatch('p-text', index, b.text));
+				return;
+			}
+
+			return;
+
+		case 'node':
+			// Bail if obvious indicators have changed. Implies more serious
+			// structural changes such that it's not worth it to diff.
+			if (a.tag !== b.tag || a.namespace !== b.namespace)
+			{
+				patches.push(makePatch('p-redraw', index, b));
+				return;
+			}
+
+			var factsDiff = diffFacts(a.facts, b.facts);
+
+			if (typeof factsDiff !== 'undefined')
+			{
+				patches.push(makePatch('p-facts', index, factsDiff));
+			}
+
+			diffChildren(a, b, patches, index);
+			return;
+
+		case 'keyed-node':
+			// Bail if obvious indicators have changed. Implies more serious
+			// structural changes such that it's not worth it to diff.
+			if (a.tag !== b.tag || a.namespace !== b.namespace)
+			{
+				patches.push(makePatch('p-redraw', index, b));
+				return;
+			}
+
+			var factsDiff = diffFacts(a.facts, b.facts);
+
+			if (typeof factsDiff !== 'undefined')
+			{
+				patches.push(makePatch('p-facts', index, factsDiff));
+			}
+
+			diffKeyedChildren(a, b, patches, index);
+			return;
+
+		case 'custom':
+			if (a.impl !== b.impl)
+			{
+				patches.push(makePatch('p-redraw', index, b));
+				return;
+			}
+
+			var factsDiff = diffFacts(a.facts, b.facts);
+			if (typeof factsDiff !== 'undefined')
+			{
+				patches.push(makePatch('p-facts', index, factsDiff));
+			}
+
+			var patch = b.impl.diff(a,b);
+			if (patch)
+			{
+				patches.push(makePatch('p-custom', index, patch));
+				return;
+			}
+
+			return;
+	}
+}
+
+
+// assumes the incoming arrays are the same length
+function pairwiseRefEqual(as, bs)
+{
+	for (var i = 0; i < as.length; i++)
+	{
+		if (as[i] !== bs[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+// TODO Instead of creating a new diff object, it's possible to just test if
+// there *is* a diff. During the actual patch, do the diff again and make the
+// modifications directly. This way, there's no new allocations. Worth it?
+function diffFacts(a, b, category)
+{
+	var diff;
+
+	// look for changes and removals
+	for (var aKey in a)
+	{
+		if (aKey === STYLE_KEY || aKey === EVENT_KEY || aKey === ATTR_KEY || aKey === ATTR_NS_KEY)
+		{
+			var subDiff = diffFacts(a[aKey], b[aKey] || {}, aKey);
+			if (subDiff)
+			{
+				diff = diff || {};
+				diff[aKey] = subDiff;
+			}
+			continue;
+		}
+
+		// remove if not in the new facts
+		if (!(aKey in b))
+		{
+			diff = diff || {};
+			diff[aKey] =
+				(typeof category === 'undefined')
+					? (typeof a[aKey] === 'string' ? '' : null)
+					:
+				(category === STYLE_KEY)
+					? ''
+					:
+				(category === EVENT_KEY || category === ATTR_KEY)
+					? undefined
+					:
+				{ namespace: a[aKey].namespace, value: undefined };
+
+			continue;
+		}
+
+		var aValue = a[aKey];
+		var bValue = b[aKey];
+
+		// reference equal, so don't worry about it
+		if (aValue === bValue && aKey !== 'value'
+			|| category === EVENT_KEY && equalEvents(aValue, bValue))
+		{
+			continue;
+		}
+
+		diff = diff || {};
+		diff[aKey] = bValue;
+	}
+
+	// add new stuff
+	for (var bKey in b)
+	{
+		if (!(bKey in a))
+		{
+			diff = diff || {};
+			diff[bKey] = b[bKey];
+		}
+	}
+
+	return diff;
+}
+
+
+function diffChildren(aParent, bParent, patches, rootIndex)
+{
+	var aChildren = aParent.children;
+	var bChildren = bParent.children;
+
+	var aLen = aChildren.length;
+	var bLen = bChildren.length;
+
+	// FIGURE OUT IF THERE ARE INSERTS OR REMOVALS
+
+	if (aLen > bLen)
+	{
+		patches.push(makePatch('p-remove-last', rootIndex, aLen - bLen));
+	}
+	else if (aLen < bLen)
+	{
+		patches.push(makePatch('p-append', rootIndex, bChildren.slice(aLen)));
+	}
+
+	// PAIRWISE DIFF EVERYTHING ELSE
+
+	var index = rootIndex;
+	var minLen = aLen < bLen ? aLen : bLen;
+	for (var i = 0; i < minLen; i++)
+	{
+		index++;
+		var aChild = aChildren[i];
+		diffHelp(aChild, bChildren[i], patches, index);
+		index += aChild.descendantsCount || 0;
+	}
+}
+
+
+
+////////////  KEYED DIFF  ////////////
+
+
+function diffKeyedChildren(aParent, bParent, patches, rootIndex)
+{
+	var localPatches = [];
+
+	var changes = {}; // Dict String Entry
+	var inserts = []; // Array { index : Int, entry : Entry }
+	// type Entry = { tag : String, vnode : VNode, index : Int, data : _ }
+
+	var aChildren = aParent.children;
+	var bChildren = bParent.children;
+	var aLen = aChildren.length;
+	var bLen = bChildren.length;
+	var aIndex = 0;
+	var bIndex = 0;
+
+	var index = rootIndex;
+
+	while (aIndex < aLen && bIndex < bLen)
+	{
+		var a = aChildren[aIndex];
+		var b = bChildren[bIndex];
+
+		var aKey = a._0;
+		var bKey = b._0;
+		var aNode = a._1;
+		var bNode = b._1;
+
+		// check if keys match
+
+		if (aKey === bKey)
+		{
+			index++;
+			diffHelp(aNode, bNode, localPatches, index);
+			index += aNode.descendantsCount || 0;
+
+			aIndex++;
+			bIndex++;
+			continue;
+		}
+
+		// look ahead 1 to detect insertions and removals.
+
+		var aLookAhead = aIndex + 1 < aLen;
+		var bLookAhead = bIndex + 1 < bLen;
+
+		if (aLookAhead)
+		{
+			var aNext = aChildren[aIndex + 1];
+			var aNextKey = aNext._0;
+			var aNextNode = aNext._1;
+			var oldMatch = bKey === aNextKey;
+		}
+
+		if (bLookAhead)
+		{
+			var bNext = bChildren[bIndex + 1];
+			var bNextKey = bNext._0;
+			var bNextNode = bNext._1;
+			var newMatch = aKey === bNextKey;
+		}
+
+
+		// swap a and b
+		if (aLookAhead && bLookAhead && newMatch && oldMatch)
+		{
+			index++;
+			diffHelp(aNode, bNextNode, localPatches, index);
+			insertNode(changes, localPatches, aKey, bNode, bIndex, inserts);
+			index += aNode.descendantsCount || 0;
+
+			index++;
+			removeNode(changes, localPatches, aKey, aNextNode, index);
+			index += aNextNode.descendantsCount || 0;
+
+			aIndex += 2;
+			bIndex += 2;
+			continue;
+		}
+
+		// insert b
+		if (bLookAhead && newMatch)
+		{
+			index++;
+			insertNode(changes, localPatches, bKey, bNode, bIndex, inserts);
+			diffHelp(aNode, bNextNode, localPatches, index);
+			index += aNode.descendantsCount || 0;
+
+			aIndex += 1;
+			bIndex += 2;
+			continue;
+		}
+
+		// remove a
+		if (aLookAhead && oldMatch)
+		{
+			index++;
+			removeNode(changes, localPatches, aKey, aNode, index);
+			index += aNode.descendantsCount || 0;
+
+			index++;
+			diffHelp(aNextNode, bNode, localPatches, index);
+			index += aNextNode.descendantsCount || 0;
+
+			aIndex += 2;
+			bIndex += 1;
+			continue;
+		}
+
+		// remove a, insert b
+		if (aLookAhead && bLookAhead && aNextKey === bNextKey)
+		{
+			index++;
+			removeNode(changes, localPatches, aKey, aNode, index);
+			insertNode(changes, localPatches, bKey, bNode, bIndex, inserts);
+			index += aNode.descendantsCount || 0;
+
+			index++;
+			diffHelp(aNextNode, bNextNode, localPatches, index);
+			index += aNextNode.descendantsCount || 0;
+
+			aIndex += 2;
+			bIndex += 2;
+			continue;
+		}
+
+		break;
+	}
+
+	// eat up any remaining nodes with removeNode and insertNode
+
+	while (aIndex < aLen)
+	{
+		index++;
+		var a = aChildren[aIndex];
+		var aNode = a._1;
+		removeNode(changes, localPatches, a._0, aNode, index);
+		index += aNode.descendantsCount || 0;
+		aIndex++;
+	}
+
+	var endInserts;
+	while (bIndex < bLen)
+	{
+		endInserts = endInserts || [];
+		var b = bChildren[bIndex];
+		insertNode(changes, localPatches, b._0, b._1, undefined, endInserts);
+		bIndex++;
+	}
+
+	if (localPatches.length > 0 || inserts.length > 0 || typeof endInserts !== 'undefined')
+	{
+		patches.push(makePatch('p-reorder', rootIndex, {
+			patches: localPatches,
+			inserts: inserts,
+			endInserts: endInserts
+		}));
+	}
+}
+
+
+
+////////////  CHANGES FROM KEYED DIFF  ////////////
+
+
+var POSTFIX = '_elmW6BL';
+
+
+function insertNode(changes, localPatches, key, vnode, bIndex, inserts)
+{
+	var entry = changes[key];
+
+	// never seen this key before
+	if (typeof entry === 'undefined')
+	{
+		entry = {
+			tag: 'insert',
+			vnode: vnode,
+			index: bIndex,
+			data: undefined
+		};
+
+		inserts.push({ index: bIndex, entry: entry });
+		changes[key] = entry;
+
+		return;
+	}
+
+	// this key was removed earlier, a match!
+	if (entry.tag === 'remove')
+	{
+		inserts.push({ index: bIndex, entry: entry });
+
+		entry.tag = 'move';
+		var subPatches = [];
+		diffHelp(entry.vnode, vnode, subPatches, entry.index);
+		entry.index = bIndex;
+		entry.data.data = {
+			patches: subPatches,
+			entry: entry
+		};
+
+		return;
+	}
+
+	// this key has already been inserted or moved, a duplicate!
+	insertNode(changes, localPatches, key + POSTFIX, vnode, bIndex, inserts);
+}
+
+
+function removeNode(changes, localPatches, key, vnode, index)
+{
+	var entry = changes[key];
+
+	// never seen this key before
+	if (typeof entry === 'undefined')
+	{
+		var patch = makePatch('p-remove', index, undefined);
+		localPatches.push(patch);
+
+		changes[key] = {
+			tag: 'remove',
+			vnode: vnode,
+			index: index,
+			data: patch
+		};
+
+		return;
+	}
+
+	// this key was inserted earlier, a match!
+	if (entry.tag === 'insert')
+	{
+		entry.tag = 'move';
+		var subPatches = [];
+		diffHelp(vnode, entry.vnode, subPatches, index);
+
+		var patch = makePatch('p-remove', index, {
+			patches: subPatches,
+			entry: entry
+		});
+		localPatches.push(patch);
+
+		return;
+	}
+
+	// this key has already been removed or moved, a duplicate!
+	removeNode(changes, localPatches, key + POSTFIX, vnode, index);
+}
+
+
+
+////////////  ADD DOM NODES  ////////////
+//
+// Each DOM node has an "index" assigned in order of traversal. It is important
+// to minimize our crawl over the actual DOM, so these indexes (along with the
+// descendantsCount of virtual nodes) let us skip touching entire subtrees of
+// the DOM if we know there are no patches there.
+
+
+function addDomNodes(domNode, vNode, patches, eventNode)
+{
+	addDomNodesHelp(domNode, vNode, patches, 0, 0, vNode.descendantsCount, eventNode);
+}
+
+
+// assumes `patches` is non-empty and indexes increase monotonically.
+function addDomNodesHelp(domNode, vNode, patches, i, low, high, eventNode)
+{
+	var patch = patches[i];
+	var index = patch.index;
+
+	while (index === low)
+	{
+		var patchType = patch.type;
+
+		if (patchType === 'p-thunk')
+		{
+			addDomNodes(domNode, vNode.node, patch.data, eventNode);
+		}
+		else if (patchType === 'p-reorder')
+		{
+			patch.domNode = domNode;
+			patch.eventNode = eventNode;
+
+			var subPatches = patch.data.patches;
+			if (subPatches.length > 0)
+			{
+				addDomNodesHelp(domNode, vNode, subPatches, 0, low, high, eventNode);
+			}
+		}
+		else if (patchType === 'p-remove')
+		{
+			patch.domNode = domNode;
+			patch.eventNode = eventNode;
+
+			var data = patch.data;
+			if (typeof data !== 'undefined')
+			{
+				data.entry.data = domNode;
+				var subPatches = data.patches;
+				if (subPatches.length > 0)
+				{
+					addDomNodesHelp(domNode, vNode, subPatches, 0, low, high, eventNode);
+				}
+			}
+		}
+		else
+		{
+			patch.domNode = domNode;
+			patch.eventNode = eventNode;
+		}
+
+		i++;
+
+		if (!(patch = patches[i]) || (index = patch.index) > high)
+		{
+			return i;
+		}
+	}
+
+	switch (vNode.type)
+	{
+		case 'tagger':
+			var subNode = vNode.node;
+
+			while (subNode.type === "tagger")
+			{
+				subNode = subNode.node;
+			}
+
+			return addDomNodesHelp(domNode, subNode, patches, i, low + 1, high, domNode.elm_event_node_ref);
+
+		case 'node':
+			var vChildren = vNode.children;
+			var childNodes = domNode.childNodes;
+			for (var j = 0; j < vChildren.length; j++)
+			{
+				low++;
+				var vChild = vChildren[j];
+				var nextLow = low + (vChild.descendantsCount || 0);
+				if (low <= index && index <= nextLow)
+				{
+					i = addDomNodesHelp(childNodes[j], vChild, patches, i, low, nextLow, eventNode);
+					if (!(patch = patches[i]) || (index = patch.index) > high)
+					{
+						return i;
+					}
+				}
+				low = nextLow;
+			}
+			return i;
+
+		case 'keyed-node':
+			var vChildren = vNode.children;
+			var childNodes = domNode.childNodes;
+			for (var j = 0; j < vChildren.length; j++)
+			{
+				low++;
+				var vChild = vChildren[j]._1;
+				var nextLow = low + (vChild.descendantsCount || 0);
+				if (low <= index && index <= nextLow)
+				{
+					i = addDomNodesHelp(childNodes[j], vChild, patches, i, low, nextLow, eventNode);
+					if (!(patch = patches[i]) || (index = patch.index) > high)
+					{
+						return i;
+					}
+				}
+				low = nextLow;
+			}
+			return i;
+
+		case 'text':
+		case 'thunk':
+			throw new Error('should never traverse `text` or `thunk` nodes like this');
+	}
+}
+
+
+
+////////////  APPLY PATCHES  ////////////
+
+
+function applyPatches(rootDomNode, oldVirtualNode, patches, eventNode)
+{
+	if (patches.length === 0)
+	{
+		return rootDomNode;
+	}
+
+	addDomNodes(rootDomNode, oldVirtualNode, patches, eventNode);
+	return applyPatchesHelp(rootDomNode, patches);
+}
+
+function applyPatchesHelp(rootDomNode, patches)
+{
+	for (var i = 0; i < patches.length; i++)
+	{
+		var patch = patches[i];
+		var localDomNode = patch.domNode
+		var newNode = applyPatch(localDomNode, patch);
+		if (localDomNode === rootDomNode)
+		{
+			rootDomNode = newNode;
+		}
+	}
+	return rootDomNode;
+}
+
+function applyPatch(domNode, patch)
+{
+	switch (patch.type)
+	{
+		case 'p-redraw':
+			return applyPatchRedraw(domNode, patch.data, patch.eventNode);
+
+		case 'p-facts':
+			applyFacts(domNode, patch.eventNode, patch.data);
+			return domNode;
+
+		case 'p-text':
+			domNode.replaceData(0, domNode.length, patch.data);
+			return domNode;
+
+		case 'p-thunk':
+			return applyPatchesHelp(domNode, patch.data);
+
+		case 'p-tagger':
+			if (typeof domNode.elm_event_node_ref !== 'undefined')
+			{
+				domNode.elm_event_node_ref.tagger = patch.data;
+			}
+			else
+			{
+				domNode.elm_event_node_ref = { tagger: patch.data, parent: patch.eventNode };
+			}
+			return domNode;
+
+		case 'p-remove-last':
+			var i = patch.data;
+			while (i--)
+			{
+				domNode.removeChild(domNode.lastChild);
+			}
+			return domNode;
+
+		case 'p-append':
+			var newNodes = patch.data;
+			for (var i = 0; i < newNodes.length; i++)
+			{
+				domNode.appendChild(render(newNodes[i], patch.eventNode));
+			}
+			return domNode;
+
+		case 'p-remove':
+			var data = patch.data;
+			if (typeof data === 'undefined')
+			{
+				domNode.parentNode.removeChild(domNode);
+				return domNode;
+			}
+			var entry = data.entry;
+			if (typeof entry.index !== 'undefined')
+			{
+				domNode.parentNode.removeChild(domNode);
+			}
+			entry.data = applyPatchesHelp(domNode, data.patches);
+			return domNode;
+
+		case 'p-reorder':
+			return applyPatchReorder(domNode, patch);
+
+		case 'p-custom':
+			var impl = patch.data;
+			return impl.applyPatch(domNode, impl.data);
+
+		default:
+			throw new Error('Ran into an unknown patch!');
+	}
+}
+
+
+function applyPatchRedraw(domNode, vNode, eventNode)
+{
+	var parentNode = domNode.parentNode;
+	var newNode = render(vNode, eventNode);
+
+	if (typeof newNode.elm_event_node_ref === 'undefined')
+	{
+		newNode.elm_event_node_ref = domNode.elm_event_node_ref;
+	}
+
+	if (parentNode && newNode !== domNode)
+	{
+		parentNode.replaceChild(newNode, domNode);
+	}
+	return newNode;
+}
+
+
+function applyPatchReorder(domNode, patch)
+{
+	var data = patch.data;
+
+	// remove end inserts
+	var frag = applyPatchReorderEndInsertsHelp(data.endInserts, patch);
+
+	// removals
+	domNode = applyPatchesHelp(domNode, data.patches);
+
+	// inserts
+	var inserts = data.inserts;
+	for (var i = 0; i < inserts.length; i++)
+	{
+		var insert = inserts[i];
+		var entry = insert.entry;
+		var node = entry.tag === 'move'
+			? entry.data
+			: render(entry.vnode, patch.eventNode);
+		domNode.insertBefore(node, domNode.childNodes[insert.index]);
+	}
+
+	// add end inserts
+	if (typeof frag !== 'undefined')
+	{
+		domNode.appendChild(frag);
+	}
+
+	return domNode;
+}
+
+
+function applyPatchReorderEndInsertsHelp(endInserts, patch)
+{
+	if (typeof endInserts === 'undefined')
+	{
+		return;
+	}
+
+	var frag = localDoc.createDocumentFragment();
+	for (var i = 0; i < endInserts.length; i++)
+	{
+		var insert = endInserts[i];
+		var entry = insert.entry;
+		frag.appendChild(entry.tag === 'move'
+			? entry.data
+			: render(entry.vnode, patch.eventNode)
+		);
+	}
+	return frag;
+}
+
+
+// PROGRAMS
+
+var program = makeProgram(checkNoFlags);
+var programWithFlags = makeProgram(checkYesFlags);
+
+function makeProgram(flagChecker)
+{
+	return F2(function(debugWrap, impl)
+	{
+		return function(flagDecoder)
+		{
+			return function(object, moduleName, debugMetadata)
+			{
+				var checker = flagChecker(flagDecoder, moduleName);
+				if (typeof debugMetadata === 'undefined')
+				{
+					normalSetup(impl, object, moduleName, checker);
+				}
+				else
+				{
+					debugSetup(A2(debugWrap, debugMetadata, impl), object, moduleName, checker);
+				}
+			};
+		};
+	});
+}
+
+function staticProgram(vNode)
+{
+	var nothing = _elm_lang$core$Native_Utils.Tuple2(
+		_elm_lang$core$Native_Utils.Tuple0,
+		_elm_lang$core$Platform_Cmd$none
+	);
+	return A2(program, _elm_lang$virtual_dom$VirtualDom_Debug$wrap, {
+		init: nothing,
+		view: function() { return vNode; },
+		update: F2(function() { return nothing; }),
+		subscriptions: function() { return _elm_lang$core$Platform_Sub$none; }
+	})();
+}
+
+
+// FLAG CHECKERS
+
+function checkNoFlags(flagDecoder, moduleName)
+{
+	return function(init, flags, domNode)
+	{
+		if (typeof flags === 'undefined')
+		{
+			return init;
+		}
+
+		var errorMessage =
+			'The `' + moduleName + '` module does not need flags.\n'
+			+ 'Initialize it with no arguments and you should be all set!';
+
+		crash(errorMessage, domNode);
+	};
+}
+
+function checkYesFlags(flagDecoder, moduleName)
+{
+	return function(init, flags, domNode)
+	{
+		if (typeof flagDecoder === 'undefined')
+		{
+			var errorMessage =
+				'Are you trying to sneak a Never value into Elm? Trickster!\n'
+				+ 'It looks like ' + moduleName + '.main is defined with `programWithFlags` but has type `Program Never`.\n'
+				+ 'Use `program` instead if you do not want flags.'
+
+			crash(errorMessage, domNode);
+		}
+
+		var result = A2(_elm_lang$core$Native_Json.run, flagDecoder, flags);
+		if (result.ctor === 'Ok')
+		{
+			return init(result._0);
+		}
+
+		var errorMessage =
+			'Trying to initialize the `' + moduleName + '` module with an unexpected flag.\n'
+			+ 'I tried to convert it to an Elm value, but ran into this problem:\n\n'
+			+ result._0;
+
+		crash(errorMessage, domNode);
+	};
+}
+
+function crash(errorMessage, domNode)
+{
+	if (domNode)
+	{
+		domNode.innerHTML =
+			'<div style="padding-left:1em;">'
+			+ '<h2 style="font-weight:normal;"><b>Oops!</b> Something went wrong when starting your Elm program.</h2>'
+			+ '<pre style="padding-left:1em;">' + errorMessage + '</pre>'
+			+ '</div>';
+	}
+
+	throw new Error(errorMessage);
+}
+
+
+//  NORMAL SETUP
+
+function normalSetup(impl, object, moduleName, flagChecker)
+{
+	object['embed'] = function embed(node, flags)
+	{
+		while (node.lastChild)
+		{
+			node.removeChild(node.lastChild);
+		}
+
+		return _elm_lang$core$Native_Platform.initialize(
+			flagChecker(impl.init, flags, node),
+			impl.update,
+			impl.subscriptions,
+			normalRenderer(node, impl.view)
+		);
+	};
+
+	object['fullscreen'] = function fullscreen(flags)
+	{
+		return _elm_lang$core$Native_Platform.initialize(
+			flagChecker(impl.init, flags, document.body),
+			impl.update,
+			impl.subscriptions,
+			normalRenderer(document.body, impl.view)
+		);
+	};
+}
+
+function normalRenderer(parentNode, view)
+{
+	return function(tagger, initialModel)
+	{
+		var eventNode = { tagger: tagger, parent: undefined };
+		var initialVirtualNode = view(initialModel);
+		var domNode = render(initialVirtualNode, eventNode);
+		parentNode.appendChild(domNode);
+		return makeStepper(domNode, view, initialVirtualNode, eventNode);
+	};
+}
+
+
+// STEPPER
+
+var rAF =
+	typeof requestAnimationFrame !== 'undefined'
+		? requestAnimationFrame
+		: function(callback) { setTimeout(callback, 1000 / 60); };
+
+function makeStepper(domNode, view, initialVirtualNode, eventNode)
+{
+	var state = 'NO_REQUEST';
+	var currNode = initialVirtualNode;
+	var nextModel;
+
+	function updateIfNeeded()
+	{
+		switch (state)
+		{
+			case 'NO_REQUEST':
+				throw new Error(
+					'Unexpected draw callback.\n' +
+					'Please report this to <https://github.com/elm-lang/virtual-dom/issues>.'
+				);
+
+			case 'PENDING_REQUEST':
+				rAF(updateIfNeeded);
+				state = 'EXTRA_REQUEST';
+
+				var nextNode = view(nextModel);
+				var patches = diff(currNode, nextNode);
+				domNode = applyPatches(domNode, currNode, patches, eventNode);
+				currNode = nextNode;
+
+				return;
+
+			case 'EXTRA_REQUEST':
+				state = 'NO_REQUEST';
+				return;
+		}
+	}
+
+	return function stepper(model)
+	{
+		if (state === 'NO_REQUEST')
+		{
+			rAF(updateIfNeeded);
+		}
+		state = 'PENDING_REQUEST';
+		nextModel = model;
+	};
+}
+
+
+// DEBUG SETUP
+
+function debugSetup(impl, object, moduleName, flagChecker)
+{
+	object['fullscreen'] = function fullscreen(flags)
+	{
+		var popoutRef = { doc: undefined };
+		return _elm_lang$core$Native_Platform.initialize(
+			flagChecker(impl.init, flags, document.body),
+			impl.update(scrollTask(popoutRef)),
+			impl.subscriptions,
+			debugRenderer(moduleName, document.body, popoutRef, impl.view, impl.viewIn, impl.viewOut)
+		);
+	};
+
+	object['embed'] = function fullscreen(node, flags)
+	{
+		var popoutRef = { doc: undefined };
+		return _elm_lang$core$Native_Platform.initialize(
+			flagChecker(impl.init, flags, node),
+			impl.update(scrollTask(popoutRef)),
+			impl.subscriptions,
+			debugRenderer(moduleName, node, popoutRef, impl.view, impl.viewIn, impl.viewOut)
+		);
+	};
+}
+
+function scrollTask(popoutRef)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		var doc = popoutRef.doc;
+		if (doc)
+		{
+			var msgs = doc.getElementsByClassName('debugger-sidebar-messages')[0];
+			if (msgs)
+			{
+				msgs.scrollTop = msgs.scrollHeight;
+			}
+		}
+		callback(_elm_lang$core$Native_Scheduler.succeed(_elm_lang$core$Native_Utils.Tuple0));
+	});
+}
+
+
+function debugRenderer(moduleName, parentNode, popoutRef, view, viewIn, viewOut)
+{
+	return function(tagger, initialModel)
+	{
+		var appEventNode = { tagger: tagger, parent: undefined };
+		var eventNode = { tagger: tagger, parent: undefined };
+
+		// make normal stepper
+		var appVirtualNode = view(initialModel);
+		var appNode = render(appVirtualNode, appEventNode);
+		parentNode.appendChild(appNode);
+		var appStepper = makeStepper(appNode, view, appVirtualNode, appEventNode);
+
+		// make overlay stepper
+		var overVirtualNode = viewIn(initialModel)._1;
+		var overNode = render(overVirtualNode, eventNode);
+		parentNode.appendChild(overNode);
+		var wrappedViewIn = wrapViewIn(appEventNode, overNode, viewIn);
+		var overStepper = makeStepper(overNode, wrappedViewIn, overVirtualNode, eventNode);
+
+		// make debugger stepper
+		var debugStepper = makeDebugStepper(initialModel, viewOut, eventNode, parentNode, moduleName, popoutRef);
+
+		return function stepper(model)
+		{
+			appStepper(model);
+			overStepper(model);
+			debugStepper(model);
+		}
+	};
+}
+
+function makeDebugStepper(initialModel, view, eventNode, parentNode, moduleName, popoutRef)
+{
+	var curr;
+	var domNode;
+
+	return function stepper(model)
+	{
+		if (!model.isDebuggerOpen)
+		{
+			return;
+		}
+
+		if (!popoutRef.doc)
+		{
+			curr = view(model);
+			domNode = openDebugWindow(moduleName, popoutRef, curr, eventNode);
+			return;
+		}
+
+		// switch to document of popout
+		localDoc = popoutRef.doc;
+
+		var next = view(model);
+		var patches = diff(curr, next);
+		domNode = applyPatches(domNode, curr, patches, eventNode);
+		curr = next;
+
+		// switch back to normal document
+		localDoc = document;
+	};
+}
+
+function openDebugWindow(moduleName, popoutRef, virtualNode, eventNode)
+{
+	var w = 900;
+	var h = 360;
+	var x = screen.width - w;
+	var y = screen.height - h;
+	var debugWindow = window.open('', '', 'width=' + w + ',height=' + h + ',left=' + x + ',top=' + y);
+
+	// switch to window document
+	localDoc = debugWindow.document;
+
+	popoutRef.doc = localDoc;
+	localDoc.title = 'Debugger - ' + moduleName;
+	localDoc.body.style.margin = '0';
+	localDoc.body.style.padding = '0';
+	var domNode = render(virtualNode, eventNode);
+	localDoc.body.appendChild(domNode);
+
+	localDoc.addEventListener('keydown', function(event) {
+		if (event.metaKey && event.which === 82)
+		{
+			window.location.reload();
+		}
+		if (event.which === 38)
+		{
+			eventNode.tagger({ ctor: 'Up' });
+			event.preventDefault();
+		}
+		if (event.which === 40)
+		{
+			eventNode.tagger({ ctor: 'Down' });
+			event.preventDefault();
+		}
+	});
+
+	function close()
+	{
+		popoutRef.doc = undefined;
+		debugWindow.close();
+	}
+	window.addEventListener('unload', close);
+	debugWindow.addEventListener('unload', function() {
+		popoutRef.doc = undefined;
+		window.removeEventListener('unload', close);
+		eventNode.tagger({ ctor: 'Close' });
+	});
+
+	// switch back to the normal document
+	localDoc = document;
+
+	return domNode;
+}
+
+
+// BLOCK EVENTS
+
+function wrapViewIn(appEventNode, overlayNode, viewIn)
+{
+	var ignorer = makeIgnorer(overlayNode);
+	var blocking = 'Normal';
+	var overflow;
+
+	var normalTagger = appEventNode.tagger;
+	var blockTagger = function() {};
+
+	return function(model)
+	{
+		var tuple = viewIn(model);
+		var newBlocking = tuple._0.ctor;
+		appEventNode.tagger = newBlocking === 'Normal' ? normalTagger : blockTagger;
+		if (blocking !== newBlocking)
+		{
+			traverse('removeEventListener', ignorer, blocking);
+			traverse('addEventListener', ignorer, newBlocking);
+
+			if (blocking === 'Normal')
+			{
+				overflow = document.body.style.overflow;
+				document.body.style.overflow = 'hidden';
+			}
+
+			if (newBlocking === 'Normal')
+			{
+				document.body.style.overflow = overflow;
+			}
+
+			blocking = newBlocking;
+		}
+		return tuple._1;
+	}
+}
+
+function traverse(verbEventListener, ignorer, blocking)
+{
+	switch(blocking)
+	{
+		case 'Normal':
+			return;
+
+		case 'Pause':
+			return traverseHelp(verbEventListener, ignorer, mostEvents);
+
+		case 'Message':
+			return traverseHelp(verbEventListener, ignorer, allEvents);
+	}
+}
+
+function traverseHelp(verbEventListener, handler, eventNames)
+{
+	for (var i = 0; i < eventNames.length; i++)
+	{
+		document.body[verbEventListener](eventNames[i], handler, true);
+	}
+}
+
+function makeIgnorer(overlayNode)
+{
+	return function(event)
+	{
+		if (event.type === 'keydown' && event.metaKey && event.which === 82)
+		{
+			return;
+		}
+
+		var isScroll = event.type === 'scroll' || event.type === 'wheel';
+
+		var node = event.target;
+		while (node !== null)
+		{
+			if (node.className === 'elm-overlay-message-details' && isScroll)
+			{
+				return;
+			}
+
+			if (node === overlayNode && !isScroll)
+			{
+				return;
+			}
+			node = node.parentNode;
+		}
+
+		event.stopPropagation();
+		event.preventDefault();
+	}
+}
+
+var mostEvents = [
+	'click', 'dblclick', 'mousemove',
+	'mouseup', 'mousedown', 'mouseenter', 'mouseleave',
+	'touchstart', 'touchend', 'touchcancel', 'touchmove',
+	'pointerdown', 'pointerup', 'pointerover', 'pointerout',
+	'pointerenter', 'pointerleave', 'pointermove', 'pointercancel',
+	'dragstart', 'drag', 'dragend', 'dragenter', 'dragover', 'dragleave', 'drop',
+	'keyup', 'keydown', 'keypress',
+	'input', 'change',
+	'focus', 'blur'
+];
+
+var allEvents = mostEvents.concat('wheel', 'scroll');
+
+
+return {
+	node: node,
+	text: text,
+	custom: custom,
+	map: F2(map),
+
+	on: F3(on),
+	style: style,
+	property: F2(property),
+	attribute: F2(attribute),
+	attributeNS: F3(attributeNS),
+	mapProperty: F2(mapProperty),
+
+	lazy: F2(lazy),
+	lazy2: F3(lazy2),
+	lazy3: F4(lazy3),
+	keyedNode: F3(keyedNode),
+
+	program: program,
+	programWithFlags: programWithFlags,
+	staticProgram: staticProgram
+};
+
+}();
+
+var _elm_lang$virtual_dom$VirtualDom$programWithFlags = function (impl) {
+	return A2(_elm_lang$virtual_dom$Native_VirtualDom.programWithFlags, _elm_lang$virtual_dom$VirtualDom_Debug$wrapWithFlags, impl);
+};
+var _elm_lang$virtual_dom$VirtualDom$program = function (impl) {
+	return A2(_elm_lang$virtual_dom$Native_VirtualDom.program, _elm_lang$virtual_dom$VirtualDom_Debug$wrap, impl);
+};
+var _elm_lang$virtual_dom$VirtualDom$keyedNode = _elm_lang$virtual_dom$Native_VirtualDom.keyedNode;
+var _elm_lang$virtual_dom$VirtualDom$lazy3 = _elm_lang$virtual_dom$Native_VirtualDom.lazy3;
+var _elm_lang$virtual_dom$VirtualDom$lazy2 = _elm_lang$virtual_dom$Native_VirtualDom.lazy2;
+var _elm_lang$virtual_dom$VirtualDom$lazy = _elm_lang$virtual_dom$Native_VirtualDom.lazy;
+var _elm_lang$virtual_dom$VirtualDom$defaultOptions = {stopPropagation: false, preventDefault: false};
+var _elm_lang$virtual_dom$VirtualDom$onWithOptions = _elm_lang$virtual_dom$Native_VirtualDom.on;
+var _elm_lang$virtual_dom$VirtualDom$on = F2(
+	function (eventName, decoder) {
+		return A3(_elm_lang$virtual_dom$VirtualDom$onWithOptions, eventName, _elm_lang$virtual_dom$VirtualDom$defaultOptions, decoder);
+	});
+var _elm_lang$virtual_dom$VirtualDom$style = _elm_lang$virtual_dom$Native_VirtualDom.style;
+var _elm_lang$virtual_dom$VirtualDom$mapProperty = _elm_lang$virtual_dom$Native_VirtualDom.mapProperty;
+var _elm_lang$virtual_dom$VirtualDom$attributeNS = _elm_lang$virtual_dom$Native_VirtualDom.attributeNS;
+var _elm_lang$virtual_dom$VirtualDom$attribute = _elm_lang$virtual_dom$Native_VirtualDom.attribute;
+var _elm_lang$virtual_dom$VirtualDom$property = _elm_lang$virtual_dom$Native_VirtualDom.property;
+var _elm_lang$virtual_dom$VirtualDom$map = _elm_lang$virtual_dom$Native_VirtualDom.map;
+var _elm_lang$virtual_dom$VirtualDom$text = _elm_lang$virtual_dom$Native_VirtualDom.text;
+var _elm_lang$virtual_dom$VirtualDom$node = _elm_lang$virtual_dom$Native_VirtualDom.node;
+var _elm_lang$virtual_dom$VirtualDom$Options = F2(
+	function (a, b) {
+		return {stopPropagation: a, preventDefault: b};
+	});
+var _elm_lang$virtual_dom$VirtualDom$Node = {ctor: 'Node'};
+var _elm_lang$virtual_dom$VirtualDom$Property = {ctor: 'Property'};
+
+var _elm_lang$html$Html$programWithFlags = _elm_lang$virtual_dom$VirtualDom$programWithFlags;
+var _elm_lang$html$Html$program = _elm_lang$virtual_dom$VirtualDom$program;
+var _elm_lang$html$Html$beginnerProgram = function (_p0) {
+	var _p1 = _p0;
+	return _elm_lang$html$Html$program(
+		{
+			init: A2(
+				_elm_lang$core$Platform_Cmd_ops['!'],
+				_p1.model,
+				{ctor: '[]'}),
+			update: F2(
+				function (msg, model) {
+					return A2(
+						_elm_lang$core$Platform_Cmd_ops['!'],
+						A2(_p1.update, msg, model),
+						{ctor: '[]'});
+				}),
+			view: _p1.view,
+			subscriptions: function (_p2) {
+				return _elm_lang$core$Platform_Sub$none;
+			}
+		});
+};
+var _elm_lang$html$Html$map = _elm_lang$virtual_dom$VirtualDom$map;
+var _elm_lang$html$Html$text = _elm_lang$virtual_dom$VirtualDom$text;
+var _elm_lang$html$Html$node = _elm_lang$virtual_dom$VirtualDom$node;
+var _elm_lang$html$Html$body = _elm_lang$html$Html$node('body');
+var _elm_lang$html$Html$section = _elm_lang$html$Html$node('section');
+var _elm_lang$html$Html$nav = _elm_lang$html$Html$node('nav');
+var _elm_lang$html$Html$article = _elm_lang$html$Html$node('article');
+var _elm_lang$html$Html$aside = _elm_lang$html$Html$node('aside');
+var _elm_lang$html$Html$h1 = _elm_lang$html$Html$node('h1');
+var _elm_lang$html$Html$h2 = _elm_lang$html$Html$node('h2');
+var _elm_lang$html$Html$h3 = _elm_lang$html$Html$node('h3');
+var _elm_lang$html$Html$h4 = _elm_lang$html$Html$node('h4');
+var _elm_lang$html$Html$h5 = _elm_lang$html$Html$node('h5');
+var _elm_lang$html$Html$h6 = _elm_lang$html$Html$node('h6');
+var _elm_lang$html$Html$header = _elm_lang$html$Html$node('header');
+var _elm_lang$html$Html$footer = _elm_lang$html$Html$node('footer');
+var _elm_lang$html$Html$address = _elm_lang$html$Html$node('address');
+var _elm_lang$html$Html$main_ = _elm_lang$html$Html$node('main');
+var _elm_lang$html$Html$p = _elm_lang$html$Html$node('p');
+var _elm_lang$html$Html$hr = _elm_lang$html$Html$node('hr');
+var _elm_lang$html$Html$pre = _elm_lang$html$Html$node('pre');
+var _elm_lang$html$Html$blockquote = _elm_lang$html$Html$node('blockquote');
+var _elm_lang$html$Html$ol = _elm_lang$html$Html$node('ol');
+var _elm_lang$html$Html$ul = _elm_lang$html$Html$node('ul');
+var _elm_lang$html$Html$li = _elm_lang$html$Html$node('li');
+var _elm_lang$html$Html$dl = _elm_lang$html$Html$node('dl');
+var _elm_lang$html$Html$dt = _elm_lang$html$Html$node('dt');
+var _elm_lang$html$Html$dd = _elm_lang$html$Html$node('dd');
+var _elm_lang$html$Html$figure = _elm_lang$html$Html$node('figure');
+var _elm_lang$html$Html$figcaption = _elm_lang$html$Html$node('figcaption');
+var _elm_lang$html$Html$div = _elm_lang$html$Html$node('div');
+var _elm_lang$html$Html$a = _elm_lang$html$Html$node('a');
+var _elm_lang$html$Html$em = _elm_lang$html$Html$node('em');
+var _elm_lang$html$Html$strong = _elm_lang$html$Html$node('strong');
+var _elm_lang$html$Html$small = _elm_lang$html$Html$node('small');
+var _elm_lang$html$Html$s = _elm_lang$html$Html$node('s');
+var _elm_lang$html$Html$cite = _elm_lang$html$Html$node('cite');
+var _elm_lang$html$Html$q = _elm_lang$html$Html$node('q');
+var _elm_lang$html$Html$dfn = _elm_lang$html$Html$node('dfn');
+var _elm_lang$html$Html$abbr = _elm_lang$html$Html$node('abbr');
+var _elm_lang$html$Html$time = _elm_lang$html$Html$node('time');
+var _elm_lang$html$Html$code = _elm_lang$html$Html$node('code');
+var _elm_lang$html$Html$var = _elm_lang$html$Html$node('var');
+var _elm_lang$html$Html$samp = _elm_lang$html$Html$node('samp');
+var _elm_lang$html$Html$kbd = _elm_lang$html$Html$node('kbd');
+var _elm_lang$html$Html$sub = _elm_lang$html$Html$node('sub');
+var _elm_lang$html$Html$sup = _elm_lang$html$Html$node('sup');
+var _elm_lang$html$Html$i = _elm_lang$html$Html$node('i');
+var _elm_lang$html$Html$b = _elm_lang$html$Html$node('b');
+var _elm_lang$html$Html$u = _elm_lang$html$Html$node('u');
+var _elm_lang$html$Html$mark = _elm_lang$html$Html$node('mark');
+var _elm_lang$html$Html$ruby = _elm_lang$html$Html$node('ruby');
+var _elm_lang$html$Html$rt = _elm_lang$html$Html$node('rt');
+var _elm_lang$html$Html$rp = _elm_lang$html$Html$node('rp');
+var _elm_lang$html$Html$bdi = _elm_lang$html$Html$node('bdi');
+var _elm_lang$html$Html$bdo = _elm_lang$html$Html$node('bdo');
+var _elm_lang$html$Html$span = _elm_lang$html$Html$node('span');
+var _elm_lang$html$Html$br = _elm_lang$html$Html$node('br');
+var _elm_lang$html$Html$wbr = _elm_lang$html$Html$node('wbr');
+var _elm_lang$html$Html$ins = _elm_lang$html$Html$node('ins');
+var _elm_lang$html$Html$del = _elm_lang$html$Html$node('del');
+var _elm_lang$html$Html$img = _elm_lang$html$Html$node('img');
+var _elm_lang$html$Html$iframe = _elm_lang$html$Html$node('iframe');
+var _elm_lang$html$Html$embed = _elm_lang$html$Html$node('embed');
+var _elm_lang$html$Html$object = _elm_lang$html$Html$node('object');
+var _elm_lang$html$Html$param = _elm_lang$html$Html$node('param');
+var _elm_lang$html$Html$video = _elm_lang$html$Html$node('video');
+var _elm_lang$html$Html$audio = _elm_lang$html$Html$node('audio');
+var _elm_lang$html$Html$source = _elm_lang$html$Html$node('source');
+var _elm_lang$html$Html$track = _elm_lang$html$Html$node('track');
+var _elm_lang$html$Html$canvas = _elm_lang$html$Html$node('canvas');
+var _elm_lang$html$Html$math = _elm_lang$html$Html$node('math');
+var _elm_lang$html$Html$table = _elm_lang$html$Html$node('table');
+var _elm_lang$html$Html$caption = _elm_lang$html$Html$node('caption');
+var _elm_lang$html$Html$colgroup = _elm_lang$html$Html$node('colgroup');
+var _elm_lang$html$Html$col = _elm_lang$html$Html$node('col');
+var _elm_lang$html$Html$tbody = _elm_lang$html$Html$node('tbody');
+var _elm_lang$html$Html$thead = _elm_lang$html$Html$node('thead');
+var _elm_lang$html$Html$tfoot = _elm_lang$html$Html$node('tfoot');
+var _elm_lang$html$Html$tr = _elm_lang$html$Html$node('tr');
+var _elm_lang$html$Html$td = _elm_lang$html$Html$node('td');
+var _elm_lang$html$Html$th = _elm_lang$html$Html$node('th');
+var _elm_lang$html$Html$form = _elm_lang$html$Html$node('form');
+var _elm_lang$html$Html$fieldset = _elm_lang$html$Html$node('fieldset');
+var _elm_lang$html$Html$legend = _elm_lang$html$Html$node('legend');
+var _elm_lang$html$Html$label = _elm_lang$html$Html$node('label');
+var _elm_lang$html$Html$input = _elm_lang$html$Html$node('input');
+var _elm_lang$html$Html$button = _elm_lang$html$Html$node('button');
+var _elm_lang$html$Html$select = _elm_lang$html$Html$node('select');
+var _elm_lang$html$Html$datalist = _elm_lang$html$Html$node('datalist');
+var _elm_lang$html$Html$optgroup = _elm_lang$html$Html$node('optgroup');
+var _elm_lang$html$Html$option = _elm_lang$html$Html$node('option');
+var _elm_lang$html$Html$textarea = _elm_lang$html$Html$node('textarea');
+var _elm_lang$html$Html$keygen = _elm_lang$html$Html$node('keygen');
+var _elm_lang$html$Html$output = _elm_lang$html$Html$node('output');
+var _elm_lang$html$Html$progress = _elm_lang$html$Html$node('progress');
+var _elm_lang$html$Html$meter = _elm_lang$html$Html$node('meter');
+var _elm_lang$html$Html$details = _elm_lang$html$Html$node('details');
+var _elm_lang$html$Html$summary = _elm_lang$html$Html$node('summary');
+var _elm_lang$html$Html$menuitem = _elm_lang$html$Html$node('menuitem');
+var _elm_lang$html$Html$menu = _elm_lang$html$Html$node('menu');
+
+var _elm_lang$html$Html_Events$keyCode = A2(_elm_lang$core$Json_Decode$field, 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$html$Html_Events$targetChecked = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'checked',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$bool);
+var _elm_lang$html$Html_Events$targetValue = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'target',
+		_1: {
+			ctor: '::',
+			_0: 'value',
+			_1: {ctor: '[]'}
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _elm_lang$html$Html_Events$defaultOptions = _elm_lang$virtual_dom$VirtualDom$defaultOptions;
+var _elm_lang$html$Html_Events$onWithOptions = _elm_lang$virtual_dom$VirtualDom$onWithOptions;
+var _elm_lang$html$Html_Events$on = _elm_lang$virtual_dom$VirtualDom$on;
+var _elm_lang$html$Html_Events$onFocus = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'focus',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onBlur = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'blur',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onSubmitOptions = _elm_lang$core$Native_Utils.update(
+	_elm_lang$html$Html_Events$defaultOptions,
+	{preventDefault: true});
+var _elm_lang$html$Html_Events$onSubmit = function (msg) {
+	return A3(
+		_elm_lang$html$Html_Events$onWithOptions,
+		'submit',
+		_elm_lang$html$Html_Events$onSubmitOptions,
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onCheck = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'change',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetChecked));
+};
+var _elm_lang$html$Html_Events$onInput = function (tagger) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'input',
+		A2(_elm_lang$core$Json_Decode$map, tagger, _elm_lang$html$Html_Events$targetValue));
+};
+var _elm_lang$html$Html_Events$onMouseOut = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseout',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseOver = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseover',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseLeave = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseleave',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseEnter = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseenter',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseUp = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mouseup',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onMouseDown = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'mousedown',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onDoubleClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'dblclick',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$onClick = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'click',
+		_elm_lang$core$Json_Decode$succeed(msg));
+};
+var _elm_lang$html$Html_Events$Options = F2(
+	function (a, b) {
+		return {stopPropagation: a, preventDefault: b};
+	});
+
 var _rtfeldman$hex$Hex$toString = function (num) {
 	return _elm_lang$core$String$fromList(
 		(_elm_lang$core$Native_Utils.cmp(num, 0) < 0) ? {
@@ -12333,7 +14505,7 @@ var _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typedTypeAnnotation = _elm_comm
 				_elm_community$parser_combinators$Combine$maybe(
 					A2(
 						_elm_community$parser_combinators$Combine_ops['*>'],
-						_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace,
+						_elm_community$parser_combinators$Combine$maybe(_stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace),
 						A2(_elm_community$parser_combinators$Combine$sepBy, _stil4m$elm_syntax$Elm_Parser_Util$moreThanIndentWhitespace, _stil4m$elm_syntax$Elm_Parser_TypeAnnotation$typeAnnotationNoFn)))));
 	});
 
@@ -14087,6 +16259,20 @@ var _user$project$And$doNothing = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
 
+var _user$project$And_File$fileOpenRequest = _elm_lang$core$Native_Platform.outgoingPort(
+	'fileOpenRequest',
+	function (v) {
+		return [v._0, v._1, v._2];
+	});
+var _user$project$And_File$requestOpen = F4(
+	function (filePath, row, column, model) {
+		return A2(
+			_user$project$And$execute,
+			model,
+			_user$project$And_File$fileOpenRequest(
+				{ctor: '_Tuple3', _0: filePath, _1: row, _2: column}));
+	});
+
 var _user$project$Types_Exposings$encoder = function (exposings) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -14132,6 +16318,16 @@ var _user$project$Types_Exposings$decoder = A3(
 		'types',
 		_elm_community$json_extra$Json_Decode_Extra$set(_elm_lang$core$Json_Decode$string)));
 
+var _user$project$Types_Reference$listUpdate = F2(
+	function (referencesA, referencesB) {
+		var newReference = _elm_lang$core$List$head(referencesB);
+		var _p0 = newReference;
+		if (_p0.ctor === 'Just') {
+			return {ctor: '::', _0: _p0._0, _1: referencesA};
+		} else {
+			return referencesB;
+		}
+	});
 var _user$project$Types_Reference$encoder = function (reference) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -14141,22 +16337,89 @@ var _user$project$Types_Reference$encoder = function (reference) {
 				_0: 'name',
 				_1: _elm_lang$core$Json_Encode$string(reference.name)
 			},
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'range',
+					_1: _stil4m$elm_syntax$Elm_Syntax_Range$encode(reference.range)
+				},
+				_1: {
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'sourceFilePath',
+						_1: _elm_lang$core$Json_Encode$string(reference.sourceFilePath)
+					},
+					_1: {ctor: '[]'}
+				}
+			}
 		});
 };
 var _user$project$Types_Reference$listEncoder = function (references) {
 	return _elm_lang$core$Json_Encode$list(
 		A2(_elm_lang$core$List$map, _user$project$Types_Reference$encoder, references));
 };
-var _user$project$Types_Reference$default = {name: ''};
-var _user$project$Types_Reference$Reference = function (a) {
-	return {name: a};
-};
-var _user$project$Types_Reference$decoder = A2(
-	_elm_lang$core$Json_Decode$map,
+var _user$project$Types_Reference$default = {name: '', range: _stil4m$elm_syntax$Elm_Syntax_Range$emptyRange, sourceFilePath: ''};
+var _user$project$Types_Reference$Reference = F3(
+	function (a, b, c) {
+		return {name: a, range: b, sourceFilePath: c};
+	});
+var _user$project$Types_Reference$make = F6(
+	function (name, startLine, startColumn, endLine, endColumn, source) {
+		return A3(
+			_user$project$Types_Reference$Reference,
+			name,
+			{
+				start: {row: startLine, column: startColumn},
+				end: {row: endLine, column: endColumn}
+			},
+			source);
+	});
+var _user$project$Types_Reference$decoder = A4(
+	_elm_lang$core$Json_Decode$map3,
 	_user$project$Types_Reference$Reference,
-	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'range', _stil4m$elm_syntax$Elm_Syntax_Range$decode),
+	A2(_elm_lang$core$Json_Decode$field, 'sourceFilePath', _elm_lang$core$Json_Decode$string));
 var _user$project$Types_Reference$listDecoder = _elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder);
+
+var _user$project$Types_KeyedReferences$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder);
+var _user$project$Types_KeyedReferences$addEntry = F2(
+	function (_p0, dict) {
+		var _p1 = _p0;
+		return A3(_elm_lang$core$Dict$insert, _p1._0, _p1._1, dict);
+	});
+var _user$project$Types_KeyedReferences$encodeInternalsDict = function (internals) {
+	return A2(
+		_elm_lang$core$List$map,
+		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
+		_elm_lang$core$Dict$toList(internals));
+};
+var _user$project$Types_KeyedReferences$toDictionary = function (dictList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_KeyedReferences$addEntry, _elm_lang$core$Dict$empty, dictList);
+};
+var _user$project$Types_KeyedReferences$existsInBoth = F4(
+	function (name, list1, list2, dict) {
+		var newList = function () {
+			var _p2 = _elm_lang$core$List$head(list2);
+			if (_p2.ctor === 'Just') {
+				return {ctor: '::', _0: _p2._0, _1: list1};
+			} else {
+				return list1;
+			}
+		}();
+		return A3(_elm_lang$core$Dict$insert, name, newList, dict);
+	});
+var _user$project$Types_KeyedReferences$update = F2(
+	function (keyedRefs1, keyedRefs2) {
+		return A6(_elm_lang$core$Dict$merge, _elm_lang$core$Dict$insert, _user$project$Types_KeyedReferences$existsInBoth, _elm_lang$core$Dict$insert, keyedRefs1, keyedRefs2, _elm_lang$core$Dict$empty);
+	});
+var _user$project$Types_KeyedReferences$decoder = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_KeyedReferences$toDictionary, _user$project$Types_KeyedReferences$tupleListDecoder);
+var _user$project$Types_KeyedReferences$encoder = function (keyedReferences) {
+	return _elm_lang$core$Json_Encode$object(
+		_user$project$Types_KeyedReferences$encodeInternalsDict(keyedReferences));
+};
 
 var _user$project$Util_ModuleName$fromHashed = function (encodedModuleName) {
 	return A2(_elm_lang$core$String$split, '|', encodedModuleName);
@@ -14170,16 +16433,30 @@ var _user$project$Util_ModuleName$encoder = function (moduleName) {
 		A2(_elm_lang$core$List$map, _elm_lang$core$Json_Encode$string, moduleName));
 };
 
-var _user$project$Types_References$externalReferenceUpdate = F2(
-	function (referencesA, referencesB) {
-		var newReference = _elm_lang$core$List$head(referencesB);
-		var _p0 = newReference;
-		if (_p0.ctor === 'Just') {
-			return {ctor: '::', _0: _p0._0, _1: referencesA};
-		} else {
-			return referencesB;
-		}
+var _user$project$Types_References$addEntry = F2(
+	function (_p0, dict) {
+		var _p1 = _p0;
+		return A3(
+			_elm_lang$core$Dict$insert,
+			_user$project$Util_ModuleName$fromHashed(_p1._0),
+			_user$project$Types_KeyedReferences$toDictionary(_p1._1),
+			dict);
 	});
+var _user$project$Types_References$toDictionary = function (dictList) {
+	return A3(_elm_lang$core$List$foldl, _user$project$Types_References$addEntry, _elm_lang$core$Dict$empty, dictList);
+};
+var _user$project$Types_References$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(
+	_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder));
+var _user$project$Types_References$decodeExternalsDict = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_References$toDictionary, _user$project$Types_References$tupleListDecoder);
+var _user$project$Types_References$encodeExternalsDict = function (externals) {
+	return A2(
+		_elm_lang$core$List$map,
+		_elm_lang$core$Tuple$mapSecond(_user$project$Types_KeyedReferences$encoder),
+		A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$mapFirst(_user$project$Util_ModuleName$toHashed),
+			_elm_lang$core$Dict$toList(externals)));
+};
 var _user$project$Types_References$addExternal = F3(
 	function (moduleName, reference, references) {
 		return _elm_lang$core$Native_Utils.update(
@@ -14187,13 +16464,16 @@ var _user$project$Types_References$addExternal = F3(
 			{
 				external: A4(
 					_elm_community$dict_extra$Dict_Extra$insertDedupe,
-					_user$project$Types_References$externalReferenceUpdate,
+					_user$project$Types_KeyedReferences$update,
 					moduleName,
-					{
-						ctor: '::',
-						_0: reference,
-						_1: {ctor: '[]'}
-					},
+					A2(
+						_elm_lang$core$Dict$singleton,
+						reference.name,
+						{
+							ctor: '::',
+							_0: reference,
+							_1: {ctor: '[]'}
+						}),
 					references.external)
 			});
 	});
@@ -14202,32 +16482,18 @@ var _user$project$Types_References$addInternal = F2(
 		return _elm_lang$core$Native_Utils.update(
 			references,
 			{
-				internal: {ctor: '::', _0: reference, _1: references.internal}
+				internal: A4(
+					_elm_community$dict_extra$Dict_Extra$insertDedupe,
+					_user$project$Types_Reference$listUpdate,
+					reference.name,
+					{
+						ctor: '::',
+						_0: reference,
+						_1: {ctor: '[]'}
+					},
+					references.internal)
 			});
 	});
-var _user$project$Types_References$addEntry = F2(
-	function (_p1, dict) {
-		var _p2 = _p1;
-		return A3(
-			_elm_lang$core$Dict$insert,
-			_user$project$Util_ModuleName$fromHashed(_p2._0),
-			_p2._1,
-			dict);
-	});
-var _user$project$Types_References$toDictionary = function (dictList) {
-	return A3(_elm_lang$core$List$foldl, _user$project$Types_References$addEntry, _elm_lang$core$Dict$empty, dictList);
-};
-var _user$project$Types_References$tupleListDecoder = _elm_lang$core$Json_Decode$keyValuePairs(_user$project$Types_Reference$listDecoder);
-var _user$project$Types_References$decodeExternalsDict = A2(_elm_lang$core$Json_Decode$map, _user$project$Types_References$toDictionary, _user$project$Types_References$tupleListDecoder);
-var _user$project$Types_References$encodeExternalsDict = function (externals) {
-	return A2(
-		_elm_lang$core$List$map,
-		_elm_lang$core$Tuple$mapSecond(_user$project$Types_Reference$listEncoder),
-		A2(
-			_elm_lang$core$List$map,
-			_elm_lang$core$Tuple$mapFirst(_user$project$Util_ModuleName$toHashed),
-			_elm_lang$core$Dict$toList(externals)));
-};
 var _user$project$Types_References$encoder = function (references) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -14235,8 +16501,7 @@ var _user$project$Types_References$encoder = function (references) {
 			_0: {
 				ctor: '_Tuple2',
 				_0: 'internal',
-				_1: _elm_lang$core$Json_Encode$list(
-					A2(_elm_lang$core$List$map, _user$project$Types_Reference$encoder, references.internal))
+				_1: _user$project$Types_KeyedReferences$encoder(references.internal)
 			},
 			_1: {
 				ctor: '::',
@@ -14250,10 +16515,7 @@ var _user$project$Types_References$encoder = function (references) {
 			}
 		});
 };
-var _user$project$Types_References$default = {
-	internal: {ctor: '[]'},
-	external: _elm_lang$core$Dict$empty
-};
+var _user$project$Types_References$default = {internal: _elm_lang$core$Dict$empty, external: _elm_lang$core$Dict$empty};
 var _user$project$Types_References$References = F2(
 	function (a, b) {
 		return {internal: a, external: b};
@@ -14261,10 +16523,7 @@ var _user$project$Types_References$References = F2(
 var _user$project$Types_References$decoder = A3(
 	_elm_lang$core$Json_Decode$map2,
 	_user$project$Types_References$References,
-	A2(
-		_elm_lang$core$Json_Decode$field,
-		'internal',
-		_elm_lang$core$Json_Decode$list(_user$project$Types_Reference$decoder)),
+	A2(_elm_lang$core$Json_Decode$field, 'internal', _user$project$Types_KeyedReferences$decoder),
 	A2(_elm_lang$core$Json_Decode$field, 'external', _user$project$Types_References$decodeExternalsDict));
 
 var _user$project$Types_SpecialType$toString = function (specialType) {
@@ -14487,6 +16746,16 @@ var _user$project$Types_Report$fromValue = function (value) {
 		A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_Report$decoder, value));
 };
 
+var _user$project$Types_ProjectFileData$moduleName = F2(
+	function (fileName, projectFileData) {
+		return function (_) {
+			return _.moduleName;
+		}(
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				_user$project$Types_FileData$default,
+				A2(_elm_lang$core$Dict$get, fileName, projectFileData)));
+	});
 var _user$project$Types_ProjectFileData$insert = F2(
 	function (report, projectFileData) {
 		return A3(
@@ -14495,6 +16764,195 @@ var _user$project$Types_ProjectFileData$insert = F2(
 			A4(_user$project$Types_FileData$FileData, report.moduleName, report.topLevelExpressions, report.exposings, report.references),
 			projectFileData);
 	});
+var _user$project$Types_ProjectFileData$default = _elm_lang$core$Dict$empty;
+
+var _user$project$Types_ReferencePanelState$fileName = function (referencePanelState) {
+	var _p0 = referencePanelState;
+	if (_p0.ctor === 'Just') {
+		return _p0._0.fileName;
+	} else {
+		return '';
+	}
+};
+var _user$project$Types_ReferencePanelState$Data = F3(
+	function (a, b, c) {
+		return {fileName: a, expressionName: b, type_: c};
+	});
+var _user$project$Types_ReferencePanelState$External = {ctor: 'External'};
+var _user$project$Types_ReferencePanelState$Internal = {ctor: 'Internal'};
+var _user$project$Types_ReferencePanelState$toType = function (isExternal) {
+	return isExternal ? _user$project$Types_ReferencePanelState$External : _user$project$Types_ReferencePanelState$Internal;
+};
+var _user$project$Types_ReferencePanelState$make = F3(
+	function (fileName, expressionName, isExternal) {
+		return _elm_lang$core$Maybe$Just(
+			A3(
+				_user$project$Types_ReferencePanelState$Data,
+				fileName,
+				expressionName,
+				_user$project$Types_ReferencePanelState$toType(isExternal)));
+	});
+
+var _user$project$Model_ReferencePanelState$referenceSorter = F2(
+	function (ref1, ref2) {
+		var _p0 = {
+			ctor: '_Tuple4',
+			_0: _elm_lang$core$Native_Utils.cmp(ref1.sourceFilePath, ref2.sourceFilePath) < 0,
+			_1: _elm_lang$core$Native_Utils.cmp(ref1.sourceFilePath, ref2.sourceFilePath) > 0,
+			_2: _elm_lang$core$Native_Utils.eq(ref1.sourceFilePath, ref2.sourceFilePath),
+			_3: _elm_lang$core$Native_Utils.cmp(ref1.range.start.row, ref2.range.start.row) < 0
+		};
+		if (_p0._0 === true) {
+			return _elm_lang$core$Basics$LT;
+		} else {
+			if (_p0._1 === true) {
+				return _elm_lang$core$Basics$GT;
+			} else {
+				if (_p0._2 === true) {
+					if (_p0._3 === true) {
+						return _elm_lang$core$Basics$LT;
+					} else {
+						return _elm_lang$core$Basics$GT;
+					}
+				} else {
+					return _elm_lang$core$Basics$EQ;
+				}
+			}
+		}
+	});
+var _user$project$Model_ReferencePanelState$externalRefsFor = F5(
+	function (expName, moduleName, fileName, fileData, references) {
+		return A2(
+			_elm_lang$core$List$append,
+			references,
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				{ctor: '[]'},
+				A2(
+					_elm_lang$core$Dict$get,
+					expName,
+					A2(
+						_elm_lang$core$Maybe$withDefault,
+						_elm_lang$core$Dict$empty,
+						A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external)))));
+	});
+var _user$project$Model_ReferencePanelState$collectExternalReferences = F4(
+	function (expName, fileName, moduleName, projectFileData) {
+		return A3(
+			_elm_lang$core$Dict$foldl,
+			A2(_user$project$Model_ReferencePanelState$externalRefsFor, expName, moduleName),
+			{ctor: '[]'},
+			projectFileData);
+	});
+var _user$project$Model_ReferencePanelState$references = function (model) {
+	var _p1 = model.referencePanelState;
+	if (_p1.ctor === 'Just') {
+		var _p3 = _p1._0;
+		var _p2 = _p3.type_;
+		if (_p2.ctor === 'Internal') {
+			return A2(
+				_elm_lang$core$List$sortWith,
+				_user$project$Model_ReferencePanelState$referenceSorter,
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '[]'},
+					A2(
+						_elm_lang$core$Dict$get,
+						_p3.expressionName,
+						function (_) {
+							return _.internal;
+						}(
+							function (_) {
+								return _.references;
+							}(
+								A2(
+									_elm_lang$core$Maybe$withDefault,
+									_user$project$Types_FileData$default,
+									A2(_elm_lang$core$Dict$get, _p3.fileName, model.projectFileData)))))));
+		} else {
+			return A2(
+				_elm_lang$core$List$sortWith,
+				_user$project$Model_ReferencePanelState$referenceSorter,
+				A4(
+					_user$project$Model_ReferencePanelState$collectExternalReferences,
+					_p3.expressionName,
+					_p3.fileName,
+					A2(_user$project$Types_ProjectFileData$moduleName, _p3.fileName, model.projectFileData),
+					model.projectFileData));
+		}
+	} else {
+		return {ctor: '[]'};
+	}
+};
+
+var _user$project$Types_FileLineRequest$decoder = _elm_lang$core$Json_Decode$dict(
+	_elm_community$json_extra$Json_Decode_Extra$set(_elm_lang$core$Json_Decode$int));
+var _user$project$Types_FileLineRequest$encodeEntry = function (_p0) {
+	var _p1 = _p0;
+	return {
+		ctor: '_Tuple2',
+		_0: _p1._0,
+		_1: _elm_lang$core$Json_Encode$list(
+			A2(
+				_elm_lang$core$List$map,
+				_elm_lang$core$Json_Encode$int,
+				_elm_lang$core$Set$toList(_p1._1)))
+	};
+};
+var _user$project$Types_FileLineRequest$encoder = function (fileLineRequest) {
+	return _elm_lang$core$Json_Encode$object(
+		A2(
+			_elm_lang$core$List$map,
+			_user$project$Types_FileLineRequest$encodeEntry,
+			_elm_lang$core$Dict$toList(fileLineRequest)));
+};
+var _user$project$Types_FileLineRequest$default = _elm_lang$core$Dict$empty;
+
+var _user$project$And_FileLines$insertReferenceLine = F2(
+	function (original, $new) {
+		return A2(_elm_lang$core$Set$union, original, $new);
+	});
+var _user$project$And_FileLines$addLineRequest = F2(
+	function (reference, fileLineRequest) {
+		return A4(
+			_elm_community$dict_extra$Dict_Extra$insertDedupe,
+			_user$project$And_FileLines$insertReferenceLine,
+			reference.sourceFilePath,
+			_elm_lang$core$Set$fromList(
+				{
+					ctor: '::',
+					_0: reference.range.start.row,
+					_1: {ctor: '[]'}
+				}),
+			fileLineRequest);
+	});
+var _user$project$And_FileLines$buildLinesFrom = F2(
+	function (model, fileLineRequest) {
+		return A3(
+			_elm_lang$core$List$foldl,
+			_user$project$And_FileLines$addLineRequest,
+			fileLineRequest,
+			_user$project$Model_ReferencePanelState$references(model));
+	});
+var _user$project$And_FileLines$buildLineRequest = function (model) {
+	return _user$project$Types_FileLineRequest$encoder(
+		A2(_user$project$And_FileLines$buildLinesFrom, model, _user$project$Types_FileLineRequest$default));
+};
+var _user$project$And_FileLines$fileLineRequest = _elm_lang$core$Native_Platform.outgoingPort(
+	'fileLineRequest',
+	function (v) {
+		return v;
+	});
+var _user$project$And_FileLines$makeRequest = function (model) {
+	return _user$project$And_FileLines$fileLineRequest(
+		_user$project$And_FileLines$buildLineRequest(model));
+};
+var _user$project$And_FileLines$request = function (model) {
+	return A2(
+		_user$project$And$execute,
+		model,
+		_user$project$And_FileLines$makeRequest(model));
+};
 
 var _user$project$Model_BatchProcess$isComplete = function (model) {
 	return _elm_lang$core$Native_Utils.cmp(
@@ -14521,14 +16979,15 @@ var _user$project$Model_FileMarkup$otherReferenceCounter = F6(
 			count,
 			_elm_lang$core$List$length(
 				A2(
-					_elm_lang$core$List$filter,
-					function (reference) {
-						return _elm_lang$core$Native_Utils.eq(reference.name, funcName);
-					},
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '[]'},
 					A2(
-						_elm_lang$core$Maybe$withDefault,
-						{ctor: '[]'},
-						A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external)))));
+						_elm_lang$core$Dict$get,
+						funcName,
+						A2(
+							_elm_lang$core$Maybe$withDefault,
+							_elm_lang$core$Dict$empty,
+							A2(_elm_lang$core$Dict$get, moduleName, fileData.references.external))))));
 	});
 var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F5(
 	function (fileIsExposed, moduleName, funcName, fileName, projectFileData) {
@@ -14538,17 +16997,13 @@ var _user$project$Model_FileMarkup$numOccurencesInOtherReferences = F5(
 			0,
 			projectFileData) : 0;
 	});
-var _user$project$Model_FileMarkup$referenceCounter = F3(
-	function (funcName, reference, count) {
-		return _elm_lang$core$Native_Utils.eq(reference.name, funcName) ? (count + 1) : count;
-	});
 var _user$project$Model_FileMarkup$numOccurencesInOwnReferences = F2(
 	function (funcName, fileData) {
-		return A3(
-			_elm_lang$core$List$foldl,
-			_user$project$Model_FileMarkup$referenceCounter(funcName),
-			0,
-			fileData.references.internal);
+		return _elm_lang$core$List$length(
+			A2(
+				_elm_lang$core$Maybe$withDefault,
+				{ctor: '[]'},
+				A2(_elm_lang$core$Dict$get, funcName, fileData.references.internal)));
 	});
 var _user$project$Model_FileMarkup$isExposed = F2(
 	function (expName, fileData) {
@@ -14731,23 +17186,12 @@ var _user$project$ElmFile_Exposings$gatherExposings = F2(
 			return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_Exposings$processExposing, _user$project$Types_Exposings$default, _p1._0);
 		}
 	});
-var _user$project$ElmFile_Exposings$exposingListFromModule = function (module_) {
-	var _p2 = module_;
-	switch (_p2.ctor) {
-		case 'NormalModule':
-			return _p2._0.exposingList;
-		case 'PortModule':
-			return _p2._0.exposingList;
-		default:
-			return _p2._0.exposingList;
-	}
-};
 var _user$project$ElmFile_Exposings$fromFile = F2(
 	function (topLevelExpressions, file) {
 		return A2(
 			_user$project$ElmFile_Exposings$gatherExposings,
 			topLevelExpressions,
-			_user$project$ElmFile_Exposings$exposingListFromModule(
+			_stil4m$elm_syntax$Elm_Syntax_Module$exposingList(
 				function (_) {
 					return _.moduleDefinition;
 				}(file)));
@@ -14925,22 +17369,14 @@ var _user$project$ElmFile_Imports$fromFile = function (file) {
 		}(file));
 };
 
-var _user$project$ElmFile_ModuleName$toModuleName = function (module_) {
-	var _p0 = module_;
-	switch (_p0.ctor) {
-		case 'NormalModule':
-			return _p0._0.moduleName;
-		case 'PortModule':
-			return _p0._0.moduleName;
-		default:
-			return _p0._0.moduleName;
-	}
-};
 var _user$project$ElmFile_ModuleName$fromFile = function (file) {
-	return _user$project$ElmFile_ModuleName$toModuleName(
-		function (_) {
-			return _.moduleDefinition;
-		}(file));
+	return A2(
+		_elm_lang$core$Maybe$withDefault,
+		{ctor: '[]'},
+		_stil4m$elm_syntax$Elm_Syntax_Module$moduleName(
+			function (_) {
+				return _.moduleDefinition;
+			}(file)));
 };
 
 var _user$project$ElmFile_References$argumentsFromPattern = F2(
@@ -14966,467 +17402,399 @@ var _user$project$ElmFile_References$argumentsFromPattern = F2(
 var _user$project$ElmFile_References$additionalArguments = function (patterns) {
 	return A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, patterns);
 };
+var _user$project$ElmFile_References$letDeclarationTypeAnnotations = F2(
+	function (letDeclaration, typeAnnotations) {
+		var _p1 = letDeclaration;
+		if ((_p1.ctor === '_Tuple2') && (_p1._1.ctor === 'LetFunction')) {
+			var _p2 = _p1._1._0.signature;
+			if (_p2.ctor === 'Just') {
+				return {ctor: '::', _0: _p2._0._1.typeAnnotation, _1: typeAnnotations};
+			} else {
+				return typeAnnotations;
+			}
+		} else {
+			return typeAnnotations;
+		}
+	});
 var _user$project$ElmFile_References$letDeclarationExpressions = F2(
 	function (letDeclaration, expressions) {
-		var _p1 = letDeclaration;
-		if (_p1._1.ctor === 'LetFunction') {
-			return {ctor: '::', _0: _p1._1._0.declaration.expression, _1: expressions};
+		var _p3 = letDeclaration;
+		if (_p3._1.ctor === 'LetFunction') {
+			return {ctor: '::', _0: _p3._1._0.declaration.expression, _1: expressions};
 		} else {
-			return {ctor: '::', _0: _p1._1._1, _1: expressions};
+			return {ctor: '::', _0: _p3._1._1, _1: expressions};
 		}
 	});
-var _user$project$ElmFile_References$coreExpressions = _elm_lang$core$Set$fromList(
-	{
-		ctor: '::',
-		_0: 'String',
-		_1: {
-			ctor: '::',
-			_0: 'Int',
-			_1: {
-				ctor: '::',
-				_0: 'Float',
-				_1: {
-					ctor: '::',
-					_0: 'Bool',
-					_1: {
-						ctor: '::',
-						_0: 'True',
-						_1: {
-							ctor: '::',
-							_0: 'False',
-							_1: {
-								ctor: '::',
-								_0: 'Char',
-								_1: {
-									ctor: '::',
-									_0: 'List',
-									_1: {
-										ctor: '::',
-										_0: 'Set',
-										_1: {
-											ctor: '::',
-											_0: 'Dict',
-											_1: {
-												ctor: '::',
-												_0: 'Task',
-												_1: {
-													ctor: '::',
-													_0: 'Never',
-													_1: {
-														ctor: '::',
-														_0: '+',
-														_1: {
-															ctor: '::',
-															_0: '-',
-															_1: {
-																ctor: '::',
-																_0: '*',
-																_1: {
-																	ctor: '::',
-																	_0: '/',
-																	_1: {
-																		ctor: '::',
-																		_0: '//',
-																		_1: {
-																			ctor: '::',
-																			_0: '==',
-																			_1: {
-																				ctor: '::',
-																				_0: '++',
-																				_1: {
-																					ctor: '::',
-																					_0: '<|',
-																					_1: {
-																						ctor: '::',
-																						_0: '|>',
-																						_1: {
-																							ctor: '::',
-																							_0: '<<',
-																							_1: {
-																								ctor: '::',
-																								_0: '>>',
-																								_1: {ctor: '[]'}
-																							}
-																						}
-																					}
-																				}
-																			}
-																		}
-																	}
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	});
-var _user$project$ElmFile_References$addTypeReference = F4(
-	function (name, moduleName, imports, references) {
-		var _p2 = {
-			ctor: '_Tuple3',
-			_0: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreExpressions),
-			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports),
-			_2: moduleName
+var _user$project$ElmFile_References$addTypeReference = F6(
+	function (typeName, fileName, range, moduleName, imports, references) {
+		var _p4 = {
+			ctor: '_Tuple2',
+			_0: A2(_user$project$Types_Imports$moduleNameForDirectEntry, typeName, imports),
+			_1: moduleName
 		};
-		if (_p2._0 === true) {
-			return references;
+		if (_p4._0.ctor === 'Just') {
+			return A3(
+				_user$project$Types_References$addExternal,
+				_p4._0._0,
+				A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
+				references);
 		} else {
-			if (_p2._1.ctor === 'Just') {
-				return A3(
-					_user$project$Types_References$addExternal,
-					_p2._1._0,
-					_user$project$Types_Reference$Reference(name),
+			if (_p4._1.ctor === '[]') {
+				return A2(
+					_user$project$Types_References$addInternal,
+					A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
 					references);
 			} else {
-				if (_p2._2.ctor === '[]') {
-					return A2(
-						_user$project$Types_References$addInternal,
-						_user$project$Types_Reference$Reference(name),
-						references);
-				} else {
-					return A3(
-						_user$project$Types_References$addExternal,
-						A2(_user$project$Types_Imports$unaliasedModuleName, moduleName, imports),
-						_user$project$Types_Reference$Reference(name),
-						references);
-				}
+				return A3(
+					_user$project$Types_References$addExternal,
+					A2(_user$project$Types_Imports$unaliasedModuleName, moduleName, imports),
+					A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
+					references);
 			}
 		}
 	});
-var _user$project$ElmFile_References$refsInTypeAnnotation = F3(
-	function (imports, typeAnnotation, references) {
-		var _p3 = typeAnnotation;
-		_v3_5:
+var _user$project$ElmFile_References$refsInTypeAnnotation = F4(
+	function (fileName, imports, typeAnnotation, references) {
+		var _p5 = typeAnnotation;
+		_v5_5:
 		do {
-			if (_p3.ctor === '_Tuple2') {
-				switch (_p3._1.ctor) {
+			if (_p5.ctor === '_Tuple2') {
+				switch (_p5._1.ctor) {
 					case 'Typed':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$ElmFile_References$refsInTypeAnnotation(imports),
-							A4(_user$project$ElmFile_References$addTypeReference, _p3._1._1, _p3._1._0, imports, references),
-							_p3._1._2);
+							A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
+							A6(_user$project$ElmFile_References$addTypeReference, _p5._1._1, fileName, _p5._0, _p5._1._0, imports, references),
+							_p5._1._2);
 					case 'Tupled':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$ElmFile_References$refsInTypeAnnotation(imports),
+							A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
 							references,
-							_p3._1._0);
+							_p5._1._0);
 					case 'Record':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$ElmFile_References$refsInRecordField(imports),
+							A2(_user$project$ElmFile_References$refsInRecordField, fileName, imports),
 							references,
-							_p3._1._0);
+							_p5._1._0);
 					case 'GenericRecord':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$ElmFile_References$refsInRecordField(imports),
+							A2(_user$project$ElmFile_References$refsInRecordField, fileName, imports),
 							references,
-							_p3._1._1);
+							_p5._1._1);
 					case 'FunctionTypeAnnotation':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$ElmFile_References$refsInTypeAnnotation(imports),
+							A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
 							references,
 							{
 								ctor: '::',
-								_0: _p3._1._0,
+								_0: _p5._1._0,
 								_1: {
 									ctor: '::',
-									_0: _p3._1._1,
+									_0: _p5._1._1,
 									_1: {ctor: '[]'}
 								}
 							});
 					default:
-						break _v3_5;
+						break _v5_5;
 				}
 			} else {
-				break _v3_5;
+				break _v5_5;
 			}
 		} while(false);
 		return references;
 	});
-var _user$project$ElmFile_References$refsInRecordField = F3(
-	function (imports, _p4, references) {
-		var _p5 = _p4;
-		return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p5._1, references);
+var _user$project$ElmFile_References$refsInRecordField = F4(
+	function (fileName, imports, _p6, references) {
+		var _p7 = _p6;
+		return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p7._1, references);
 	});
-var _user$project$ElmFile_References$refsInValueConstructor = F3(
-	function (imports, valueConstructor, references) {
+var _user$project$ElmFile_References$refsInValueConstructor = F4(
+	function (fileName, imports, valueConstructor, references) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			_user$project$ElmFile_References$refsInTypeAnnotation(imports),
+			A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
 			references,
 			valueConstructor.$arguments);
 	});
-var _user$project$ElmFile_References$appendSignatureReferences = F3(
-	function (imports, $function, references) {
-		var _p6 = $function.signature;
-		if (_p6.ctor === 'Just') {
-			return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p6._0._1.typeAnnotation, references);
+var _user$project$ElmFile_References$appendSignatureReferences = F4(
+	function (fileName, imports, $function, references) {
+		var _p8 = $function.signature;
+		if (_p8.ctor === 'Just') {
+			return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p8._0._1.typeAnnotation, references);
 		} else {
 			return references;
 		}
 	});
-var _user$project$ElmFile_References$addReference = F4(
-	function (name, $arguments, imports, references) {
-		var _p7 = {
-			ctor: '_Tuple3',
-			_0: A2(_elm_lang$core$Set$member, name, $arguments),
-			_1: A2(_elm_lang$core$Set$member, name, _user$project$ElmFile_References$coreExpressions),
-			_2: A2(_user$project$Types_Imports$moduleNameForDirectEntry, name, imports)
+var _user$project$ElmFile_References$addReference = F6(
+	function (expName, fileName, range, $arguments, imports, references) {
+		var _p9 = {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$Set$member, expName, $arguments),
+			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, expName, imports)
 		};
-		_v6_3:
+		_v8_2:
 		do {
-			if (_p7.ctor === '_Tuple3') {
-				if (_p7._0 === true) {
+			if (_p9.ctor === '_Tuple2') {
+				if (_p9._0 === true) {
 					return references;
 				} else {
-					if (_p7._1 === true) {
-						return references;
+					if (_p9._1.ctor === 'Just') {
+						return A3(
+							_user$project$Types_References$addExternal,
+							_p9._1._0,
+							A3(_user$project$Types_Reference$Reference, expName, range, fileName),
+							references);
 					} else {
-						if (_p7._2.ctor === 'Just') {
-							return A3(
-								_user$project$Types_References$addExternal,
-								_p7._2._0,
-								_user$project$Types_Reference$Reference(name),
-								references);
-						} else {
-							break _v6_3;
-						}
+						break _v8_2;
 					}
 				}
 			} else {
-				break _v6_3;
+				break _v8_2;
 			}
 		} while(false);
 		return A2(
 			_user$project$Types_References$addInternal,
-			_user$project$Types_Reference$Reference(name),
+			A3(_user$project$Types_Reference$Reference, expName, range, fileName),
 			references);
 	});
-var _user$project$ElmFile_References$refsInExpression = F4(
-	function ($arguments, imports, expression, references) {
+var _user$project$ElmFile_References$refsInExpression = F5(
+	function (fileName, $arguments, imports, expression, references) {
 		refsInExpression:
 		while (true) {
-			var _p8 = expression;
-			_v7_15:
+			var _p10 = expression;
+			_v9_15:
 			do {
-				if (_p8.ctor === '_Tuple2') {
-					switch (_p8._1.ctor) {
+				if (_p10.ctor === '_Tuple2') {
+					switch (_p10._1.ctor) {
 						case 'Application':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
 								references,
-								_p8._1._0);
+								_p10._1._0);
 						case 'OperatorApplication':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
-								A4(_user$project$ElmFile_References$addReference, _p8._1._0, $arguments, imports, references),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A6(_user$project$ElmFile_References$addReference, _p10._1._0, fileName, _p10._0, $arguments, imports, references),
 								{
 									ctor: '::',
-									_0: _p8._1._2,
+									_0: _p10._1._2,
 									_1: {
 										ctor: '::',
-										_0: _p8._1._3,
+										_0: _p10._1._3,
 										_1: {ctor: '[]'}
 									}
 								});
 						case 'FunctionOrValue':
-							return A4(_user$project$ElmFile_References$addReference, _p8._1._0, $arguments, imports, references);
+							return A6(_user$project$ElmFile_References$addReference, _p10._1._0, fileName, _p10._0, $arguments, imports, references);
 						case 'IfBlock':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
 								references,
 								{
 									ctor: '::',
-									_0: _p8._1._0,
+									_0: _p10._1._0,
 									_1: {
 										ctor: '::',
-										_0: _p8._1._1,
+										_0: _p10._1._1,
 										_1: {
 											ctor: '::',
-											_0: _p8._1._2,
+											_0: _p10._1._2,
 											_1: {ctor: '[]'}
 										}
 									}
 								});
 						case 'Negation':
-							var _v8 = $arguments,
-								_v9 = imports,
-								_v10 = _p8._1._0,
-								_v11 = references;
-							$arguments = _v8;
-							imports = _v9;
-							expression = _v10;
-							references = _v11;
+							var _v10 = fileName,
+								_v11 = $arguments,
+								_v12 = imports,
+								_v13 = _p10._1._0,
+								_v14 = references;
+							fileName = _v10;
+							$arguments = _v11;
+							imports = _v12;
+							expression = _v13;
+							references = _v14;
 							continue refsInExpression;
 						case 'TupledExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
 								references,
-								_p8._1._0);
+								_p10._1._0);
 						case 'ParenthesizedExpression':
-							var _v12 = $arguments,
-								_v13 = imports,
-								_v14 = _p8._1._0,
-								_v15 = references;
-							$arguments = _v12;
-							imports = _v13;
-							expression = _v14;
-							references = _v15;
-							continue refsInExpression;
-						case 'LetExpression':
-							var _p9 = _p8._1._0;
-							var expressions = A3(
-								_elm_lang$core$List$foldl,
-								_user$project$ElmFile_References$letDeclarationExpressions,
-								{ctor: '[]'},
-								_p9.declarations);
-							return A3(
-								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
-								references,
-								{ctor: '::', _0: _p9.expression, _1: expressions});
-						case 'CaseExpression':
-							var _p10 = _p8._1._0;
-							var allArguments = A2(
-								_elm_lang$core$Set$union,
-								$arguments,
-								_user$project$ElmFile_References$additionalArguments(
-									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p10.cases)));
-							return A3(
-								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, allArguments, imports),
-								references,
-								{
-									ctor: '::',
-									_0: _p10.expression,
-									_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p10.cases)
-								});
-						case 'LambdaExpression':
-							var _p11 = _p8._1._0;
-							var allArguments = A2(
-								_elm_lang$core$Set$union,
-								$arguments,
-								_user$project$ElmFile_References$additionalArguments(_p11.args));
-							var _v16 = allArguments,
+							var _v15 = fileName,
+								_v16 = $arguments,
 								_v17 = imports,
-								_v18 = _p11.expression,
+								_v18 = _p10._1._0,
 								_v19 = references;
+							fileName = _v15;
 							$arguments = _v16;
 							imports = _v17;
 							expression = _v18;
 							references = _v19;
 							continue refsInExpression;
+						case 'LetExpression':
+							var _p11 = _p10._1._0;
+							var typeAnnotations = A3(
+								_elm_lang$core$List$foldl,
+								_user$project$ElmFile_References$letDeclarationTypeAnnotations,
+								{ctor: '[]'},
+								_p11.declarations);
+							var expressions = A3(
+								_elm_lang$core$List$foldl,
+								_user$project$ElmFile_References$letDeclarationExpressions,
+								{ctor: '[]'},
+								_p11.declarations);
+							return function (refs) {
+								return A3(
+									_elm_lang$core$List$foldl,
+									A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
+									refs,
+									typeAnnotations);
+							}(
+								A3(
+									_elm_lang$core$List$foldl,
+									A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+									references,
+									{ctor: '::', _0: _p11.expression, _1: expressions}));
+						case 'CaseExpression':
+							var _p12 = _p10._1._0;
+							var allArguments = A2(
+								_elm_lang$core$Set$union,
+								$arguments,
+								_user$project$ElmFile_References$additionalArguments(
+									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p12.cases)));
+							return A3(
+								_elm_lang$core$List$foldl,
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, allArguments, imports),
+								references,
+								{
+									ctor: '::',
+									_0: _p12.expression,
+									_1: A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p12.cases)
+								});
+						case 'LambdaExpression':
+							var _p13 = _p10._1._0;
+							var allArguments = A2(
+								_elm_lang$core$Set$union,
+								$arguments,
+								_user$project$ElmFile_References$additionalArguments(_p13.args));
+							var _v20 = fileName,
+								_v21 = allArguments,
+								_v22 = imports,
+								_v23 = _p13.expression,
+								_v24 = references;
+							fileName = _v20;
+							$arguments = _v21;
+							imports = _v22;
+							expression = _v23;
+							references = _v24;
+							continue refsInExpression;
 						case 'RecordExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
 								references,
-								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p8._1._0));
+								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p10._1._0));
 						case 'ListExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
 								references,
-								_p8._1._0);
+								_p10._1._0);
 						case 'QualifiedExpr':
 							return A3(
 								_user$project$Types_References$addExternal,
-								A2(_user$project$Types_Imports$unaliasedModuleName, _p8._1._0, imports),
-								_user$project$Types_Reference$Reference(_p8._1._1),
+								A2(_user$project$Types_Imports$unaliasedModuleName, _p10._1._0, imports),
+								A3(_user$project$Types_Reference$Reference, _p10._1._1, _p10._0, fileName),
 								references);
 						case 'RecordAccess':
-							var _v20 = $arguments,
-								_v21 = imports,
-								_v22 = _p8._1._0,
-								_v23 = references;
-							$arguments = _v20;
-							imports = _v21;
-							expression = _v22;
-							references = _v23;
+							var _v25 = fileName,
+								_v26 = $arguments,
+								_v27 = imports,
+								_v28 = _p10._1._0,
+								_v29 = references;
+							fileName = _v25;
+							$arguments = _v26;
+							imports = _v27;
+							expression = _v28;
+							references = _v29;
 							continue refsInExpression;
 						case 'RecordUpdateExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A2(_user$project$ElmFile_References$refsInExpression, $arguments, imports),
+								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
 								references,
-								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p8._1._0.updates));
+								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p10._1._0.updates));
 						default:
-							break _v7_15;
+							break _v9_15;
 					}
 				} else {
-					break _v7_15;
+					break _v9_15;
 				}
 			} while(false);
 			return references;
 		}
 	});
-var _user$project$ElmFile_References$collectRefsFromDeclaration = F3(
-	function (imports, declaration, references) {
-		var _p12 = declaration;
-		_v24_5:
+var _user$project$ElmFile_References$collectRefsFromDeclaration = F4(
+	function (fileName, imports, declaration, references) {
+		var _p14 = declaration;
+		_v30_5:
 		do {
-			if (_p12.ctor === '_Tuple2') {
-				switch (_p12._1.ctor) {
+			if (_p14.ctor === '_Tuple2') {
+				switch (_p14._1.ctor) {
 					case 'FuncDecl':
-						var _p13 = _p12._1._0;
-						return A3(
+						var _p15 = _p14._1._0;
+						return A4(
 							_user$project$ElmFile_References$appendSignatureReferences,
+							fileName,
 							imports,
-							_p13,
+							_p15,
 							function (args) {
-								return A4(_user$project$ElmFile_References$refsInExpression, args, imports, _p13.declaration.expression, references);
+								return A5(_user$project$ElmFile_References$refsInExpression, fileName, args, imports, _p15.declaration.expression, references);
 							}(
-								A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p13.declaration.$arguments)));
+								A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p15.declaration.$arguments)));
 					case 'AliasDecl':
-						return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p12._1._0.typeAnnotation, references);
+						return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p14._1._0.typeAnnotation, references);
 					case 'TypeDecl':
 						return A3(
 							_elm_lang$core$List$foldl,
-							_user$project$ElmFile_References$refsInValueConstructor(imports),
+							A2(_user$project$ElmFile_References$refsInValueConstructor, fileName, imports),
 							references,
-							_p12._1._0.constructors);
+							_p14._1._0.constructors);
 					case 'PortDeclaration':
-						return A3(_user$project$ElmFile_References$refsInTypeAnnotation, imports, _p12._1._0.typeAnnotation, references);
+						return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p14._1._0.typeAnnotation, references);
 					case 'Destructuring':
-						return A4(_user$project$ElmFile_References$refsInExpression, _elm_lang$core$Set$empty, imports, _p12._1._1, references);
+						return A5(_user$project$ElmFile_References$refsInExpression, fileName, _elm_lang$core$Set$empty, imports, _p14._1._1, references);
 					default:
-						break _v24_5;
+						break _v30_5;
 				}
 			} else {
-				break _v24_5;
+				break _v30_5;
 			}
 		} while(false);
 		return references;
 	});
-var _user$project$ElmFile_References$collectRefsFrom = F2(
-	function (imports, declarations) {
+var _user$project$ElmFile_References$collectRefsFrom = F3(
+	function (fileName, imports, declarations) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			_user$project$ElmFile_References$collectRefsFromDeclaration(imports),
+			A2(_user$project$ElmFile_References$collectRefsFromDeclaration, fileName, imports),
 			_user$project$Types_References$default,
 			declarations);
 	});
-var _user$project$ElmFile_References$fromFile = F2(
-	function (imports, file) {
-		return A2(
+var _user$project$ElmFile_References$fromFile = F3(
+	function (fileName, imports, file) {
+		return A3(
 			_user$project$ElmFile_References$collectRefsFrom,
+			fileName,
 			imports,
 			function (_) {
 				return _.declarations;
@@ -15521,17 +17889,18 @@ var _user$project$ElmFile_TopLevelExpressions$fromFile = function (file) {
 		}(file));
 };
 
-var _user$project$ElmFile$fromFile = function (file) {
-	var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
-	var imports = _user$project$ElmFile_Imports$fromFile(file);
-	return {
-		moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
-		imports: imports,
-		topLevelExpressions: topLevelExpressions,
-		exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file),
-		references: A2(_user$project$ElmFile_References$fromFile, imports, file)
-	};
-};
+var _user$project$ElmFile$fromFile = F2(
+	function (fileName, file) {
+		var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
+		var imports = _user$project$ElmFile_Imports$fromFile(file);
+		return {
+			moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
+			imports: imports,
+			topLevelExpressions: topLevelExpressions,
+			exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file),
+			references: A3(_user$project$ElmFile_References$fromFile, fileName, imports, file)
+		};
+	});
 var _user$project$ElmFile$default = {
 	moduleName: {ctor: '[]'},
 	imports: _user$project$Types_Imports$default,
@@ -15539,18 +17908,23 @@ var _user$project$ElmFile$default = {
 	exposings: _user$project$Types_Exposings$default,
 	references: _user$project$Types_References$default
 };
-var _user$project$ElmFile$make = function (result) {
-	var _p0 = result;
-	if (_p0.ctor === 'Ok') {
-		return _user$project$ElmFile$fromFile(
-			A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p0._0));
-	} else {
-		return _user$project$ElmFile$default;
-	}
-};
+var _user$project$ElmFile$make = F2(
+	function (fileName, result) {
+		var _p0 = result;
+		if (_p0.ctor === 'Ok') {
+			return A2(
+				_user$project$ElmFile$fromFile,
+				fileName,
+				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p0._0));
+		} else {
+			return _user$project$ElmFile$default;
+		}
+	});
 var _user$project$ElmFile$fromString = F2(
 	function (fileName, fileText) {
-		return _user$project$ElmFile$make(
+		return A2(
+			_user$project$ElmFile$make,
+			fileName,
 			_stil4m$elm_syntax$Elm_Parser$parse(fileText));
 	});
 var _user$project$ElmFile$ElmFile = F5(
@@ -15585,6 +17959,195 @@ var _user$project$Model_ProjectFileData$add = F2(
 			model);
 	});
 
+var _user$project$Types_FileLineResponse$decoder = _elm_lang$core$Json_Decode$dict(
+	A2(_elm_community$json_extra$Json_Decode_Extra$dict2, _elm_lang$core$Json_Decode$int, _elm_lang$core$Json_Decode$string));
+var _user$project$Types_FileLineResponse$decode = function (value) {
+	return A2(
+		_elm_lang$core$Result$withDefault,
+		_elm_lang$core$Dict$empty,
+		A2(_elm_lang$core$Json_Decode$decodeValue, _user$project$Types_FileLineResponse$decoder, value));
+};
+
+var _user$project$Types_ProjectFileLines$getLine = F3(
+	function (fileName, lineNumber, projectFileLines) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			'',
+			A2(
+				_elm_lang$core$Dict$get,
+				lineNumber,
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$core$Dict$empty,
+					A2(_elm_lang$core$Dict$get, fileName, projectFileLines))));
+	});
+var _user$project$Types_ProjectFileLines$mergeIn = F2(
+	function (newLines, projectFileLines) {
+		return A2(
+			_elm_lang$core$Dict$union,
+			_user$project$Types_FileLineResponse$decode(newLines),
+			projectFileLines);
+	});
+var _user$project$Types_ProjectFileLines$default = _elm_lang$core$Dict$empty;
+
+var _user$project$View$withEmboldenedReference = F2(
+	function (reference, line) {
+		var startCol = reference.range.start.column;
+		var lineLength = _elm_lang$core$String$length(line);
+		var endCol = (_elm_lang$core$Native_Utils.cmp(reference.range.end.column, startCol) < 1) ? (lineLength - 1) : reference.range.end.column;
+		var fullReference = A3(_elm_lang$core$String$slice, startCol, endCol, line);
+		var afterReference = A2(_elm_lang$core$String$dropLeft, endCol, line);
+		var beforeReference = A2(_elm_lang$core$String$dropRight, lineLength - startCol, line);
+		return {
+			ctor: '::',
+			_0: _elm_lang$html$Html$text(beforeReference),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$strong,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(fullReference),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(afterReference),
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+	});
+var _user$project$View$stripProjectPath = F2(
+	function (projectPath, fileName) {
+		return A2(_elm_lang$core$String$contains, projectPath, fileName) ? A2(
+			_elm_lang$core$String$dropLeft,
+			_elm_lang$core$String$length(projectPath),
+			fileName) : fileName;
+	});
+var _user$project$View$truncatedFileName = F2(
+	function (projectPathRegistry, fileName) {
+		return A3(_elm_lang$core$Set$foldl, _user$project$View$stripProjectPath, fileName, projectPathRegistry);
+	});
+var _user$project$View$referenceRow = F3(
+	function (data, messages, reference) {
+		return A2(
+			_elm_lang$html$Html$tr,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(
+					A3(messages.requestOpenFileAtLine, reference.sourceFilePath, reference.range.start.row, reference.range.start.column)),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$td,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							A2(_user$project$View$truncatedFileName, data.projectPathRegistry, reference.sourceFilePath)),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$td,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(
+								_elm_lang$core$Basics$toString(reference.range.start.row + 1)),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$td,
+							{ctor: '[]'},
+							A2(
+								_user$project$View$withEmboldenedReference,
+								reference,
+								A3(_user$project$Types_ProjectFileLines$getLine, reference.sourceFilePath, reference.range.start.row, data.projectFileLines))),
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	});
+var _user$project$View$render = F2(
+	function (data, messages) {
+		return A2(
+			_elm_lang$html$Html$table,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$thead,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$tr,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$th,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('File'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$th,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Line #'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$th,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('Code'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}
+								}
+							}),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$tbody,
+						{ctor: '[]'},
+						A2(
+							_elm_lang$core$List$map,
+							A2(_user$project$View$referenceRow, data, messages),
+							_user$project$Model_ReferencePanelState$references(data))),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$View$Data = F4(
+	function (a, b, c, d) {
+		return {referencePanelState: a, projectFileData: b, projectPathRegistry: c, projectFileLines: d};
+	});
+var _user$project$View$Messages = function (a) {
+	return {requestOpenFileAtLine: a};
+};
+
 var _user$project$Main$update = F2(
 	function (message, model) {
 		var _p0 = message;
@@ -15595,6 +18158,13 @@ var _user$project$Main$update = F2(
 						model,
 						{
 							projectFileRegistry: _elm_lang$core$Set$fromList(_p0._0)
+						}));
+			case 'RegisterProjectPaths':
+				return _user$project$And$doNothing(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							projectPathRegistry: _elm_lang$core$Set$fromList(_p0._0)
 						}));
 			case 'RegisterTextEditor':
 				return _user$project$And$doNothing(
@@ -15613,7 +18183,7 @@ var _user$project$Main$update = F2(
 			case 'AddFileData':
 				return _user$project$And_FileMarkup$transmit(
 					A2(_user$project$Model_ProjectFileData$add, _p0._0, model));
-			default:
+			case 'MarkAsReprocessing':
 				var _p1 = _p0._0;
 				return A2(
 					_user$project$And_FileMarkup$transmitTo,
@@ -15623,21 +18193,76 @@ var _user$project$Main$update = F2(
 						{
 							fileBeingReprocessed: _elm_lang$core$Maybe$Just(_p1)
 						}));
+			case 'SetReferencePanel':
+				return _user$project$And_FileLines$request(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							referencePanelState: A3(_user$project$Types_ReferencePanelState$make, _p0._0._0, _p0._0._1, _p0._0._2)
+						}));
+			case 'FileLinesReport':
+				return _user$project$And$doNothing(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							projectFileLines: A2(_user$project$Types_ProjectFileLines$mergeIn, _p0._0, model.projectFileLines)
+						}));
+			default:
+				return A4(_user$project$And_File$requestOpen, _p0._0, _p0._1, _p0._2, model);
 		}
 	});
 var _user$project$Main$init = _user$project$And$doNothing(
-	{projectFileData: _elm_lang$core$Dict$empty, projectFileRegistry: _elm_lang$core$Set$empty, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false});
+	{projectFileData: _user$project$Types_ProjectFileData$default, projectFileRegistry: _elm_lang$core$Set$empty, projectPathRegistry: _elm_lang$core$Set$empty, projectFileLines: _user$project$Types_ProjectFileLines$default, activeTextEditors: _elm_lang$core$Set$empty, lastUpdatedFile: _elm_lang$core$Maybe$Nothing, fileBeingReprocessed: _elm_lang$core$Maybe$Nothing, batchUpdateSent: false, referencePanelState: _elm_lang$core$Maybe$Nothing});
 var _user$project$Main$notifyReprocessingFile = _elm_lang$core$Native_Platform.incomingPort('notifyReprocessingFile', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$registerProjectFiles = _elm_lang$core$Native_Platform.incomingPort(
 	'registerProjectFiles',
 	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
+var _user$project$Main$registerProjectPaths = _elm_lang$core$Native_Platform.incomingPort(
+	'registerProjectPaths',
+	_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string));
 var _user$project$Main$registerTextEditor = _elm_lang$core$Native_Platform.incomingPort('registerTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$unregisterTextEditor = _elm_lang$core$Native_Platform.incomingPort('unregisterTextEditor', _elm_lang$core$Json_Decode$string);
 var _user$project$Main$processReport = _elm_lang$core$Native_Platform.incomingPort('processReport', _elm_lang$core$Json_Decode$value);
-var _user$project$Main$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {projectFileData: a, projectFileRegistry: b, activeTextEditors: c, lastUpdatedFile: d, fileBeingReprocessed: e, batchUpdateSent: f};
+var _user$project$Main$setReferencePanel = _elm_lang$core$Native_Platform.incomingPort(
+	'setReferencePanel',
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (x0) {
+			return A2(
+				_elm_lang$core$Json_Decode$andThen,
+				function (x1) {
+					return A2(
+						_elm_lang$core$Json_Decode$andThen,
+						function (x2) {
+							return _elm_lang$core$Json_Decode$succeed(
+								{ctor: '_Tuple3', _0: x0, _1: x1, _2: x2});
+						},
+						A2(_elm_lang$core$Json_Decode$index, 2, _elm_lang$core$Json_Decode$bool));
+				},
+				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
+		},
+		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
+var _user$project$Main$reportFileLines = _elm_lang$core$Native_Platform.incomingPort('reportFileLines', _elm_lang$core$Json_Decode$value);
+var _user$project$Main$Model = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {projectFileData: a, projectFileRegistry: b, projectPathRegistry: c, projectFileLines: d, activeTextEditors: e, lastUpdatedFile: f, fileBeingReprocessed: g, batchUpdateSent: h, referencePanelState: i};
 	});
+var _user$project$Main$RequestOpenFileAtLine = F3(
+	function (a, b, c) {
+		return {ctor: 'RequestOpenFileAtLine', _0: a, _1: b, _2: c};
+	});
+var _user$project$Main$view = function (model) {
+	return A2(
+		_user$project$View$render,
+		{referencePanelState: model.referencePanelState, projectFileData: model.projectFileData, projectPathRegistry: model.projectPathRegistry, projectFileLines: model.projectFileLines},
+		{requestOpenFileAtLine: _user$project$Main$RequestOpenFileAtLine});
+};
+var _user$project$Main$FileLinesReport = function (a) {
+	return {ctor: 'FileLinesReport', _0: a};
+};
+var _user$project$Main$SetReferencePanel = function (a) {
+	return {ctor: 'SetReferencePanel', _0: a};
+};
 var _user$project$Main$MarkAsReprocessing = function (a) {
 	return {ctor: 'MarkAsReprocessing', _0: a};
 };
@@ -15650,6 +18275,9 @@ var _user$project$Main$UnregisterTextEditor = function (a) {
 var _user$project$Main$RegisterTextEditor = function (a) {
 	return {ctor: 'RegisterTextEditor', _0: a};
 };
+var _user$project$Main$RegisterProjectPaths = function (a) {
+	return {ctor: 'RegisterProjectPaths', _0: a};
+};
 var _user$project$Main$RegisterProjectFiles = function (a) {
 	return {ctor: 'RegisterProjectFiles', _0: a};
 };
@@ -15660,25 +18288,37 @@ var _user$project$Main$subscriptions = function (model) {
 			_0: _user$project$Main$registerProjectFiles(_user$project$Main$RegisterProjectFiles),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Main$registerTextEditor(_user$project$Main$RegisterTextEditor),
+				_0: _user$project$Main$registerProjectPaths(_user$project$Main$RegisterProjectPaths),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Main$unregisterTextEditor(_user$project$Main$UnregisterTextEditor),
+					_0: _user$project$Main$registerTextEditor(_user$project$Main$RegisterTextEditor),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
+						_0: _user$project$Main$unregisterTextEditor(_user$project$Main$UnregisterTextEditor),
 						_1: {
 							ctor: '::',
-							_0: _user$project$Main$notifyReprocessingFile(_user$project$Main$MarkAsReprocessing),
-							_1: {ctor: '[]'}
+							_0: _user$project$Main$processReport(_user$project$Main$AddFileData),
+							_1: {
+								ctor: '::',
+								_0: _user$project$Main$notifyReprocessingFile(_user$project$Main$MarkAsReprocessing),
+								_1: {
+									ctor: '::',
+									_0: _user$project$Main$setReferencePanel(_user$project$Main$SetReferencePanel),
+									_1: {
+										ctor: '::',
+										_0: _user$project$Main$reportFileLines(_user$project$Main$FileLinesReport),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
 						}
 					}
 				}
 			}
 		});
 };
-var _user$project$Main$main = _elm_lang$core$Platform$program(
-	{init: _user$project$Main$init, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})();
+var _user$project$Main$main = _elm_lang$html$Html$program(
+	{init: _user$project$Main$init, update: _user$project$Main$update, view: _user$project$Main$view, subscriptions: _user$project$Main$subscriptions})();
 
 var _user$project$Model_Report$make = F2(
 	function (fileName, elmFile) {

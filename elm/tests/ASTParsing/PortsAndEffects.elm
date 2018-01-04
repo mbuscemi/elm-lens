@@ -43,8 +43,11 @@ canParsePort =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = []
-                    , external = Dict.empty
+                    { internal =
+                        Dict.empty
+                            |> Dict.insert "Int" [ Types.Reference.make "Int" 2 8 2 11 "SimplePort.elm" ]
+                    , external =
+                        Dict.empty
                     }
         ]
 
@@ -98,27 +101,54 @@ canParseEffects =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "SomeCmd"
-                        , Reference "SomeCmd"
-                        , Reference "NoOp"
-                        , Reference "SomeTask"
-                        , Reference "SomeState"
-                        , Reference "SomeCmd"
-                        , Reference "SomeCmd"
-                        , Reference "State"
-                        , Reference "SomeTask"
-                        , Reference "SomeState"
-                        , Reference "SomeCmd"
-                        , Reference "SomeCmd"
-                        , Reference "State"
-                        , Reference "SomeTask"
-                        , Reference "State"
-                        , Reference "SomeState"
-                        ]
+                        Dict.empty
+                            |> Dict.insert "List"
+                                [ Types.Reference.make "List" 22 49 22 67 "SimpleEffects.elm" ]
+                            |> Dict.insert "Never"
+                                [ Types.Reference.make "Never" 14 18 14 39 "SimpleEffects.elm" ]
+                            |> Dict.insert "SomeCmd"
+                                [ Types.Reference.make "SomeCmd" 32 34 32 43 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeCmd" 32 21 32 30 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeCmd" 27 49 27 60 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeCmd" 27 32 27 45 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeCmd" 22 54 22 67 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeCmd" 22 32 22 45 "SimpleEffects.elm"
+                                ]
+                            |> Dict.insert "NoOp"
+                                [ Types.Reference.make "NoOp" 34 4 34 8 "SimpleEffects.elm" ]
+                            |> Dict.insert "SomeTask"
+                                [ Types.Reference.make "SomeTask" 27 81 27 93 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeTask" 22 88 22 100 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeTask" 17 7 17 19 "SimpleEffects.elm"
+                                ]
+                            |> Dict.insert "SomeState"
+                                [ Types.Reference.make "SomeState" 27 64 27 77 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeState" 22 71 22 84 "SimpleEffects.elm"
+                                , Types.Reference.make "SomeState" 14 24 14 39 "SimpleEffects.elm"
+                                ]
+                            |> Dict.insert "State"
+                                [ Types.Reference.make "State" 29 18 29 23 "SimpleEffects.elm"
+                                , Types.Reference.make "State" 24 18 24 23 "SimpleEffects.elm"
+                                , Types.Reference.make "State" 19 18 19 23 "SimpleEffects.elm"
+                                ]
                     , external =
                         Dict.empty
-                            |> Dict.insert [ "Task" ] [ Reference "succeed", Reference "succeed", Reference "succeed" ]
-                            |> Dict.insert [ "Platform" ] [ Reference "Router", Reference "Router" ]
+                            |> Dict.insert [ "Task" ]
+                                (Dict.singleton "succeed"
+                                    [ Types.Reference.make "succeed" 29 4 29 16 "SimpleEffects.elm"
+                                    , Types.Reference.make "succeed" 24 4 24 16 "SimpleEffects.elm"
+                                    , Types.Reference.make "succeed" 19 4 19 16 "SimpleEffects.elm"
+                                    ]
+                                )
+                            |> Dict.insert [ "Platform" ]
+                                (Dict.empty
+                                    |> Dict.insert "Router"
+                                        [ Types.Reference.make "Router" 27 12 27 45 "SimpleEffects.elm"
+                                        , Types.Reference.make "Router" 22 12 22 45 "SimpleEffects.elm"
+                                        ]
+                                    |> Dict.insert "Task"
+                                        [ Types.Reference.make "Task" 14 4 14 39 "SimpleEffects.elm" ]
+                                )
                     }
         ]
 

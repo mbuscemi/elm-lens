@@ -46,7 +46,11 @@ canParseFromIf =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Reference "reference" ]
+                    { internal =
+                        Dict.empty
+                            |> Dict.insert "Bool" [ Types.Reference.make "Bool" 6 15 6 20 "IfExpression.elm" ]
+                            |> Dict.insert "String" [ Types.Reference.make "String" 6 23 6 29 "IfExpression.elm", Types.Reference.make "String" 2 12 2 18 "IfExpression.elm" ]
+                            |> Dict.insert "reference" [ Types.Reference.make "reference" 9 8 9 17 "IfExpression.elm" ]
                     , external = Dict.empty
                     }
         ]

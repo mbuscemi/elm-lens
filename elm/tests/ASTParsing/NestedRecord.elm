@@ -14,7 +14,7 @@ canParse =
     describe "Nested Record Elm File" <|
         let
             elmFile =
-                ElmFile.fromString "Simple.elm" nestedRecordDotElm
+                ElmFile.fromString "NestedRecord.elm" nestedRecordDotElm
         in
         [ test "has expected module name" <|
             \_ ->
@@ -52,7 +52,12 @@ canParse =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "someRecord" ]
+                        Dict.empty
+                            |> Dict.insert "String"
+                                [ Types.Reference.make "String" 6 9 6 15 "NestedRecord.elm"
+                                , Types.Reference.make "String" 2 25 2 32 "NestedRecord.elm"
+                                ]
+                            |> Dict.insert "someRecord" [ Types.Reference.make "someRecord" 8 4 8 14 "NestedRecord.elm" ]
                     , external =
                         Dict.empty
                     }

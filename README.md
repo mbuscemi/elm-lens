@@ -25,6 +25,17 @@ counts are also displayed.
 Elm Lens runs parallel background processes in order to gather its data, so you aren't blocked from working on your project
 while Elm Lens does its work.
 
+### The Reference Panel
+
+![The Reference Panel](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/reference-panel.png?raw=true)
+
+Clicking on the "n internal references" or "n external references" markup for a function will display a detailed list of all
+associated references in the reference panel. You can then click on a reference in the reference panel to navigate to the
+document and location of that reference.
+
+Clicking the same markup element a second time will close the reference panel. (Of course, the reference panel can also be
+closed with the standard Atom interface elements.)
+
 ### Unused Local Functions
 
 ![Unused Exposed Function Warning](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/local-no-references-warning.png?raw=true)
@@ -60,7 +71,16 @@ unreferenced in other modules. Such functions are typically executed by a comman
 tag for any function with a type signature of `Test`.
 
 ## Roadmap
- 
-* 0.3.0 Display test references separately from internal/external
-* 0.2.0 Visualization of References
-* 0.1.0 Initial Release
+
+* 0.7.0 Editor Dependency Abstraction
+* 0.6.0 Exposed/Local Upgrades
+  * Clicking on "exposed/local" toggles the function between being exposed and local.
+  * Add a menu option "Auto-Adjust Exports..." which updates all exposings to correspond to whether or not the function is used externally.
+* 0.5.0 Differentiate Test References
+* 0.4.0 Handle Zero-Reference Exposed Functions in `exposed-modules`
+  * Functions that are exposed and unreferenced in modules listed in `exposed-modules` should be handled differently.
+* 0.3.0 Configurability Upgrade
+  * Will be able to toggle off parts of the metadata or entire metadata via command keys and plugin options.
+  * Will be able to configure markup text opacity.
+* ~0.2.0 Visualization of References~
+* ~0.1.0 Initial Release~

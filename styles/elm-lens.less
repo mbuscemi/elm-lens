@@ -26,6 +26,11 @@
     color: gray;
 }
 
+.elm-lens-marker .internal-refs.non-zero:hover,
+.elm-lens-marker .external-refs.non-zero:hover {
+    text-decoration: underline;
+}
+
 .elm-lens-marker .internal-refs.warning,
 .elm-lens-marker .external-refs.warning {
     color: @warning-color;
@@ -38,4 +43,28 @@
 
 .elm-lens-marker .warning-icon {
     color: @warning-color;
+}
+
+.elm-lens {
+    padding: 0 5px;
+    overflow: scroll;
+}
+
+.elm-lens table {
+    width: 100%;
+    margin: 5px 0;
+}
+
+.elm-lens table td,
+.elm-lens table th {
+    padding: 3px 5px;
+    border-width: 1px 0;
+    border-color: @tool-panel-border-color;
+    border-style: solid;
+    cursor: default;
+}
+
+.elm-lens table th {
+    background-color: @inset-panel-background-color;
+    border-bottom-width: 2px;
 }

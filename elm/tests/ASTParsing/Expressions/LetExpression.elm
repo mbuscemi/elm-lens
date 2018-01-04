@@ -33,7 +33,7 @@ canParseFromLet =
                             |> Dict.insert "reference1" (Types.Expression.standardExpression 2)
                             |> Dict.insert "reference2" (Types.Expression.standardExpression 6)
                             |> Dict.insert "letExpression" (Types.Expression.standardExpression 10)
-                            |> Dict.insert "letDestructuring" (Types.Expression.standardExpression 18)
+                            |> Dict.insert "letDestructuring" (Types.Expression.standardExpression 19)
                     , types = Dict.empty
                     , typeAliases = Dict.empty
                     }
@@ -49,12 +49,25 @@ canParseFromLet =
             \_ ->
                 Expect.equal elmFile.references
                     { internal =
-                        [ Reference "reference2"
-                        , Reference "first"
-                        , Reference "reference1"
-                        , Reference "incremented"
-                        ]
-                    , external = Dict.empty
+                        Dict.empty
+                            |> Dict.insert "+"
+                                [ Types.Reference.make "+" 15 12 15 26 "LetExpression.elm"
+                                , Types.Reference.make "+" 17 4 17 19 "LetExpression.elm"
+                                ]
+                            |> Dict.insert "Int"
+                                [ Types.Reference.make "Int" 19 19 19 22 "LetExpression.elm"
+                                , Types.Reference.make "Int" 10 16 10 19 "LetExpression.elm"
+                                , Types.Reference.make "Int" 13 22 13 25 "LetExpression.elm"
+                                , Types.Reference.make "Int" 6 20 6 24 "LetExpression.elm"
+                                , Types.Reference.make "Int" 6 15 6 18 "LetExpression.elm"
+                                , Types.Reference.make "Int" 2 13 2 16 "LetExpression.elm"
+                                ]
+                            |> Dict.insert "reference2" [ Types.Reference.make "reference2" 23 12 23 22 "LetExpression.elm" ]
+                            |> Dict.insert "first" [ Types.Reference.make "first" 25 4 25 9 "LetExpression.elm" ]
+                            |> Dict.insert "reference1" [ Types.Reference.make "reference1" 15 12 15 22 "LetExpression.elm" ]
+                            |> Dict.insert "incremented" [ Types.Reference.make "incremented" 17 4 17 15 "LetExpression.elm" ]
+                    , external =
+                        Dict.empty
                     }
         ]
 
@@ -74,6 +87,7 @@ reference2 =
 letExpression : Int
 letExpression =
     let
+        incremented : Int
         incremented =
             reference1 + 1
     in

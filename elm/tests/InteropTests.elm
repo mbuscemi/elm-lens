@@ -1,4 +1,4 @@
-module InteropTests exposing (exposings, imports, reference, references, report, topLevelExpressions)
+module InteropTests exposing (exposings, fileLineRequest, imports, reference, references, report, topLevelExpressions)
 
 import Dict
 import Expect
@@ -7,6 +7,7 @@ import Set
 import Test exposing (Test, describe, test)
 import Types.Exposings exposing (Exposings)
 import Types.Expression exposing (Expression)
+import Types.FileLineRequest
 import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
 import Types.References exposing (References)
@@ -71,7 +72,10 @@ reference =
             \_ ->
                 let
                     orig =
-                        Reference "blarg"
+                        Reference
+                            "blarg"
+                            { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
+                            "file.elm"
 
                     encoded =
                         Types.Reference.encoder orig
@@ -85,9 +89,9 @@ reference =
             \_ ->
                 let
                     orig =
-                        [ Reference "blarg"
-                        , Reference "frangle"
-                        , Reference "blargargle"
+                        [ Types.Reference.make "blarg" 1 2 3 4 "file1.elm"
+                        , Types.Reference.make "frangle" 5 6 7 8 "file2.elm"
+                        , Types.Reference.make "blargargle" 11 12 13 14 "file3.elm"
                         ]
 
                     encoded =
@@ -109,10 +113,21 @@ references =
                 let
                     orig =
                         References
-                            [ Reference "abc", Reference "def" ]
                             (Dict.empty
-                                |> Dict.insert [ "ab", "cd", "de" ] [ Reference "ghi", Reference "klm" ]
-                                |> Dict.insert [ "ed", "fg" ] [ Reference "no", Reference "pq" ]
+                                |> Dict.insert "abc" [ Types.Reference.make "abc" 1 2 3 4 "file1.elm" ]
+                                |> Dict.insert "def" [ Types.Reference.make "def" 5 6 7 8 "file2.elm" ]
+                            )
+                            (Dict.empty
+                                |> Dict.insert [ "ab", "cd", "de" ]
+                                    (Dict.empty
+                                        |> Dict.insert "ghi" [ Types.Reference.make "ghi" 1 2 3 4 "file2.elm" ]
+                                        |> Dict.insert "klm" [ Types.Reference.make "klm" 5 6 7 8 "file3.elm" ]
+                                    )
+                                |> Dict.insert [ "ed", "fg" ]
+                                    (Dict.empty
+                                        |> Dict.insert "no" [ Types.Reference.make "no" 1 2 3 4 "file3.elm" ]
+                                        |> Dict.insert "pq" [ Types.Reference.make "pq" 5 6 7 8 "file4.elm" ]
+                                    )
                             )
 
                     encoded =
@@ -146,10 +161,21 @@ report =
                                 (Set.singleton "mom")
                             )
                             (References
-                                [ Reference "dgsklh", Reference "sdfljk" ]
                                 (Dict.empty
-                                    |> Dict.insert [ "fds", "xcv", "qwe" ] [ Reference "hj", Reference "io" ]
-                                    |> Dict.insert [ "gyu", "xsq" ] [ Reference "tuyi", Reference "fas" ]
+                                    |> Dict.insert "dgsklh" [ Reference "dgsklh" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm" ]
+                                    |> Dict.insert "sdfljk" [ Reference "sdfljk" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm" ]
+                                )
+                                (Dict.empty
+                                    |> Dict.insert [ "fds", "xcv", "qwe" ]
+                                        (Dict.empty
+                                            |> Dict.insert "hj" [ Reference "hj" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm" ]
+                                            |> Dict.insert "io" [ Reference "io" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm" ]
+                                        )
+                                    |> Dict.insert [ "gyu", "xsq" ]
+                                        (Dict.empty
+                                            |> Dict.insert "tuyi" [ Reference "tuyi" { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } } "file1.elm" ]
+                                            |> Dict.insert "fas" [ Reference "fas" { start = { row = 5, column = 6 }, end = { row = 7, column = 8 } } "file1.elm" ]
+                                        )
                                 )
                             )
 
@@ -182,6 +208,28 @@ topLevelExpressions =
                     decoded =
                         decodeValue Types.TopLevelExpressions.decoder encoded
                             |> Result.withDefault Types.TopLevelExpressions.default
+                in
+                Expect.equal decoded orig
+        ]
+
+
+fileLineRequest : Test
+fileLineRequest =
+    describe "FileLineRequest" <|
+        [ test "can encode and decode" <|
+            \_ ->
+                let
+                    orig =
+                        Dict.empty
+                            |> Dict.insert "a" (Set.fromList [ 1, 2, 3 ])
+                            |> Dict.insert "b" (Set.fromList [ 4 ])
+
+                    encoded =
+                        Types.FileLineRequest.encoder orig
+
+                    decoded =
+                        decodeValue Types.FileLineRequest.decoder encoded
+                            |> Result.withDefault Types.FileLineRequest.default
                 in
                 Expect.equal decoded orig
         ]

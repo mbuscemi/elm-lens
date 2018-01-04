@@ -43,12 +43,24 @@ canParseProgram =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = [ Reference "Message", Reference "Model", Reference "Program" ]
+                    { internal =
+                        Dict.empty
+                            |> Dict.insert "Message" [ Types.Reference.make "Message" 5 27 5 34 "Main.elm" ]
+                            |> Dict.insert "Model" [ Types.Reference.make "Model" 5 21 5 34 "Main.elm" ]
+                            |> Dict.insert "Never" [ Types.Reference.make "Never" 5 15 5 34 "Main.elm" ]
+                            |> Dict.insert "Program" [ Types.Reference.make "Program" 5 7 5 34 "Main.elm" ]
                     , external =
                         Dict.empty
-                            |> Dict.insert [ "Cmd" ] [ Reference "none", Reference "none" ]
-                            |> Dict.insert [ "Platform" ] [ Reference "program" ]
-                            |> Dict.insert [ "Sub" ] [ Reference "none" ]
+                            |> Dict.insert [ "Cmd" ]
+                                (Dict.singleton "none"
+                                    [ Types.Reference.make "none" 9 33 9 41 "Main.elm"
+                                    , Types.Reference.make "none" 8 22 8 30 "Main.elm"
+                                    ]
+                                )
+                            |> Dict.insert [ "Platform" ]
+                                (Dict.singleton "program" [ Types.Reference.make "program" 7 4 7 20 "Main.elm" ])
+                            |> Dict.insert [ "Sub" ]
+                                (Dict.singleton "none" [ Types.Reference.make "none" 10 26 10 34 "Main.elm" ])
                     }
         ]
 
@@ -90,11 +102,26 @@ canParseTest =
         , test "has expected references" <|
             \_ ->
                 Expect.equal elmFile.references
-                    { internal = []
+                    { internal =
+                        Dict.empty
+                            |> Dict.insert "<|"
+                                [ Types.Reference.make "<|" 9 12 11 42 "TruthTest.elm"
+                                , Types.Reference.make "<|" 7 4 12 9 "TruthTest.elm"
+                                ]
+                            |> Dict.insert "True"
+                                [ Types.Reference.make "True" 11 38 11 42 "TruthTest.elm"
+                                , Types.Reference.make "True" 11 33 11 37 "TruthTest.elm"
+                                ]
                     , external =
                         Dict.empty
-                            |> Dict.insert [ "Expect" ] [ Reference "equal" ]
-                            |> Dict.insert [ "Test" ] [ Reference "Test", Reference "test", Reference "describe" ]
+                            |> Dict.insert [ "Expect" ]
+                                (Dict.singleton "equal" [ Types.Reference.make "equal" 11 20 11 32 "TruthTest.elm" ])
+                            |> Dict.insert [ "Test" ]
+                                (Dict.empty
+                                    |> Dict.insert "Test" [ Types.Reference.make "Test" 5 7 5 11 "TruthTest.elm" ]
+                                    |> Dict.insert "test" [ Types.Reference.make "test" 9 12 9 16 "TruthTest.elm" ]
+                                    |> Dict.insert "describe" [ Types.Reference.make "describe" 7 4 7 12 "TruthTest.elm" ]
+                                )
                     }
         ]
 
