@@ -78,8 +78,12 @@ refsInExpression fileName arguments imports expression references =
             let
                 expressions =
                     List.foldl letDeclarationExpressions [] letBlock.declarations
+
+                typeAnnotations =
+                    List.foldl letDeclarationTypeAnnotations [] letBlock.declarations
             in
             List.foldl (refsInExpression fileName arguments imports) references (letBlock.expression :: expressions)
+                |> (\refs -> List.foldl (refsInTypeAnnotation fileName imports) refs typeAnnotations)
 
         ( range, Elm.Syntax.Expression.CaseExpression caseBlock ) ->
             let
@@ -193,6 +197,21 @@ letDeclarationExpressions letDeclaration expressions =
 
         ( range, Elm.Syntax.Expression.LetDestructuring pattern expression ) ->
             expression :: expressions
+
+
+letDeclarationTypeAnnotations : Ranged LetDeclaration -> List (Ranged TypeAnnotation) -> List (Ranged TypeAnnotation)
+letDeclarationTypeAnnotations letDeclaration typeAnnotations =
+    case letDeclaration of
+        ( range, Elm.Syntax.Expression.LetFunction function ) ->
+            case function.signature of
+                Just ( range, signature ) ->
+                    signature.typeAnnotation :: typeAnnotations
+
+                Nothing ->
+                    typeAnnotations
+
+        _ ->
+            typeAnnotations
 
 
 additionalArguments : List (Ranged Pattern) -> Set String
