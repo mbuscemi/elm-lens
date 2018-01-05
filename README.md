@@ -72,11 +72,12 @@ tag for any function with a type signature of `Test`.
 
 ## Roadmap
 
-* 0.7.0 Editor Dependency Abstraction
-* 0.6.0 Exposed/Local Upgrades
+* 0.8.0 Editor Dependency Abstraction
+* 0.7.0 Exposed/Local Upgrades
   * Clicking on "exposed/local" toggles the function between being exposed and local.
   * Add a menu option "Auto-Adjust Exports..." which updates all exposings to correspond to whether or not the function is used externally.
-* 0.5.0 Differentiate Test References
+* 0.6.0 Differentiate Test References
+* 0.5.0 Support Type Constructors
 * 0.4.0 Handle Zero-Reference Exposed Functions in `exposed-modules`
   * Functions that are exposed and unreferenced in modules listed in `exposed-modules` should be handled differently.
 * 0.3.0 Configurability Upgrade
