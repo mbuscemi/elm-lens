@@ -3,13 +3,16 @@ module Types.Imports exposing (Imports, addAlias, addDirect, decoder, default, e
 import Dict exposing (Dict)
 import Elm.Syntax.Base exposing (ModuleName)
 import Json.Decode as JD exposing (Decoder)
+import Json.Decode.Extra as JD
 import Json.Encode as JE exposing (Value)
+import Set exposing (Set)
 import Util.ModuleName
 
 
 type alias Imports =
     { direct : Dict String ModuleName
     , aliases : Dict ModuleName ModuleName
+    , unqualified : Set ModuleName
     }
 
 
@@ -17,6 +20,7 @@ default : Imports
 default =
     { direct = Dict.empty
     , aliases = Dict.empty
+    , unqualified = Set.empty
     }
 
 
@@ -50,6 +54,7 @@ encoder imports =
     JE.object
         [ ( "direct", encodeDirect imports.direct )
         , ( "aliases", encodeAliases imports.aliases )
+        , ( "unqualified", encodeUnqualified imports.unqualified )
         ]
 
 
@@ -68,11 +73,19 @@ encodeAliases aliasImports =
         |> JE.object
 
 
+encodeUnqualified : Set ModuleName -> Value
+encodeUnqualified unqualifiedImports =
+    Set.toList unqualifiedImports
+        |> List.map Util.ModuleName.encoder
+        |> JE.list
+
+
 decoder : Decoder Imports
 decoder =
-    JD.map2 Imports
+    JD.map3 Imports
         (JD.field "direct" <| JD.map toDirectsDict <| JD.keyValuePairs Util.ModuleName.decoder)
         (JD.field "aliases" <| JD.map toAliasesDict <| JD.keyValuePairs Util.ModuleName.decoder)
+        (JD.field "unqualified" <| JD.set <| Util.ModuleName.decoder)
 
 
 toDirectsDict : List ( String, ModuleName ) -> Dict String ModuleName

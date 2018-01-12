@@ -24,6 +24,7 @@ canParsePort =
                 Expect.equal elmFile.imports
                     { direct = Dict.empty
                     , aliases = Dict.empty
+                    , unqualified = Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->
@@ -67,6 +68,7 @@ canParseEffects =
                 Expect.equal elmFile.imports
                     { direct = Dict.empty
                     , aliases = Dict.empty
+                    , unqualified = Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->

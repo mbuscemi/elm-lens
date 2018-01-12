@@ -26,6 +26,8 @@ canParse =
                         Dict.empty
                     , aliases =
                         Dict.empty
+                    , unqualified =
+                        Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->

@@ -17480,6 +17480,13 @@ var _user$project$Types_Imports$addDirectEntry = F2(
 var _user$project$Types_Imports$toDirectsDict = function (pairs) {
 	return A3(_elm_lang$core$List$foldl, _user$project$Types_Imports$addDirectEntry, _elm_lang$core$Dict$empty, pairs);
 };
+var _user$project$Types_Imports$encodeUnqualified = function (unqualifiedImports) {
+	return _elm_lang$core$Json_Encode$list(
+		A2(
+			_elm_lang$core$List$map,
+			_user$project$Util_ModuleName$encoder,
+			_elm_lang$core$Set$toList(unqualifiedImports)));
+};
 var _user$project$Types_Imports$encodeAliases = function (aliasImports) {
 	return _elm_lang$core$Json_Encode$object(
 		A2(
@@ -17513,7 +17520,15 @@ var _user$project$Types_Imports$encoder = function (imports) {
 					_0: 'aliases',
 					_1: _user$project$Types_Imports$encodeAliases(imports.aliases)
 				},
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'unqualified',
+						_1: _user$project$Types_Imports$encodeUnqualified(imports.unqualified)
+					},
+					_1: {ctor: '[]'}
+				}
 			}
 		});
 };
@@ -17546,13 +17561,13 @@ var _user$project$Types_Imports$addDirect = F3(
 				direct: A3(_elm_lang$core$Dict$insert, funcName, moduleName, imports.direct)
 			});
 	});
-var _user$project$Types_Imports$default = {direct: _elm_lang$core$Dict$empty, aliases: _elm_lang$core$Dict$empty};
-var _user$project$Types_Imports$Imports = F2(
-	function (a, b) {
-		return {direct: a, aliases: b};
+var _user$project$Types_Imports$default = {direct: _elm_lang$core$Dict$empty, aliases: _elm_lang$core$Dict$empty, unqualified: _elm_lang$core$Set$empty};
+var _user$project$Types_Imports$Imports = F3(
+	function (a, b, c) {
+		return {direct: a, aliases: b, unqualified: c};
 	});
-var _user$project$Types_Imports$decoder = A3(
-	_elm_lang$core$Json_Decode$map2,
+var _user$project$Types_Imports$decoder = A4(
+	_elm_lang$core$Json_Decode$map3,
 	_user$project$Types_Imports$Imports,
 	A2(
 		_elm_lang$core$Json_Decode$field,
@@ -17567,7 +17582,11 @@ var _user$project$Types_Imports$decoder = A3(
 		A2(
 			_elm_lang$core$Json_Decode$map,
 			_user$project$Types_Imports$toAliasesDict,
-			_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder))));
+			_elm_lang$core$Json_Decode$keyValuePairs(_user$project$Util_ModuleName$decoder))),
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'unqualified',
+		_elm_community$json_extra$Json_Decode_Extra$set(_user$project$Util_ModuleName$decoder)));
 
 var _user$project$ElmFile_Imports$fromExposing = F3(
 	function (moduleName, _p0, imports) {
