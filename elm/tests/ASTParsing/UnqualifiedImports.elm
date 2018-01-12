@@ -1,4 +1,4 @@
-module ASTParsing.NestedRecord exposing (canParse)
+module ASTParsing.UnqualifiedImports exposing (canParse)
 
 import Dict
 import ElmFile
@@ -11,28 +11,33 @@ import Types.Reference exposing (Reference)
 
 canParse : Test
 canParse =
-    describe "Nested Record Elm File" <|
+    describe "Elm File with Unqualified Imports" <|
         let
             elmFile =
-                ElmFile.fromString "NestedRecord.elm" nestedRecordDotElm
+                ElmFile.fromString "UnqualifiedImports.elm" unqualifiedImports
         in
         [ test "has expected module name" <|
             \_ ->
-                Expect.equal elmFile.moduleName [ "NestedRecord" ]
+                Expect.equal elmFile.moduleName [ "UnqualifiedImports" ]
         , test "has expected imports" <|
             \_ ->
                 Expect.equal elmFile.imports
-                    { direct = Dict.empty
-                    , aliases = Dict.empty
-                    , unqualified = Set.empty
+                    { direct =
+                        Dict.empty
+                    , aliases =
+                        Dict.empty
+                            |> Dict.insert [ "F" ] [ "Frangle" ]
+                    , unqualified =
+                        Set.empty
+                            |> Set.insert [ "Frangle" ]
+                            |> Set.insert [ "Blarg" ]
                     }
         , test "has expected top level expressions" <|
             \_ ->
                 Expect.equal elmFile.topLevelExpressions
                     { functions =
                         Dict.empty
-                            |> Dict.insert "someRecord" (Types.Expression.standardExpression 2)
-                            |> Dict.insert "nested" (Types.Expression.standardExpression 6)
+                            |> Dict.insert "blarg" (Types.Expression.standardExpression 5)
                     , types =
                         Dict.empty
                     , typeAliases =
@@ -43,7 +48,7 @@ canParse =
                 Expect.equal elmFile.exposings
                     { functions =
                         Set.empty
-                            |> Set.insert "nested"
+                            |> Set.insert "blarg"
                     , types =
                         Set.empty
                     }
@@ -52,27 +57,24 @@ canParse =
                 Expect.equal elmFile.references
                     { internal =
                         Dict.empty
-                            |> Dict.insert "String"
-                                [ Types.Reference.make "String" 6 9 6 15 "NestedRecord.elm"
-                                , Types.Reference.make "String" 2 25 2 32 "NestedRecord.elm"
+                            |> Dict.insert "Int"
+                                [ Types.Reference.make "Int" 5 8 5 11 "UnqualifiedImports.elm"
                                 ]
-                            |> Dict.insert "someRecord" [ Types.Reference.make "someRecord" 8 4 8 14 "NestedRecord.elm" ]
                     , external =
                         Dict.empty
                     }
         ]
 
 
-nestedRecordDotElm : String
-nestedRecordDotElm =
-    """module NestedRecord exposing (nested)
+unqualifiedImports : String
+unqualifiedImports =
+    """module UnqualifiedImports exposing (blarg)
 
-someRecord : { a : { b : String } }
-someRecord =
-    { a = { b = "blarg" } }
+import Blarg exposing (..)
+import Frangle as F exposing (..)
 
-nested : String
-nested =
-    someRecord.a.b
+blarg : Int
+blarg =
+    10
 
 """

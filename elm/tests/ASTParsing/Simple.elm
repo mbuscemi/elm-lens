@@ -42,6 +42,7 @@ canParseSimple =
                             |> Dict.insert [ "JE" ] [ "Json", "Encode" ]
                     , unqualified =
                         Set.empty
+                            |> Set.insert [ "Result" ]
                     }
         , test "has expected top level expressions" <|
             \_ ->

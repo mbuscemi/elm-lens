@@ -1,4 +1,4 @@
-module Types.Imports exposing (Imports, addAlias, addDirect, decoder, default, encoder, moduleNameForDirectEntry, unaliasedModuleName)
+module Types.Imports exposing (Imports, addAlias, addDirect, addUnqualified, decoder, default, encoder, moduleNameForDirectEntry, unaliasedModuleName)
 
 import Dict exposing (Dict)
 import Elm.Syntax.Base exposing (ModuleName)
@@ -32,6 +32,11 @@ addDirect funcName moduleName imports =
 addAlias : ModuleName -> ModuleName -> Imports -> Imports
 addAlias aliasName realModuleName imports =
     { imports | aliases = Dict.insert aliasName realModuleName imports.aliases }
+
+
+addUnqualified : ModuleName -> Imports -> Imports
+addUnqualified moduleName imports =
+    { imports | unqualified = Set.insert moduleName imports.unqualified }
 
 
 moduleNameForDirectEntry : String -> Imports -> Maybe ModuleName
