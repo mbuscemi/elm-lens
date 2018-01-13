@@ -1,5 +1,6 @@
 module ElmFile exposing (ElmFile, createBase, default, makeAst, parseCore, parseReferences)
 
+import Dict exposing (Dict)
 import Elm.Parser
 import Elm.Processing exposing (init, process)
 import Elm.Syntax.Base exposing (ModuleName)
@@ -66,6 +67,6 @@ parseCore fileName file elmFile =
     }
 
 
-parseReferences : String -> File -> ElmFile -> ElmFile
-parseReferences fileName file elmFile =
-    { elmFile | references = ElmFile.References.fromFile fileName elmFile.imports file }
+parseReferences : String -> File -> Dict ModuleName TopLevelExpressions -> ElmFile -> ElmFile
+parseReferences fileName file dependencies elmFile =
+    { elmFile | references = ElmFile.References.fromFile fileName elmFile.imports dependencies file }

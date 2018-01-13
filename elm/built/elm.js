@@ -17847,8 +17847,8 @@ var _user$project$ElmFile_References$collectRefsFrom = F3(
 			_user$project$Types_References$default,
 			declarations);
 	});
-var _user$project$ElmFile_References$fromFile = F3(
-	function (fileName, imports, file) {
+var _user$project$ElmFile_References$fromFile = F4(
+	function (fileName, imports, dependencies, file) {
 		return A3(
 			_user$project$ElmFile_References$collectRefsFrom,
 			fileName,
@@ -17963,12 +17963,12 @@ var _user$project$Util_File$default = {
 	comments: {ctor: '[]'}
 };
 
-var _user$project$ElmFile$parseReferences = F3(
-	function (fileName, file, elmFile) {
+var _user$project$ElmFile$parseReferences = F4(
+	function (fileName, file, dependencies, elmFile) {
 		return _elm_lang$core$Native_Utils.update(
 			elmFile,
 			{
-				references: A3(_user$project$ElmFile_References$fromFile, fileName, elmFile.imports, file)
+				references: A4(_user$project$ElmFile_References$fromFile, fileName, elmFile.imports, dependencies, file)
 			});
 	});
 var _user$project$ElmFile$parseCore = F3(
@@ -18444,24 +18444,39 @@ var _user$project$Model_FileProcessing$processReferences = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			processedFile: A3(_user$project$ElmFile$parseReferences, model.fileName, model.fileAst, model.processedFile)
+			processedFile: A4(_user$project$ElmFile$parseReferences, model.fileName, model.fileAst, model.processedDependencies, model.processedFile)
 		});
 };
 var _user$project$Model_FileProcessing$processDependencies = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			processedDependencies: A2(_elm_lang$core$Dict$map, _user$project$ElmFile$createBase, model.asts)
+			processedDependencies: A2(
+				_elm_lang$core$Dict$map,
+				F2(
+					function (_p0, value) {
+						return function (_) {
+							return _.topLevelExpressions;
+						}(value);
+					}),
+				A3(
+					_elm_lang$core$Dict$foldl,
+					F3(
+						function (key, value, dict) {
+							return A3(_elm_lang$core$Dict$insert, value.moduleName, value, dict);
+						}),
+					_elm_lang$core$Dict$empty,
+					A2(_elm_lang$core$Dict$map, _user$project$ElmFile$createBase, model.asts)))
 		});
 };
 var _user$project$Model_FileProcessing$addDependency = F2(
-	function (_p0, dict) {
-		var _p1 = _p0;
-		var _p2 = _p1._0;
+	function (_p1, dict) {
+		var _p2 = _p1;
+		var _p3 = _p2._0;
 		return A3(
 			_elm_lang$core$Dict$insert,
-			_p2,
-			A2(_user$project$ElmFile$makeAst, _p2, _p1._1),
+			_p3,
+			A2(_user$project$ElmFile$makeAst, _p3, _p2._1),
 			dict);
 	});
 var _user$project$Model_FileProcessing$addDependencies = F2(
