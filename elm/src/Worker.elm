@@ -19,8 +19,8 @@ type alias Model =
 
 
 type Message
-    = ProcessFileStageOne ( String, String )
-    | ProcessFileStageTwo
+    = ProcessFileFirstPass ( String, String )
+    | ProcessReferencesAndReport
 
 
 main : Program Never Model Message
@@ -45,14 +45,14 @@ init =
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        ProcessFileStageOne ( fileName, text ) ->
+        ProcessFileFirstPass ( fileName, text ) ->
             model
                 |> Model.FileProcessing.setFileName fileName
                 |> Model.FileProcessing.setAst (ElmFile.makeAst fileName text)
                 |> Model.FileProcessing.firstPass
-                |> And.executeNext ProcessFileStageTwo
+                |> And.executeNext ProcessReferencesAndReport
 
-        ProcessFileStageTwo ->
+        ProcessReferencesAndReport ->
             model
                 |> Model.FileProcessing.processReferences
                 |> andSendReport model.fileName
@@ -60,7 +60,7 @@ update message model =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Sub.batch [ process ProcessFileStageOne ]
+    Sub.batch [ process ProcessFileFirstPass ]
 
 
 andSendReport : String -> Model -> ( Model, Cmd Message )

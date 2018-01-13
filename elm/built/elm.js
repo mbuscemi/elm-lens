@@ -18437,15 +18437,15 @@ var _user$project$Worker$Model = F4(
 	function (a, b, c, d) {
 		return {fileName: a, fileAst: b, asts: c, processedFile: d};
 	});
-var _user$project$Worker$ProcessFileStageTwo = {ctor: 'ProcessFileStageTwo'};
+var _user$project$Worker$ProcessReferencesAndReport = {ctor: 'ProcessReferencesAndReport'};
 var _user$project$Worker$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		if (_p0.ctor === 'ProcessFileStageOne') {
+		if (_p0.ctor === 'ProcessFileFirstPass') {
 			var _p1 = _p0._0._0;
 			return A2(
 				_user$project$And$executeNext,
-				_user$project$Worker$ProcessFileStageTwo,
+				_user$project$Worker$ProcessReferencesAndReport,
 				_user$project$Model_FileProcessing$firstPass(
 					A2(
 						_user$project$Model_FileProcessing$setAst,
@@ -18458,14 +18458,14 @@ var _user$project$Worker$update = F2(
 				_user$project$Model_FileProcessing$processReferences(model));
 		}
 	});
-var _user$project$Worker$ProcessFileStageOne = function (a) {
-	return {ctor: 'ProcessFileStageOne', _0: a};
+var _user$project$Worker$ProcessFileFirstPass = function (a) {
+	return {ctor: 'ProcessFileFirstPass', _0: a};
 };
 var _user$project$Worker$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: _user$project$Worker$process(_user$project$Worker$ProcessFileStageOne),
+			_0: _user$project$Worker$process(_user$project$Worker$ProcessFileFirstPass),
 			_1: {ctor: '[]'}
 		});
 };
