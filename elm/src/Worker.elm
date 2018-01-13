@@ -20,6 +20,7 @@ type alias Model =
 
 type Message
     = ProcessFileFirstPass ( String, String )
+    | ProcessImportDependencies (List ( String, String ))
     | ProcessReferencesAndReport
 
 
@@ -52,6 +53,10 @@ update message model =
                 |> Model.FileProcessing.firstPass
                 |> And.executeNext ProcessReferencesAndReport
 
+        ProcessImportDependencies fileData ->
+            model
+                |> And.executeNext ProcessReferencesAndReport
+
         ProcessReferencesAndReport ->
             model
                 |> Model.FileProcessing.processReferences
@@ -60,7 +65,10 @@ update message model =
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Sub.batch [ process ProcessFileFirstPass ]
+    Sub.batch
+        [ process ProcessFileFirstPass
+        , processMultiple ProcessImportDependencies
+        ]
 
 
 andSendReport : String -> Model -> ( Model, Cmd Message )
@@ -74,3 +82,6 @@ port report : Value -> Cmd message
 
 
 port process : (( String, String ) -> message) -> Sub message
+
+
+port processMultiple : (List ( String, String ) -> message) -> Sub message

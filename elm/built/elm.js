@@ -18433,6 +18433,21 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
+var _user$project$Worker$processMultiple = _elm_lang$core$Native_Platform.incomingPort(
+	'processMultiple',
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$andThen,
+			function (x0) {
+				return A2(
+					_elm_lang$core$Json_Decode$andThen,
+					function (x1) {
+						return _elm_lang$core$Json_Decode$succeed(
+							{ctor: '_Tuple2', _0: x0, _1: x1});
+					},
+					A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
+			},
+			A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string))));
 var _user$project$Worker$Model = F4(
 	function (a, b, c, d) {
 		return {fileName: a, fileAst: b, asts: c, processedFile: d};
@@ -18441,23 +18456,29 @@ var _user$project$Worker$ProcessReferencesAndReport = {ctor: 'ProcessReferencesA
 var _user$project$Worker$update = F2(
 	function (message, model) {
 		var _p0 = message;
-		if (_p0.ctor === 'ProcessFileFirstPass') {
-			var _p1 = _p0._0._0;
-			return A2(
-				_user$project$And$executeNext,
-				_user$project$Worker$ProcessReferencesAndReport,
-				_user$project$Model_FileProcessing$firstPass(
-					A2(
-						_user$project$Model_FileProcessing$setAst,
-						A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1),
-						A2(_user$project$Model_FileProcessing$setFileName, _p1, model))));
-		} else {
-			return A2(
-				_user$project$Worker$andSendReport,
-				model.fileName,
-				_user$project$Model_FileProcessing$processReferences(model));
+		switch (_p0.ctor) {
+			case 'ProcessFileFirstPass':
+				var _p1 = _p0._0._0;
+				return A2(
+					_user$project$And$executeNext,
+					_user$project$Worker$ProcessReferencesAndReport,
+					_user$project$Model_FileProcessing$firstPass(
+						A2(
+							_user$project$Model_FileProcessing$setAst,
+							A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1),
+							A2(_user$project$Model_FileProcessing$setFileName, _p1, model))));
+			case 'ProcessImportDependencies':
+				return A2(_user$project$And$executeNext, _user$project$Worker$ProcessReferencesAndReport, model);
+			default:
+				return A2(
+					_user$project$Worker$andSendReport,
+					model.fileName,
+					_user$project$Model_FileProcessing$processReferences(model));
 		}
 	});
+var _user$project$Worker$ProcessImportDependencies = function (a) {
+	return {ctor: 'ProcessImportDependencies', _0: a};
+};
 var _user$project$Worker$ProcessFileFirstPass = function (a) {
 	return {ctor: 'ProcessFileFirstPass', _0: a};
 };
@@ -18466,7 +18487,11 @@ var _user$project$Worker$subscriptions = function (model) {
 		{
 			ctor: '::',
 			_0: _user$project$Worker$process(_user$project$Worker$ProcessFileFirstPass),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: _user$project$Worker$processMultiple(_user$project$Worker$ProcessImportDependencies),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$Worker$main = _elm_lang$core$Platform$program(
