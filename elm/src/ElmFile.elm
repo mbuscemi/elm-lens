@@ -1,8 +1,7 @@
-module ElmFile exposing (ElmFile, default, fromString)
+module ElmFile exposing (ElmFile, default, fromFile, makeAst)
 
 import Elm.Parser
 import Elm.Processing exposing (init, process)
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.File exposing (File)
 import ElmFile.Exposings
@@ -14,6 +13,7 @@ import Types.Exposings exposing (Exposings)
 import Types.Imports exposing (Imports)
 import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
+import Util.File
 
 
 type alias ElmFile =
@@ -35,21 +35,14 @@ default =
     }
 
 
-fromString : String -> String -> ElmFile
-fromString fileName fileText =
-    Elm.Parser.parse fileText
-        |> make fileName
-
-
-make : String -> Result (List String) RawFile -> ElmFile
-make fileName result =
-    case result of
+makeAst : String -> String -> File
+makeAst fileName fileText =
+    case Elm.Parser.parse fileText of
         Ok rawFile ->
             process init rawFile
-                |> fromFile fileName
 
         Err stringList ->
-            default
+            Util.File.default
 
 
 fromFile : String -> File -> ElmFile

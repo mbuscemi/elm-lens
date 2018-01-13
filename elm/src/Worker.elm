@@ -1,13 +1,17 @@
 port module Worker exposing (main)
 
 import And
+import Dict exposing (Dict)
+import Elm.Syntax.File exposing (File)
 import ElmFile exposing (ElmFile)
 import Json.Decode exposing (Value)
 import Model.Report
 
 
 type alias Model =
-    { processedFile : ElmFile }
+    { asts : Dict String File
+    , processedFile : ElmFile
+    }
 
 
 type Message
@@ -25,7 +29,9 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { processedFile = ElmFile.default }
+    { asts = Dict.empty
+    , processedFile = ElmFile.default
+    }
         |> And.doNothing
 
 
@@ -33,8 +39,12 @@ update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         ProcessFile ( fileName, text ) ->
-            ElmFile.fromString fileName text
-                |> (\elmFile -> { processedFile = elmFile })
+            let
+                fileAst =
+                    ElmFile.makeAst fileName text
+            in
+            { model | asts = Dict.insert fileName fileAst model.asts }
+                |> (\newModel -> { newModel | processedFile = ElmFile.fromFile fileName fileAst })
                 |> andSendReport fileName
 
 
@@ -45,7 +55,9 @@ subscriptions model =
 
 andSendReport : String -> Model -> ( Model, Cmd Message )
 andSendReport fileName model =
-    And.execute model (report <| Model.Report.make fileName model.processedFile)
+    Model.Report.make fileName model.processedFile
+        |> report
+        |> And.execute model
 
 
 port report : Value -> Cmd message

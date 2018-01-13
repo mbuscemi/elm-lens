@@ -17916,6 +17916,21 @@ var _user$project$ElmFile_TopLevelExpressions$fromFile = function (file) {
 		}(file));
 };
 
+var _user$project$Util_File$default = {
+	moduleDefinition: _stil4m$elm_syntax$Elm_Syntax_Module$NormalModule(
+		{
+			moduleName: {ctor: '[]'},
+			exposingList: _stil4m$elm_syntax$Elm_Syntax_Exposing$All(
+				{
+					start: {row: 0, column: 0},
+					end: {row: 0, column: 0}
+				})
+		}),
+	imports: {ctor: '[]'},
+	declarations: {ctor: '[]'},
+	comments: {ctor: '[]'}
+};
+
 var _user$project$ElmFile$fromFile = F2(
 	function (fileName, file) {
 		var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
@@ -17928,6 +17943,15 @@ var _user$project$ElmFile$fromFile = F2(
 			references: A3(_user$project$ElmFile_References$fromFile, fileName, imports, file)
 		};
 	});
+var _user$project$ElmFile$makeAst = F2(
+	function (fileName, fileText) {
+		var _p0 = _stil4m$elm_syntax$Elm_Parser$parse(fileText);
+		if (_p0.ctor === 'Ok') {
+			return A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p0._0);
+		} else {
+			return _user$project$Util_File$default;
+		}
+	});
 var _user$project$ElmFile$default = {
 	moduleName: {ctor: '[]'},
 	imports: _user$project$Types_Imports$default,
@@ -17935,25 +17959,6 @@ var _user$project$ElmFile$default = {
 	exposings: _user$project$Types_Exposings$default,
 	references: _user$project$Types_References$default
 };
-var _user$project$ElmFile$make = F2(
-	function (fileName, result) {
-		var _p0 = result;
-		if (_p0.ctor === 'Ok') {
-			return A2(
-				_user$project$ElmFile$fromFile,
-				fileName,
-				A2(_stil4m$elm_syntax$Elm_Processing$process, _stil4m$elm_syntax$Elm_Processing$init, _p0._0));
-		} else {
-			return _user$project$ElmFile$default;
-		}
-	});
-var _user$project$ElmFile$fromString = F2(
-	function (fileName, fileText) {
-		return A2(
-			_user$project$ElmFile$make,
-			fileName,
-			_stil4m$elm_syntax$Elm_Parser$parse(fileText));
-	});
 var _user$project$ElmFile$ElmFile = F5(
 	function (a, b, c, d, e) {
 		return {moduleName: a, imports: b, topLevelExpressions: c, exposings: d, references: e};
@@ -18354,7 +18359,7 @@ var _user$project$Model_Report$make = F2(
 	});
 
 var _user$project$Worker$init = _user$project$And$doNothing(
-	{processedFile: _user$project$ElmFile$default});
+	{asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default});
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -18372,13 +18377,22 @@ var _user$project$Worker$update = F2(
 	function (message, model) {
 		var _p0 = message;
 		var _p1 = _p0._0._0;
+		var fileAst = A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1);
 		return A2(
 			_user$project$Worker$andSendReport,
 			_p1,
-			function (elmFile) {
-				return {processedFile: elmFile};
+			function (newModel) {
+				return _elm_lang$core$Native_Utils.update(
+					newModel,
+					{
+						processedFile: A2(_user$project$ElmFile$fromFile, _p1, fileAst)
+					});
 			}(
-				A2(_user$project$ElmFile$fromString, _p1, _p0._0._1)));
+				_elm_lang$core$Native_Utils.update(
+					model,
+					{
+						asts: A3(_elm_lang$core$Dict$insert, _p1, fileAst, model.asts)
+					})));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',
@@ -18394,9 +18408,10 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Worker$Model = function (a) {
-	return {processedFile: a};
-};
+var _user$project$Worker$Model = F2(
+	function (a, b) {
+		return {asts: a, processedFile: b};
+	});
 var _user$project$Worker$ProcessFile = function (a) {
 	return {ctor: 'ProcessFile', _0: a};
 };
