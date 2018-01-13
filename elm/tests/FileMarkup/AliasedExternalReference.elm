@@ -16,17 +16,33 @@ canFindAliasedExternalReference : Test
 canFindAliasedExternalReference =
     describe "Aliased External Reference" <|
         let
+            fileNameA =
+                "ModuleA.elm"
+
+            fileNameB =
+                "ModuleB.elm"
+
+            parsedFileA =
+                ElmFile.makeAst fileNameA fileA
+
+            parsedFileB =
+                ElmFile.makeAst fileNameB fileB
+
             elmFileA =
-                ElmFile.fromString "ModuleA.elm" fileA
+                ElmFile.createBase fileNameA parsedFileA
+                    |> ElmFile.parseCore fileNameA parsedFileA
+                    |> ElmFile.parseReferences fileNameA parsedFileA Dict.empty
 
             elmFileB =
-                ElmFile.fromString "ModuleB.elm" fileB
+                ElmFile.createBase fileNameB parsedFileB
+                    |> ElmFile.parseCore fileNameB parsedFileB
+                    |> ElmFile.parseReferences fileNameB parsedFileB Dict.empty
 
             reportA =
-                Model.Report.make "ModuleA.elm" elmFileA
+                Model.Report.make fileNameA elmFileA
 
             reportB =
-                Model.Report.make "ModuleB.elm" elmFileB
+                Model.Report.make fileNameB elmFileB
 
             model1 =
                 { projectFileData = Types.ProjectFileData.default
@@ -38,10 +54,10 @@ canFindAliasedExternalReference =
 
             moduleAFileMarkup =
                 { projectFileData = model1.projectFileData
-                , projectFileRegistry = Set.fromList [ "ModuleA.elm", "ModuleB.elm" ]
+                , projectFileRegistry = Set.fromList [ fileNameA, fileNameB ]
                 , fileBeingReprocessed = Nothing
                 }
-                    |> Model.FileMarkup.make "ModuleA.elm"
+                    |> Model.FileMarkup.make fileNameA
         in
         [ test "parsed ModuleB has expected references" <|
             \_ ->

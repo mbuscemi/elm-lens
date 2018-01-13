@@ -13,8 +13,16 @@ canParseProgram : Test
 canParseProgram =
     describe "File with Program Function" <|
         let
+            fileName =
+                "Main.elm"
+
+            file =
+                ElmFile.makeAst fileName moduleWithProgram
+
             elmFile =
-                ElmFile.fromString "Main.elm" moduleWithProgram
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
@@ -70,8 +78,16 @@ canParseTest : Test
 canParseTest =
     describe "File with Test Function" <|
         let
+            fileName =
+                "TruthTest.elm"
+
+            file =
+                ElmFile.makeAst fileName moduleWithTest
+
             elmFile =
-                ElmFile.fromString "TruthTest.elm" moduleWithTest
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

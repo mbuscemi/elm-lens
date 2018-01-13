@@ -19,8 +19,13 @@ canMake =
             fileName =
                 "File.elm"
 
+            file =
+                ElmFile.makeAst fileName anElmFile
+
             elmFile =
-                ElmFile.fromString fileName anElmFile
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
 
             report =
                 Model.Report.make fileName elmFile

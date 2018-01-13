@@ -16,8 +16,13 @@ canParseSimple =
             fileName =
                 "Simple.elm"
 
+            file =
+                ElmFile.makeAst fileName simpleDotElm
+
             elmFile =
-                ElmFile.fromString fileName simpleDotElm
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

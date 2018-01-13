@@ -13,8 +13,16 @@ canParse : Test
 canParse =
     describe "Infix Elm File" <|
         let
+            fileName =
+                "Infix.elm"
+
+            file =
+                ElmFile.makeAst fileName infixDotElm
+
             elmFile =
-                ElmFile.fromString "Infix.elm" infixDotElm
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

@@ -13,8 +13,16 @@ canParseFromIf : Test
 canParseFromIf =
     describe "Reference in If Expression" <|
         let
+            fileName =
+                "IfExpression.elm"
+
+            file =
+                ElmFile.makeAst fileName elmFileText
+
             elmFile =
-                ElmFile.fromString "IfExpression.elm" elmFileText
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

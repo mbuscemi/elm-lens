@@ -13,8 +13,16 @@ canParse : Test
 canParse =
     describe "Elm File with Unqualified Imports" <|
         let
+            fileName =
+                "UnqualifiedImports.elm"
+
+            file =
+                ElmFile.makeAst fileName unqualifiedImports
+
             elmFile =
-                ElmFile.fromString "UnqualifiedImports.elm" unqualifiedImports
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

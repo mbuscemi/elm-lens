@@ -13,8 +13,16 @@ canParseFromNegation : Test
 canParseFromNegation =
     describe "Reference in Negation Expression" <|
         let
+            fileName =
+                "NegationExpression.elm"
+
+            file =
+                ElmFile.makeAst fileName elmFileText
+
             elmFile =
-                ElmFile.fromString "NegationExpression.elm" elmFileText
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

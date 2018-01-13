@@ -13,8 +13,16 @@ canParseFromLet : Test
 canParseFromLet =
     describe "Reference in Let Expression" <|
         let
+            fileName =
+                "LetExpression.elm"
+
+            file =
+                ElmFile.makeAst fileName elmFileText
+
             elmFile =
-                ElmFile.fromString "LetExpression.elm" elmFileText
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

@@ -13,8 +13,16 @@ canParse : Test
 canParse =
     describe "Nested Record Elm File" <|
         let
+            fileName =
+                "NestedRecord.elm"
+
+            file =
+                ElmFile.makeAst fileName nestedRecordDotElm
+
             elmFile =
-                ElmFile.fromString "NestedRecord.elm" nestedRecordDotElm
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

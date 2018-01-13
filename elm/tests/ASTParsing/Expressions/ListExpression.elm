@@ -13,8 +13,16 @@ canParseFromList : Test
 canParseFromList =
     describe "References in List Expression" <|
         let
+            fileName =
+                "ListExpression.elm"
+
+            file =
+                ElmFile.makeAst fileName elmFileText
+
             elmFile =
-                ElmFile.fromString "ListExpression.elm" elmFileText
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

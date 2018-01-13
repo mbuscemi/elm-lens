@@ -13,8 +13,16 @@ canParsePort : Test
 canParsePort =
     describe "Simple Ports File" <|
         let
+            fileName =
+                "SimplePort.elm"
+
+            file =
+                ElmFile.makeAst fileName simplePortModule
+
             elmFile =
-                ElmFile.fromString "SimplePort.elm" simplePortModule
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
@@ -57,8 +65,16 @@ canParseEffects : Test
 canParseEffects =
     describe "Simple Effects File" <|
         let
+            fileName =
+                "SimpleEffects.elm"
+
+            file =
+                ElmFile.makeAst fileName simpleEffectsModule
+
             elmFile =
-                ElmFile.fromString "SimpleEffects.elm" simpleEffectsModule
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->

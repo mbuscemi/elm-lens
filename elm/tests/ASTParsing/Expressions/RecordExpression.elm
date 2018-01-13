@@ -13,8 +13,16 @@ canParseFromRecord : Test
 canParseFromRecord =
     describe "Reference in Record Expression" <|
         let
+            fileName =
+                "RecordExpression.elm"
+
+            file =
+                ElmFile.makeAst fileName elmFileText
+
             elmFile =
-                ElmFile.fromString "RecordExpression.elm" elmFileText
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
