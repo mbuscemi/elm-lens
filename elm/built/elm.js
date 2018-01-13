@@ -17983,6 +17983,14 @@ var _user$project$ElmFile$ElmFile = F5(
 		return {moduleName: a, imports: b, topLevelExpressions: c, exposings: d, references: e};
 	});
 
+var _user$project$And_ImportDependencies$process = F2(
+	function (finalizeHandler, model) {
+		var unqualifiedImports = model.processedFile.imports.unqualified;
+		return (_elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$Set$size(unqualifiedImports),
+			0) > 0) ? A2(_user$project$And$executeNext, finalizeHandler, model) : A2(_user$project$And$executeNext, finalizeHandler, model);
+	});
+
 var _user$project$Model_ProjectFileData$markReprocessedFileComplete = F2(
 	function (report, model) {
 		var _p0 = model.fileBeingReprocessed;
@@ -18460,7 +18468,7 @@ var _user$project$Worker$update = F2(
 			case 'ProcessFileFirstPass':
 				var _p1 = _p0._0._0;
 				return A2(
-					_user$project$And$executeNext,
+					_user$project$And_ImportDependencies$process,
 					_user$project$Worker$ProcessReferencesAndReport,
 					_user$project$Model_FileProcessing$firstPass(
 						A2(

@@ -1,6 +1,7 @@
 port module Worker exposing (main)
 
 import And
+import And.ImportDependencies
 import Dict exposing (Dict)
 import Elm.Syntax.File exposing (File)
 import ElmFile exposing (ElmFile)
@@ -51,7 +52,7 @@ update message model =
                 |> Model.FileProcessing.setFileName fileName
                 |> Model.FileProcessing.setAst (ElmFile.makeAst fileName text)
                 |> Model.FileProcessing.firstPass
-                |> And.executeNext ProcessReferencesAndReport
+                |> And.ImportDependencies.process ProcessReferencesAndReport
 
         ProcessImportDependencies fileData ->
             model
