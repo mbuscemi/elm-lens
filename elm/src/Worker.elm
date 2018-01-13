@@ -3,13 +3,12 @@ port module Worker exposing (main)
 import And
 import And.ImportDependencies
 import Dict exposing (Dict)
-import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.File exposing (File)
 import ElmFile exposing (ElmFile)
 import Json.Decode exposing (Value)
 import Model.FileProcessing
 import Model.Report
-import Types.TopLevelExpressions exposing (TopLevelExpressions)
+import Types.ImportDependencies exposing (ImportDependencies)
 import Util.File
 
 
@@ -18,7 +17,7 @@ type alias Model =
     , fileAst : File
     , asts : Dict String File
     , processedFile : ElmFile
-    , processedDependencies : Dict ModuleName TopLevelExpressions
+    , processedDependencies : ImportDependencies
     }
 
 
@@ -43,7 +42,7 @@ init =
     , fileAst = Util.File.default
     , asts = Dict.empty
     , processedFile = ElmFile.default
-    , processedDependencies = Dict.empty
+    , processedDependencies = Types.ImportDependencies.default
     }
         |> And.doNothing
 

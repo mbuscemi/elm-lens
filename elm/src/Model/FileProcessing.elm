@@ -1,10 +1,9 @@
 module Model.FileProcessing exposing (addDependencies, firstPass, processDependencies, processReferences, setAst, setFileName)
 
 import Dict exposing (Dict)
-import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.File exposing (File)
 import ElmFile exposing (ElmFile)
-import Types.TopLevelExpressions exposing (TopLevelExpressions)
+import Types.ImportDependencies exposing (ImportDependencies)
 
 
 type alias Model model =
@@ -13,7 +12,7 @@ type alias Model model =
         , fileAst : File
         , asts : Dict String File
         , processedFile : ElmFile
-        , processedDependencies : Dict ModuleName TopLevelExpressions
+        , processedDependencies : ImportDependencies
     }
 
 

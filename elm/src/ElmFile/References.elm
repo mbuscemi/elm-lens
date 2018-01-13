@@ -1,7 +1,5 @@
 module ElmFile.References exposing (fromFile)
 
-import Dict exposing (Dict)
-import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.Declaration exposing (Declaration)
 import Elm.Syntax.Expression exposing (Expression, Function, LetDeclaration)
 import Elm.Syntax.File exposing (File)
@@ -11,17 +9,13 @@ import Elm.Syntax.Ranged exposing (Ranged)
 import Elm.Syntax.Type exposing (ValueConstructor)
 import Elm.Syntax.TypeAnnotation exposing (TypeAnnotation)
 import Set exposing (Set)
+import Types.ImportDependencies exposing (ImportDependencies)
 import Types.Imports exposing (Imports)
 import Types.Reference exposing (Reference)
 import Types.References exposing (References)
-import Types.TopLevelExpressions exposing (TopLevelExpressions)
 
 
-type alias Dependencies =
-    Dict ModuleName TopLevelExpressions
-
-
-fromFile : String -> Imports -> Dependencies -> File -> References
+fromFile : String -> Imports -> ImportDependencies -> File -> References
 fromFile fileName imports dependencies file =
     file
         |> .declarations
