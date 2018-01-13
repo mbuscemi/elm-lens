@@ -5,17 +5,22 @@ import Dict exposing (Dict)
 import Elm.Syntax.File exposing (File)
 import ElmFile exposing (ElmFile)
 import Json.Decode exposing (Value)
+import Model.FileProcessing
 import Model.Report
+import Util.File
 
 
 type alias Model =
-    { asts : Dict String File
+    { fileName : String
+    , fileAst : File
+    , asts : Dict String File
     , processedFile : ElmFile
     }
 
 
 type Message
-    = ProcessFile ( String, String )
+    = ProcessFileStageOne ( String, String )
+    | ProcessFileStageTwo
 
 
 main : Program Never Model Message
@@ -29,7 +34,9 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    { asts = Dict.empty
+    { fileName = ""
+    , fileAst = Util.File.default
+    , asts = Dict.empty
     , processedFile = ElmFile.default
     }
         |> And.doNothing
@@ -38,25 +45,22 @@ init =
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
-        ProcessFile ( fileName, text ) ->
-            let
-                fileAst =
-                    ElmFile.makeAst fileName text
-            in
-            { model | asts = Dict.insert fileName fileAst model.asts }
-                |> (\newModel ->
-                        { newModel
-                            | processedFile =
-                                ElmFile.createBase fileName fileAst
-                                    |> ElmFile.parseReferences fileName fileAst
-                        }
-                   )
-                |> andSendReport fileName
+        ProcessFileStageOne ( fileName, text ) ->
+            model
+                |> Model.FileProcessing.setFileName fileName
+                |> Model.FileProcessing.setAst (ElmFile.makeAst fileName text)
+                |> Model.FileProcessing.firstPass
+                |> And.executeNext ProcessFileStageTwo
+
+        ProcessFileStageTwo ->
+            model
+                |> Model.FileProcessing.processReferences
+                |> andSendReport model.fileName
 
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Sub.batch [ process ProcessFile ]
+    Sub.batch [ process ProcessFileStageOne ]
 
 
 andSendReport : String -> Model -> ( Model, Cmd Message )

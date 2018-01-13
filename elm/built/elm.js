@@ -16255,6 +16255,17 @@ var _user$project$And$execute = F2(
 	function (model, command) {
 		return {ctor: '_Tuple2', _0: model, _1: command};
 	});
+var _user$project$And$executeNext = F2(
+	function (message, model) {
+		return A2(
+			_user$project$And$execute,
+			model,
+			A2(
+				_elm_lang$core$Task$perform,
+				_elm_lang$core$Basics$always(message),
+				_elm_lang$core$Task$succeed(
+					{ctor: '_Tuple0'})));
+	});
 var _user$project$And$doNothing = function (model) {
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
@@ -18360,6 +18371,33 @@ var _user$project$Main$subscriptions = function (model) {
 var _user$project$Main$main = _elm_lang$html$Html$program(
 	{init: _user$project$Main$init, update: _user$project$Main$update, view: _user$project$Main$view, subscriptions: _user$project$Main$subscriptions})();
 
+var _user$project$Model_FileProcessing$processReferences = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			processedFile: A3(_user$project$ElmFile$parseReferences, model.fileName, model.fileAst, model.processedFile)
+		});
+};
+var _user$project$Model_FileProcessing$firstPass = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			processedFile: A2(_user$project$ElmFile$createBase, model.fileName, model.fileAst)
+		});
+};
+var _user$project$Model_FileProcessing$setAst = F2(
+	function (file, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{fileAst: file});
+	});
+var _user$project$Model_FileProcessing$setFileName = F2(
+	function (fileName, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{fileName: fileName});
+	});
+
 var _user$project$Model_Report$make = F2(
 	function (fileName, elmFile) {
 		return _user$project$Types_Report$encoder(
@@ -18367,7 +18405,7 @@ var _user$project$Model_Report$make = F2(
 	});
 
 var _user$project$Worker$init = _user$project$And$doNothing(
-	{asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default});
+	{fileName: '', fileAst: _user$project$Util_File$default, asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default});
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -18380,31 +18418,6 @@ var _user$project$Worker$andSendReport = F2(
 			model,
 			_user$project$Worker$report(
 				A2(_user$project$Model_Report$make, fileName, model.processedFile)));
-	});
-var _user$project$Worker$update = F2(
-	function (message, model) {
-		var _p0 = message;
-		var _p1 = _p0._0._0;
-		var fileAst = A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1);
-		return A2(
-			_user$project$Worker$andSendReport,
-			_p1,
-			function (newModel) {
-				return _elm_lang$core$Native_Utils.update(
-					newModel,
-					{
-						processedFile: A3(
-							_user$project$ElmFile$parseReferences,
-							_p1,
-							fileAst,
-							A2(_user$project$ElmFile$createBase, _p1, fileAst))
-					});
-			}(
-				_elm_lang$core$Native_Utils.update(
-					model,
-					{
-						asts: A3(_elm_lang$core$Dict$insert, _p1, fileAst, model.asts)
-					})));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',
@@ -18420,18 +18433,39 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
-var _user$project$Worker$Model = F2(
-	function (a, b) {
-		return {asts: a, processedFile: b};
+var _user$project$Worker$Model = F4(
+	function (a, b, c, d) {
+		return {fileName: a, fileAst: b, asts: c, processedFile: d};
 	});
-var _user$project$Worker$ProcessFile = function (a) {
-	return {ctor: 'ProcessFile', _0: a};
+var _user$project$Worker$ProcessFileStageTwo = {ctor: 'ProcessFileStageTwo'};
+var _user$project$Worker$update = F2(
+	function (message, model) {
+		var _p0 = message;
+		if (_p0.ctor === 'ProcessFileStageOne') {
+			var _p1 = _p0._0._0;
+			return A2(
+				_user$project$And$executeNext,
+				_user$project$Worker$ProcessFileStageTwo,
+				_user$project$Model_FileProcessing$firstPass(
+					A2(
+						_user$project$Model_FileProcessing$setAst,
+						A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1),
+						A2(_user$project$Model_FileProcessing$setFileName, _p1, model))));
+		} else {
+			return A2(
+				_user$project$Worker$andSendReport,
+				model.fileName,
+				_user$project$Model_FileProcessing$processReferences(model));
+		}
+	});
+var _user$project$Worker$ProcessFileStageOne = function (a) {
+	return {ctor: 'ProcessFileStageOne', _0: a};
 };
 var _user$project$Worker$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
-			_0: _user$project$Worker$process(_user$project$Worker$ProcessFile),
+			_0: _user$project$Worker$process(_user$project$Worker$ProcessFileStageOne),
 			_1: {ctor: '[]'}
 		});
 };
