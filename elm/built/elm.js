@@ -18353,7 +18353,8 @@ var _user$project$Model_Report$make = F2(
 			A5(_user$project$Types_Report$Report, fileName, elmFile.moduleName, elmFile.topLevelExpressions, elmFile.exposings, elmFile.references));
 	});
 
-var _user$project$Worker$init = _user$project$And$doNothing(_user$project$ElmFile$default);
+var _user$project$Worker$init = _user$project$And$doNothing(
+	{processedFile: _user$project$ElmFile$default});
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -18365,7 +18366,7 @@ var _user$project$Worker$andSendReport = F2(
 			_user$project$And$execute,
 			model,
 			_user$project$Worker$report(
-				A2(_user$project$Model_Report$make, fileName, model)));
+				A2(_user$project$Model_Report$make, fileName, model.processedFile)));
 	});
 var _user$project$Worker$update = F2(
 	function (message, model) {
@@ -18374,7 +18375,10 @@ var _user$project$Worker$update = F2(
 		return A2(
 			_user$project$Worker$andSendReport,
 			_p1,
-			A2(_user$project$ElmFile$fromString, _p1, _p0._0._1));
+			function (elmFile) {
+				return {processedFile: elmFile};
+			}(
+				A2(_user$project$ElmFile$fromString, _p1, _p0._0._1)));
 	});
 var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 	'process',
@@ -18390,6 +18394,9 @@ var _user$project$Worker$process = _elm_lang$core$Native_Platform.incomingPort(
 				A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 		},
 		A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string)));
+var _user$project$Worker$Model = function (a) {
+	return {processedFile: a};
+};
 var _user$project$Worker$ProcessFile = function (a) {
 	return {ctor: 'ProcessFile', _0: a};
 };

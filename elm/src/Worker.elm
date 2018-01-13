@@ -7,7 +7,7 @@ import Model.Report
 
 
 type alias Model =
-    ElmFile
+    { processedFile : ElmFile }
 
 
 type Message
@@ -25,14 +25,17 @@ main =
 
 init : ( Model, Cmd Message )
 init =
-    ElmFile.default |> And.doNothing
+    { processedFile = ElmFile.default }
+        |> And.doNothing
 
 
 update : Message -> Model -> ( Model, Cmd Message )
 update message model =
     case message of
         ProcessFile ( fileName, text ) ->
-            ElmFile.fromString fileName text |> andSendReport fileName
+            ElmFile.fromString fileName text
+                |> (\elmFile -> { processedFile = elmFile })
+                |> andSendReport fileName
 
 
 subscriptions : Model -> Sub Message
@@ -42,7 +45,7 @@ subscriptions model =
 
 andSendReport : String -> Model -> ( Model, Cmd Message )
 andSendReport fileName model =
-    And.execute model (report <| Model.Report.make fileName model)
+    And.execute model (report <| Model.Report.make fileName model.processedFile)
 
 
 port report : Value -> Cmd message
