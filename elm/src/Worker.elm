@@ -44,7 +44,13 @@ update message model =
                     ElmFile.makeAst fileName text
             in
             { model | asts = Dict.insert fileName fileAst model.asts }
-                |> (\newModel -> { newModel | processedFile = ElmFile.fromFile fileName fileAst })
+                |> (\newModel ->
+                        { newModel
+                            | processedFile =
+                                ElmFile.createBase fileName fileAst
+                                    |> ElmFile.parseReferences fileName fileAst
+                        }
+                   )
                 |> andSendReport fileName
 
 

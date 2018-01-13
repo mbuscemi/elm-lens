@@ -1,4 +1,4 @@
-module ElmFile exposing (ElmFile, default, fromFile, makeAst)
+module ElmFile exposing (ElmFile, createBase, default, makeAst, parseReferences)
 
 import Elm.Parser
 import Elm.Processing exposing (init, process)
@@ -45,18 +45,20 @@ makeAst fileName fileText =
             Util.File.default
 
 
-fromFile : String -> File -> ElmFile
-fromFile fileName file =
+createBase : String -> File -> ElmFile
+createBase fileName file =
     let
-        imports =
-            ElmFile.Imports.fromFile file
-
         topLevelExpressions =
             ElmFile.TopLevelExpressions.fromFile file
     in
-    { moduleName = ElmFile.ModuleName.fromFile file
-    , imports = imports
-    , topLevelExpressions = topLevelExpressions
-    , exposings = ElmFile.Exposings.fromFile topLevelExpressions file
-    , references = ElmFile.References.fromFile fileName imports file
+    { default
+        | moduleName = ElmFile.ModuleName.fromFile file
+        , imports = ElmFile.Imports.fromFile file
+        , topLevelExpressions = topLevelExpressions
+        , exposings = ElmFile.Exposings.fromFile topLevelExpressions file
     }
+
+
+parseReferences : String -> File -> ElmFile -> ElmFile
+parseReferences fileName file elmFile =
+    { elmFile | references = ElmFile.References.fromFile fileName elmFile.imports file }

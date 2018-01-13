@@ -17931,17 +17931,13 @@ var _user$project$Util_File$default = {
 	comments: {ctor: '[]'}
 };
 
-var _user$project$ElmFile$fromFile = F2(
-	function (fileName, file) {
-		var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
-		var imports = _user$project$ElmFile_Imports$fromFile(file);
-		return {
-			moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
-			imports: imports,
-			topLevelExpressions: topLevelExpressions,
-			exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file),
-			references: A3(_user$project$ElmFile_References$fromFile, fileName, imports, file)
-		};
+var _user$project$ElmFile$parseReferences = F3(
+	function (fileName, file, elmFile) {
+		return _elm_lang$core$Native_Utils.update(
+			elmFile,
+			{
+				references: A3(_user$project$ElmFile_References$fromFile, fileName, elmFile.imports, file)
+			});
 	});
 var _user$project$ElmFile$makeAst = F2(
 	function (fileName, fileText) {
@@ -17959,6 +17955,18 @@ var _user$project$ElmFile$default = {
 	exposings: _user$project$Types_Exposings$default,
 	references: _user$project$Types_References$default
 };
+var _user$project$ElmFile$createBase = F2(
+	function (fileName, file) {
+		var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
+		return _elm_lang$core$Native_Utils.update(
+			_user$project$ElmFile$default,
+			{
+				moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
+				imports: _user$project$ElmFile_Imports$fromFile(file),
+				topLevelExpressions: topLevelExpressions,
+				exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file)
+			});
+	});
 var _user$project$ElmFile$ElmFile = F5(
 	function (a, b, c, d, e) {
 		return {moduleName: a, imports: b, topLevelExpressions: c, exposings: d, references: e};
@@ -18385,7 +18393,11 @@ var _user$project$Worker$update = F2(
 				return _elm_lang$core$Native_Utils.update(
 					newModel,
 					{
-						processedFile: A2(_user$project$ElmFile$fromFile, _p1, fileAst)
+						processedFile: A3(
+							_user$project$ElmFile$parseReferences,
+							_p1,
+							fileAst,
+							A2(_user$project$ElmFile$createBase, _p1, fileAst))
 					});
 			}(
 				_elm_lang$core$Native_Utils.update(
