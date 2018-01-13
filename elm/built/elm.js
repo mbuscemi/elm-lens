@@ -16632,6 +16632,20 @@ var _user$project$Types_TopLevelExpressions$expressionValue = function (dict) {
 			},
 			_elm_lang$core$Dict$toList(dict)));
 };
+var _user$project$Types_TopLevelExpressions$hasSymbol = F2(
+	function (symbol, exps) {
+		var _p2 = {
+			ctor: '_Tuple3',
+			_0: A2(_elm_lang$core$Dict$get, symbol, exps.functions),
+			_1: A2(_elm_lang$core$Dict$get, symbol, exps.types),
+			_2: A2(_elm_lang$core$Dict$get, symbol, exps.typeAliases)
+		};
+		if ((((_p2.ctor === '_Tuple3') && (_p2._0.ctor === 'Nothing')) && (_p2._1.ctor === 'Nothing')) && (_p2._2.ctor === 'Nothing')) {
+			return false;
+		} else {
+			return true;
+		}
+	});
 var _user$project$Types_TopLevelExpressions$encoder = function (expressions) {
 	return _elm_lang$core$Json_Encode$object(
 		{
@@ -17436,6 +17450,22 @@ var _user$project$ElmFile_ProjectPath$determine = F2(
 			moduleName);
 	});
 
+var _user$project$Types_ImportDependencies$isInModule = F3(
+	function (symbol, _p0, topLevelExpressions) {
+		return A2(_user$project$Types_TopLevelExpressions$hasSymbol, symbol, topLevelExpressions);
+	});
+var _user$project$Types_ImportDependencies$moduleNameForSymbol = F2(
+	function (symbol, importDependencies) {
+		return A2(
+			_elm_lang$core$Maybe$map,
+			_elm_lang$core$Tuple$first,
+			A2(
+				_elm_community$dict_extra$Dict_Extra$find,
+				_user$project$Types_ImportDependencies$isInModule(symbol),
+				importDependencies));
+	});
+var _user$project$Types_ImportDependencies$default = _elm_lang$core$Dict$empty;
+
 var _user$project$ElmFile_References$argumentsFromPattern = F2(
 	function (pattern, $arguments) {
 		var _p0 = pattern;
@@ -17482,12 +17512,13 @@ var _user$project$ElmFile_References$letDeclarationExpressions = F2(
 			return {ctor: '::', _0: _p3._1._1, _1: expressions};
 		}
 	});
-var _user$project$ElmFile_References$addTypeReference = F6(
-	function (typeName, fileName, range, moduleName, imports, references) {
+var _user$project$ElmFile_References$addTypeReference = F7(
+	function (typeName, fileName, range, moduleName, imports, importDependencies, references) {
 		var _p4 = {
-			ctor: '_Tuple2',
+			ctor: '_Tuple3',
 			_0: A2(_user$project$Types_Imports$moduleNameForDirectEntry, typeName, imports),
-			_1: moduleName
+			_1: A2(_user$project$Types_ImportDependencies$moduleNameForSymbol, typeName, importDependencies),
+			_2: moduleName
 		};
 		if (_p4._0.ctor === 'Just') {
 			return A3(
@@ -17496,22 +17527,30 @@ var _user$project$ElmFile_References$addTypeReference = F6(
 				A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
 				references);
 		} else {
-			if (_p4._1.ctor === '[]') {
-				return A2(
-					_user$project$Types_References$addInternal,
+			if (_p4._1.ctor === 'Just') {
+				return A3(
+					_user$project$Types_References$addExternal,
+					_p4._1._0,
 					A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
 					references);
 			} else {
-				return A3(
-					_user$project$Types_References$addExternal,
-					A2(_user$project$Types_Imports$unaliasedModuleName, moduleName, imports),
-					A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
-					references);
+				if (_p4._2.ctor === '[]') {
+					return A2(
+						_user$project$Types_References$addInternal,
+						A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
+						references);
+				} else {
+					return A3(
+						_user$project$Types_References$addExternal,
+						A2(_user$project$Types_Imports$unaliasedModuleName, moduleName, imports),
+						A3(_user$project$Types_Reference$Reference, typeName, range, fileName),
+						references);
+				}
 			}
 		}
 	});
-var _user$project$ElmFile_References$refsInTypeAnnotation = F4(
-	function (fileName, imports, typeAnnotation, references) {
+var _user$project$ElmFile_References$refsInTypeAnnotation = F5(
+	function (fileName, imports, importDependencies, typeAnnotation, references) {
 		var _p5 = typeAnnotation;
 		_v5_5:
 		do {
@@ -17520,31 +17559,31 @@ var _user$project$ElmFile_References$refsInTypeAnnotation = F4(
 					case 'Typed':
 						return A3(
 							_elm_lang$core$List$foldl,
-							A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
-							A6(_user$project$ElmFile_References$addTypeReference, _p5._1._1, fileName, _p5._0, _p5._1._0, imports, references),
+							A3(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies),
+							A7(_user$project$ElmFile_References$addTypeReference, _p5._1._1, fileName, _p5._0, _p5._1._0, imports, importDependencies, references),
 							_p5._1._2);
 					case 'Tupled':
 						return A3(
 							_elm_lang$core$List$foldl,
-							A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
+							A3(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies),
 							references,
 							_p5._1._0);
 					case 'Record':
 						return A3(
 							_elm_lang$core$List$foldl,
-							A2(_user$project$ElmFile_References$refsInRecordField, fileName, imports),
+							A3(_user$project$ElmFile_References$refsInRecordField, fileName, imports, importDependencies),
 							references,
 							_p5._1._0);
 					case 'GenericRecord':
 						return A3(
 							_elm_lang$core$List$foldl,
-							A2(_user$project$ElmFile_References$refsInRecordField, fileName, imports),
+							A3(_user$project$ElmFile_References$refsInRecordField, fileName, imports, importDependencies),
 							references,
 							_p5._1._1);
 					case 'FunctionTypeAnnotation':
 						return A3(
 							_elm_lang$core$List$foldl,
-							A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
+							A3(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies),
 							references,
 							{
 								ctor: '::',
@@ -17564,38 +17603,39 @@ var _user$project$ElmFile_References$refsInTypeAnnotation = F4(
 		} while(false);
 		return references;
 	});
-var _user$project$ElmFile_References$refsInRecordField = F4(
-	function (fileName, imports, _p6, references) {
+var _user$project$ElmFile_References$refsInRecordField = F5(
+	function (fileName, imports, importDependencies, _p6, references) {
 		var _p7 = _p6;
-		return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p7._1, references);
+		return A5(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies, _p7._1, references);
 	});
-var _user$project$ElmFile_References$refsInValueConstructor = F4(
-	function (fileName, imports, valueConstructor, references) {
+var _user$project$ElmFile_References$refsInValueConstructor = F5(
+	function (fileName, imports, importDependencies, valueConstructor, references) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
+			A3(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies),
 			references,
 			valueConstructor.$arguments);
 	});
-var _user$project$ElmFile_References$appendSignatureReferences = F4(
-	function (fileName, imports, $function, references) {
+var _user$project$ElmFile_References$appendSignatureReferences = F5(
+	function (fileName, imports, importDependencies, $function, references) {
 		var _p8 = $function.signature;
 		if (_p8.ctor === 'Just') {
-			return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p8._0._1.typeAnnotation, references);
+			return A5(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies, _p8._0._1.typeAnnotation, references);
 		} else {
 			return references;
 		}
 	});
-var _user$project$ElmFile_References$addReference = F6(
-	function (expName, fileName, range, $arguments, imports, references) {
+var _user$project$ElmFile_References$addReference = F7(
+	function (expName, fileName, range, $arguments, imports, importDependencies, references) {
 		var _p9 = {
-			ctor: '_Tuple2',
+			ctor: '_Tuple3',
 			_0: A2(_elm_lang$core$Set$member, expName, $arguments),
-			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, expName, imports)
+			_1: A2(_user$project$Types_Imports$moduleNameForDirectEntry, expName, imports),
+			_2: A2(_user$project$Types_ImportDependencies$moduleNameForSymbol, expName, importDependencies)
 		};
-		_v8_2:
+		_v8_3:
 		do {
-			if (_p9.ctor === '_Tuple2') {
+			if (_p9.ctor === '_Tuple3') {
 				if (_p9._0 === true) {
 					return references;
 				} else {
@@ -17606,11 +17646,19 @@ var _user$project$ElmFile_References$addReference = F6(
 							A3(_user$project$Types_Reference$Reference, expName, range, fileName),
 							references);
 					} else {
-						break _v8_2;
+						if (_p9._2.ctor === 'Just') {
+							return A3(
+								_user$project$Types_References$addExternal,
+								_p9._2._0,
+								A3(_user$project$Types_Reference$Reference, expName, range, fileName),
+								references);
+						} else {
+							break _v8_3;
+						}
 					}
 				}
 			} else {
-				break _v8_2;
+				break _v8_3;
 			}
 		} while(false);
 		return A2(
@@ -17618,8 +17666,8 @@ var _user$project$ElmFile_References$addReference = F6(
 			A3(_user$project$Types_Reference$Reference, expName, range, fileName),
 			references);
 	});
-var _user$project$ElmFile_References$refsInExpression = F5(
-	function (fileName, $arguments, imports, expression, references) {
+var _user$project$ElmFile_References$refsInExpression = F6(
+	function (fileName, $arguments, imports, importDependencies, expression, references) {
 		refsInExpression:
 		while (true) {
 			var _p10 = expression;
@@ -17630,14 +17678,14 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 						case 'Application':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 								references,
 								_p10._1._0);
 						case 'OperatorApplication':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
-								A6(_user$project$ElmFile_References$addReference, _p10._1._0, fileName, _p10._0, $arguments, imports, references),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
+								A7(_user$project$ElmFile_References$addReference, _p10._1._0, fileName, _p10._0, $arguments, imports, importDependencies, references),
 								{
 									ctor: '::',
 									_0: _p10._1._2,
@@ -17648,11 +17696,11 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 									}
 								});
 						case 'FunctionOrValue':
-							return A6(_user$project$ElmFile_References$addReference, _p10._1._0, fileName, _p10._0, $arguments, imports, references);
+							return A7(_user$project$ElmFile_References$addReference, _p10._1._0, fileName, _p10._0, $arguments, imports, importDependencies, references);
 						case 'IfBlock':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 								references,
 								{
 									ctor: '::',
@@ -17671,31 +17719,35 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 							var _v10 = fileName,
 								_v11 = $arguments,
 								_v12 = imports,
-								_v13 = _p10._1._0,
-								_v14 = references;
+								_v13 = importDependencies,
+								_v14 = _p10._1._0,
+								_v15 = references;
 							fileName = _v10;
 							$arguments = _v11;
 							imports = _v12;
-							expression = _v13;
-							references = _v14;
+							importDependencies = _v13;
+							expression = _v14;
+							references = _v15;
 							continue refsInExpression;
 						case 'TupledExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 								references,
 								_p10._1._0);
 						case 'ParenthesizedExpression':
-							var _v15 = fileName,
-								_v16 = $arguments,
-								_v17 = imports,
-								_v18 = _p10._1._0,
-								_v19 = references;
-							fileName = _v15;
-							$arguments = _v16;
-							imports = _v17;
-							expression = _v18;
-							references = _v19;
+							var _v16 = fileName,
+								_v17 = $arguments,
+								_v18 = imports,
+								_v19 = importDependencies,
+								_v20 = _p10._1._0,
+								_v21 = references;
+							fileName = _v16;
+							$arguments = _v17;
+							imports = _v18;
+							importDependencies = _v19;
+							expression = _v20;
+							references = _v21;
 							continue refsInExpression;
 						case 'LetExpression':
 							var _p11 = _p10._1._0;
@@ -17712,13 +17764,13 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 							return function (refs) {
 								return A3(
 									_elm_lang$core$List$foldl,
-									A2(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports),
+									A3(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies),
 									refs,
 									typeAnnotations);
 							}(
 								A3(
 									_elm_lang$core$List$foldl,
-									A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+									A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 									references,
 									{ctor: '::', _0: _p11.expression, _1: expressions}));
 						case 'CaseExpression':
@@ -17730,7 +17782,7 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 									A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$first, _p12.cases)));
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, allArguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, allArguments, imports, importDependencies),
 								references,
 								{
 									ctor: '::',
@@ -17743,27 +17795,29 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 								_elm_lang$core$Set$union,
 								$arguments,
 								_user$project$ElmFile_References$additionalArguments(_p13.args));
-							var _v20 = fileName,
-								_v21 = allArguments,
-								_v22 = imports,
-								_v23 = _p13.expression,
-								_v24 = references;
-							fileName = _v20;
-							$arguments = _v21;
-							imports = _v22;
-							expression = _v23;
-							references = _v24;
+							var _v22 = fileName,
+								_v23 = allArguments,
+								_v24 = imports,
+								_v25 = importDependencies,
+								_v26 = _p13.expression,
+								_v27 = references;
+							fileName = _v22;
+							$arguments = _v23;
+							imports = _v24;
+							importDependencies = _v25;
+							expression = _v26;
+							references = _v27;
 							continue refsInExpression;
 						case 'RecordExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 								references,
 								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p10._1._0));
 						case 'ListExpr':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 								references,
 								_p10._1._0);
 						case 'QualifiedExpr':
@@ -17773,21 +17827,23 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 								A3(_user$project$Types_Reference$Reference, _p10._1._1, _p10._0, fileName),
 								references);
 						case 'RecordAccess':
-							var _v25 = fileName,
-								_v26 = $arguments,
-								_v27 = imports,
-								_v28 = _p10._1._0,
-								_v29 = references;
-							fileName = _v25;
-							$arguments = _v26;
-							imports = _v27;
-							expression = _v28;
-							references = _v29;
+							var _v28 = fileName,
+								_v29 = $arguments,
+								_v30 = imports,
+								_v31 = importDependencies,
+								_v32 = _p10._1._0,
+								_v33 = references;
+							fileName = _v28;
+							$arguments = _v29;
+							imports = _v30;
+							importDependencies = _v31;
+							expression = _v32;
+							references = _v33;
 							continue refsInExpression;
 						case 'RecordUpdateExpression':
 							return A3(
 								_elm_lang$core$List$foldl,
-								A3(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports),
+								A4(_user$project$ElmFile_References$refsInExpression, fileName, $arguments, imports, importDependencies),
 								references,
 								A2(_elm_lang$core$List$map, _elm_lang$core$Tuple$second, _p10._1._0.updates));
 						default:
@@ -17800,59 +17856,61 @@ var _user$project$ElmFile_References$refsInExpression = F5(
 			return references;
 		}
 	});
-var _user$project$ElmFile_References$collectRefsFromDeclaration = F4(
-	function (fileName, imports, declaration, references) {
+var _user$project$ElmFile_References$collectRefsFromDeclaration = F5(
+	function (fileName, imports, importDependencies, declaration, references) {
 		var _p14 = declaration;
-		_v30_5:
+		_v34_5:
 		do {
 			if (_p14.ctor === '_Tuple2') {
 				switch (_p14._1.ctor) {
 					case 'FuncDecl':
 						var _p15 = _p14._1._0;
-						return A4(
+						return A5(
 							_user$project$ElmFile_References$appendSignatureReferences,
 							fileName,
 							imports,
+							importDependencies,
 							_p15,
 							function (args) {
-								return A5(_user$project$ElmFile_References$refsInExpression, fileName, args, imports, _p15.declaration.expression, references);
+								return A6(_user$project$ElmFile_References$refsInExpression, fileName, args, imports, importDependencies, _p15.declaration.expression, references);
 							}(
 								A3(_elm_lang$core$List$foldl, _user$project$ElmFile_References$argumentsFromPattern, _elm_lang$core$Set$empty, _p15.declaration.$arguments)));
 					case 'AliasDecl':
-						return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p14._1._0.typeAnnotation, references);
+						return A5(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies, _p14._1._0.typeAnnotation, references);
 					case 'TypeDecl':
 						return A3(
 							_elm_lang$core$List$foldl,
-							A2(_user$project$ElmFile_References$refsInValueConstructor, fileName, imports),
+							A3(_user$project$ElmFile_References$refsInValueConstructor, fileName, imports, importDependencies),
 							references,
 							_p14._1._0.constructors);
 					case 'PortDeclaration':
-						return A4(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, _p14._1._0.typeAnnotation, references);
+						return A5(_user$project$ElmFile_References$refsInTypeAnnotation, fileName, imports, importDependencies, _p14._1._0.typeAnnotation, references);
 					case 'Destructuring':
-						return A5(_user$project$ElmFile_References$refsInExpression, fileName, _elm_lang$core$Set$empty, imports, _p14._1._1, references);
+						return A6(_user$project$ElmFile_References$refsInExpression, fileName, _elm_lang$core$Set$empty, imports, importDependencies, _p14._1._1, references);
 					default:
-						break _v30_5;
+						break _v34_5;
 				}
 			} else {
-				break _v30_5;
+				break _v34_5;
 			}
 		} while(false);
 		return references;
 	});
-var _user$project$ElmFile_References$collectRefsFrom = F3(
-	function (fileName, imports, declarations) {
+var _user$project$ElmFile_References$collectRefsFrom = F4(
+	function (fileName, imports, importDependencies, declarations) {
 		return A3(
 			_elm_lang$core$List$foldl,
-			A2(_user$project$ElmFile_References$collectRefsFromDeclaration, fileName, imports),
+			A3(_user$project$ElmFile_References$collectRefsFromDeclaration, fileName, imports, importDependencies),
 			_user$project$Types_References$default,
 			declarations);
 	});
 var _user$project$ElmFile_References$fromFile = F4(
-	function (fileName, imports, dependencies, file) {
-		return A3(
+	function (fileName, imports, importDependencies, file) {
+		return A4(
 			_user$project$ElmFile_References$collectRefsFrom,
 			fileName,
 			imports,
+			importDependencies,
 			function (_) {
 				return _.declarations;
 			}(file));
@@ -18517,8 +18575,13 @@ var _user$project$Model_Report$make = F2(
 			A5(_user$project$Types_Report$Report, fileName, elmFile.moduleName, elmFile.topLevelExpressions, elmFile.exposings, elmFile.references));
 	});
 
-var _user$project$Worker$init = _user$project$And$doNothing(
-	{fileName: '', fileAst: _user$project$Util_File$default, asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default, processedDependencies: _elm_lang$core$Dict$empty});
+var _user$project$WorkerModel$default = {fileName: '', fileAst: _user$project$Util_File$default, asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default, processedDependencies: _user$project$Types_ImportDependencies$default};
+var _user$project$WorkerModel$WorkerModel = F5(
+	function (a, b, c, d, e) {
+		return {fileName: a, fileAst: b, asts: c, processedFile: d, processedDependencies: e};
+	});
+
+var _user$project$Worker$init = _user$project$And$doNothing(_user$project$WorkerModel$default);
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -18561,10 +18624,6 @@ var _user$project$Worker$processMultiple = _elm_lang$core$Native_Platform.incomi
 					A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 			},
 			A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string))));
-var _user$project$Worker$Model = F5(
-	function (a, b, c, d, e) {
-		return {fileName: a, fileAst: b, asts: c, processedFile: d, processedDependencies: e};
-	});
 var _user$project$Worker$ProcessReferencesAndReport = {ctor: 'ProcessReferencesAndReport'};
 var _user$project$Worker$update = F2(
 	function (message, model) {
@@ -18579,7 +18638,7 @@ var _user$project$Worker$update = F2(
 						A2(
 							_user$project$Model_FileProcessing$setAst,
 							A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1),
-							A2(_user$project$Model_FileProcessing$setFileName, _p1, model))));
+							A2(_user$project$Model_FileProcessing$setFileName, _p1, _user$project$WorkerModel$default))));
 			case 'ProcessImportDependencies':
 				return A2(
 					_user$project$And$executeNext,

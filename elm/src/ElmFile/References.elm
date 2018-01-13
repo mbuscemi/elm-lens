@@ -16,64 +16,64 @@ import Types.References exposing (References)
 
 
 fromFile : String -> Imports -> ImportDependencies -> File -> References
-fromFile fileName imports dependencies file =
+fromFile fileName imports importDependencies file =
     file
         |> .declarations
-        |> collectRefsFrom fileName imports
+        |> collectRefsFrom fileName imports importDependencies
 
 
-collectRefsFrom : String -> Imports -> List (Ranged Declaration) -> References
-collectRefsFrom fileName imports declarations =
-    List.foldl (collectRefsFromDeclaration fileName imports) Types.References.default declarations
+collectRefsFrom : String -> Imports -> ImportDependencies -> List (Ranged Declaration) -> References
+collectRefsFrom fileName imports importDependencies declarations =
+    List.foldl (collectRefsFromDeclaration fileName imports importDependencies) Types.References.default declarations
 
 
-collectRefsFromDeclaration : String -> Imports -> Ranged Declaration -> References -> References
-collectRefsFromDeclaration fileName imports declaration references =
+collectRefsFromDeclaration : String -> Imports -> ImportDependencies -> Ranged Declaration -> References -> References
+collectRefsFromDeclaration fileName imports importDependencies declaration references =
     case declaration of
         ( range, Elm.Syntax.Declaration.FuncDecl function ) ->
             List.foldl argumentsFromPattern Set.empty function.declaration.arguments
-                |> (\args -> refsInExpression fileName args imports function.declaration.expression references)
-                |> appendSignatureReferences fileName imports function
+                |> (\args -> refsInExpression fileName args imports importDependencies function.declaration.expression references)
+                |> appendSignatureReferences fileName imports importDependencies function
 
         ( range, Elm.Syntax.Declaration.AliasDecl typeAlias ) ->
-            refsInTypeAnnotation fileName imports typeAlias.typeAnnotation references
+            refsInTypeAnnotation fileName imports importDependencies typeAlias.typeAnnotation references
 
         ( range, Elm.Syntax.Declaration.TypeDecl type_ ) ->
-            List.foldl (refsInValueConstructor fileName imports) references type_.constructors
+            List.foldl (refsInValueConstructor fileName imports importDependencies) references type_.constructors
 
         ( range, Elm.Syntax.Declaration.PortDeclaration signature ) ->
-            refsInTypeAnnotation fileName imports signature.typeAnnotation references
+            refsInTypeAnnotation fileName imports importDependencies signature.typeAnnotation references
 
         ( range, Elm.Syntax.Declaration.Destructuring rangedPattern rangedExpression ) ->
-            refsInExpression fileName Set.empty imports rangedExpression references
+            refsInExpression fileName Set.empty imports importDependencies rangedExpression references
 
         _ ->
             references
 
 
-refsInExpression : String -> Set String -> Imports -> Ranged Expression -> References -> References
-refsInExpression fileName arguments imports expression references =
+refsInExpression : String -> Set String -> Imports -> ImportDependencies -> Ranged Expression -> References -> References
+refsInExpression fileName arguments imports importDependencies expression references =
     case expression of
         ( range, Elm.Syntax.Expression.Application exps ) ->
-            List.foldl (refsInExpression fileName arguments imports) references exps
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references exps
 
         ( range, Elm.Syntax.Expression.OperatorApplication name _ exp1 exp2 ) ->
-            List.foldl (refsInExpression fileName arguments imports) (addReference name fileName range arguments imports references) [ exp1, exp2 ]
+            List.foldl (refsInExpression fileName arguments imports importDependencies) (addReference name fileName range arguments imports importDependencies references) [ exp1, exp2 ]
 
         ( range, Elm.Syntax.Expression.FunctionOrValue name ) ->
-            addReference name fileName range arguments imports references
+            addReference name fileName range arguments imports importDependencies references
 
         ( range, Elm.Syntax.Expression.IfBlock exp1 exp2 exp3 ) ->
-            List.foldl (refsInExpression fileName arguments imports) references [ exp1, exp2, exp3 ]
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references [ exp1, exp2, exp3 ]
 
         ( range, Elm.Syntax.Expression.Negation exp ) ->
-            refsInExpression fileName arguments imports exp references
+            refsInExpression fileName arguments imports importDependencies exp references
 
         ( range, Elm.Syntax.Expression.TupledExpression exps ) ->
-            List.foldl (refsInExpression fileName arguments imports) references exps
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references exps
 
         ( range, Elm.Syntax.Expression.ParenthesizedExpression exp ) ->
-            refsInExpression fileName arguments imports exp references
+            refsInExpression fileName arguments imports importDependencies exp references
 
         ( range, Elm.Syntax.Expression.LetExpression letBlock ) ->
             let
@@ -83,8 +83,8 @@ refsInExpression fileName arguments imports expression references =
                 typeAnnotations =
                     List.foldl letDeclarationTypeAnnotations [] letBlock.declarations
             in
-            List.foldl (refsInExpression fileName arguments imports) references (letBlock.expression :: expressions)
-                |> (\refs -> List.foldl (refsInTypeAnnotation fileName imports) refs typeAnnotations)
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references (letBlock.expression :: expressions)
+                |> (\refs -> List.foldl (refsInTypeAnnotation fileName imports importDependencies) refs typeAnnotations)
 
         ( range, Elm.Syntax.Expression.CaseExpression caseBlock ) ->
             let
@@ -93,7 +93,7 @@ refsInExpression fileName arguments imports expression references =
                         |> additionalArguments
                         |> Set.union arguments
             in
-            List.foldl (refsInExpression fileName allArguments imports) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
+            List.foldl (refsInExpression fileName allArguments imports importDependencies) references (caseBlock.expression :: List.map Tuple.second caseBlock.cases)
 
         ( range, Elm.Syntax.Expression.LambdaExpression lambda ) ->
             let
@@ -101,90 +101,96 @@ refsInExpression fileName arguments imports expression references =
                     additionalArguments lambda.args
                         |> Set.union arguments
             in
-            refsInExpression fileName allArguments imports lambda.expression references
+            refsInExpression fileName allArguments imports importDependencies lambda.expression references
 
         ( range, Elm.Syntax.Expression.RecordExpr recordSetters ) ->
-            List.foldl (refsInExpression fileName arguments imports) references (List.map Tuple.second recordSetters)
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references (List.map Tuple.second recordSetters)
 
         ( range, Elm.Syntax.Expression.ListExpr exps ) ->
-            List.foldl (refsInExpression fileName arguments imports) references exps
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references exps
 
         ( range, Elm.Syntax.Expression.QualifiedExpr moduleName name ) ->
             Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference name range fileName) references
 
         ( range, Elm.Syntax.Expression.RecordAccess exp _ ) ->
-            refsInExpression fileName arguments imports exp references
+            refsInExpression fileName arguments imports importDependencies exp references
 
         ( range, Elm.Syntax.Expression.RecordUpdateExpression recordUpdate ) ->
-            List.foldl (refsInExpression fileName arguments imports) references (List.map Tuple.second recordUpdate.updates)
+            List.foldl (refsInExpression fileName arguments imports importDependencies) references (List.map Tuple.second recordUpdate.updates)
 
         _ ->
             references
 
 
-addReference : String -> String -> Range -> Set String -> Imports -> References -> References
-addReference expName fileName range arguments imports references =
-    case ( Set.member expName arguments, Types.Imports.moduleNameForDirectEntry expName imports ) of
-        ( True, _ ) ->
+addReference : String -> String -> Range -> Set String -> Imports -> ImportDependencies -> References -> References
+addReference expName fileName range arguments imports importDependencies references =
+    case ( Set.member expName arguments, Types.Imports.moduleNameForDirectEntry expName imports, Types.ImportDependencies.moduleNameForSymbol expName importDependencies ) of
+        ( True, _, _ ) ->
             references
 
-        ( _, Just moduleName ) ->
+        ( _, Just moduleName, _ ) ->
+            Types.References.addExternal moduleName (Reference expName range fileName) references
+
+        ( _, _, Just moduleName ) ->
             Types.References.addExternal moduleName (Reference expName range fileName) references
 
         _ ->
             Types.References.addInternal (Reference expName range fileName) references
 
 
-addTypeReference : String -> String -> Range -> List String -> Imports -> References -> References
-addTypeReference typeName fileName range moduleName imports references =
-    case ( Types.Imports.moduleNameForDirectEntry typeName imports, moduleName ) of
-        ( Just externalModule, _ ) ->
+addTypeReference : String -> String -> Range -> List String -> Imports -> ImportDependencies -> References -> References
+addTypeReference typeName fileName range moduleName imports importDependencies references =
+    case ( Types.Imports.moduleNameForDirectEntry typeName imports, Types.ImportDependencies.moduleNameForSymbol typeName importDependencies, moduleName ) of
+        ( Just externalModule, _, _ ) ->
             Types.References.addExternal externalModule (Reference typeName range fileName) references
 
-        ( _, [] ) ->
+        ( _, Just externalModule, _ ) ->
+            Types.References.addExternal externalModule (Reference typeName range fileName) references
+
+        ( _, _, [] ) ->
             Types.References.addInternal (Reference typeName range fileName) references
 
-        ( _, externalModule ) ->
+        ( _, _, externalModule ) ->
             Types.References.addExternal (Types.Imports.unaliasedModuleName moduleName imports) (Reference typeName range fileName) references
 
 
-refsInValueConstructor : String -> Imports -> ValueConstructor -> References -> References
-refsInValueConstructor fileName imports valueConstructor references =
-    List.foldl (refsInTypeAnnotation fileName imports) references valueConstructor.arguments
+refsInValueConstructor : String -> Imports -> ImportDependencies -> ValueConstructor -> References -> References
+refsInValueConstructor fileName imports importDependencies valueConstructor references =
+    List.foldl (refsInTypeAnnotation fileName imports importDependencies) references valueConstructor.arguments
 
 
-refsInTypeAnnotation : String -> Imports -> Ranged TypeAnnotation -> References -> References
-refsInTypeAnnotation fileName imports typeAnnotation references =
+refsInTypeAnnotation : String -> Imports -> ImportDependencies -> Ranged TypeAnnotation -> References -> References
+refsInTypeAnnotation fileName imports importDependencies typeAnnotation references =
     case typeAnnotation of
         ( range, Elm.Syntax.TypeAnnotation.Typed moduleName name typeAnnotations ) ->
-            List.foldl (refsInTypeAnnotation fileName imports) (addTypeReference name fileName range moduleName imports references) typeAnnotations
+            List.foldl (refsInTypeAnnotation fileName imports importDependencies) (addTypeReference name fileName range moduleName imports importDependencies references) typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.Tupled typeAnnotations ) ->
-            List.foldl (refsInTypeAnnotation fileName imports) references typeAnnotations
+            List.foldl (refsInTypeAnnotation fileName imports importDependencies) references typeAnnotations
 
         ( range, Elm.Syntax.TypeAnnotation.Record recordFields ) ->
-            List.foldl (refsInRecordField fileName imports) references recordFields
+            List.foldl (refsInRecordField fileName imports importDependencies) references recordFields
 
         ( range, Elm.Syntax.TypeAnnotation.GenericRecord _ recordFields ) ->
-            List.foldl (refsInRecordField fileName imports) references recordFields
+            List.foldl (refsInRecordField fileName imports importDependencies) references recordFields
 
         ( range, Elm.Syntax.TypeAnnotation.FunctionTypeAnnotation ta1 ta2 ) ->
-            List.foldl (refsInTypeAnnotation fileName imports) references [ ta1, ta2 ]
+            List.foldl (refsInTypeAnnotation fileName imports importDependencies) references [ ta1, ta2 ]
 
         _ ->
             references
 
 
-refsInRecordField : String -> Imports -> ( String, Ranged TypeAnnotation ) -> References -> References
-refsInRecordField fileName imports ( string, typeAnnotation ) references =
-    refsInTypeAnnotation fileName imports typeAnnotation references
+refsInRecordField : String -> Imports -> ImportDependencies -> ( String, Ranged TypeAnnotation ) -> References -> References
+refsInRecordField fileName imports importDependencies ( string, typeAnnotation ) references =
+    refsInTypeAnnotation fileName imports importDependencies typeAnnotation references
 
 
-appendSignatureReferences : String -> Imports -> Function -> References -> References
-appendSignatureReferences fileName imports function references =
+appendSignatureReferences : String -> Imports -> ImportDependencies -> Function -> References -> References
+appendSignatureReferences fileName imports importDependencies function references =
     case function.signature of
         Just ( range, signature ) ->
-            refsInTypeAnnotation fileName imports signature.typeAnnotation references
+            refsInTypeAnnotation fileName imports importDependencies signature.typeAnnotation references
 
         Nothing ->
             references

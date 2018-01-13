@@ -2,23 +2,11 @@ port module Worker exposing (main)
 
 import And
 import And.ImportDependencies
-import Dict exposing (Dict)
-import Elm.Syntax.File exposing (File)
 import ElmFile exposing (ElmFile)
 import Json.Decode exposing (Value)
 import Model.FileProcessing
 import Model.Report
-import Types.ImportDependencies exposing (ImportDependencies)
-import Util.File
-
-
-type alias Model =
-    { fileName : String
-    , fileAst : File
-    , asts : Dict String File
-    , processedFile : ElmFile
-    , processedDependencies : ImportDependencies
-    }
+import WorkerModel exposing (WorkerModel)
 
 
 type Message
@@ -27,7 +15,7 @@ type Message
     | ProcessReferencesAndReport
 
 
-main : Program Never Model Message
+main : Program Never WorkerModel Message
 main =
     Platform.program
         { init = init
@@ -36,22 +24,16 @@ main =
         }
 
 
-init : ( Model, Cmd Message )
+init : ( WorkerModel, Cmd Message )
 init =
-    { fileName = ""
-    , fileAst = Util.File.default
-    , asts = Dict.empty
-    , processedFile = ElmFile.default
-    , processedDependencies = Types.ImportDependencies.default
-    }
-        |> And.doNothing
+    WorkerModel.default |> And.doNothing
 
 
-update : Message -> Model -> ( Model, Cmd Message )
+update : Message -> WorkerModel -> ( WorkerModel, Cmd Message )
 update message model =
     case message of
         ProcessFileFirstPass ( fileName, text ) ->
-            model
+            WorkerModel.default
                 |> Model.FileProcessing.setFileName fileName
                 |> Model.FileProcessing.setAst (ElmFile.makeAst fileName text)
                 |> Model.FileProcessing.firstPass
@@ -69,7 +51,7 @@ update message model =
                 |> andSendReport model.fileName
 
 
-subscriptions : Model -> Sub Message
+subscriptions : WorkerModel -> Sub Message
 subscriptions model =
     Sub.batch
         [ process ProcessFileFirstPass
@@ -77,7 +59,7 @@ subscriptions model =
         ]
 
 
-andSendReport : String -> Model -> ( Model, Cmd Message )
+andSendReport : String -> WorkerModel -> ( WorkerModel, Cmd Message )
 andSendReport fileName model =
     Model.Report.make fileName model.processedFile
         |> report
