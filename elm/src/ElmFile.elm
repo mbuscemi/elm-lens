@@ -7,10 +7,12 @@ import Elm.Syntax.File exposing (File)
 import ElmFile.Exposings
 import ElmFile.Imports
 import ElmFile.ModuleName
+import ElmFile.ProjectPath
 import ElmFile.References
 import ElmFile.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
 import Types.Imports exposing (Imports)
+import Types.ProjectPath exposing (ProjectPath)
 import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
 import Util.File
@@ -18,6 +20,7 @@ import Util.File
 
 type alias ElmFile =
     { moduleName : ModuleName
+    , projectPath : ProjectPath
     , imports : Imports
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
@@ -28,6 +31,7 @@ type alias ElmFile =
 default : ElmFile
 default =
     { moduleName = []
+    , projectPath = Types.ProjectPath.default
     , imports = Types.Imports.default
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
@@ -48,11 +52,15 @@ makeAst fileName fileText =
 createBase : String -> File -> ElmFile
 createBase fileName file =
     let
+        moduleName =
+            ElmFile.ModuleName.fromFile file
+
         topLevelExpressions =
             ElmFile.TopLevelExpressions.fromFile file
     in
     { default
-        | moduleName = ElmFile.ModuleName.fromFile file
+        | moduleName = moduleName
+        , projectPath = ElmFile.ProjectPath.determine fileName moduleName
         , imports = ElmFile.Imports.fromFile file
         , topLevelExpressions = topLevelExpressions
         , exposings = ElmFile.Exposings.fromFile topLevelExpressions file

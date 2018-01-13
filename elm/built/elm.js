@@ -17417,6 +17417,25 @@ var _user$project$ElmFile_ModuleName$fromFile = function (file) {
 			}(file)));
 };
 
+var _user$project$ElmFile_ProjectPath$stripDotElm = function (path) {
+	return A2(_elm_lang$core$String$dropRight, 4, path);
+};
+var _user$project$ElmFile_ProjectPath$eliminateModuleName = F2(
+	function (modulePiece, path) {
+		return A2(
+			_elm_lang$core$String$dropRight,
+			_elm_lang$core$String$length(modulePiece) + 1,
+			path);
+	});
+var _user$project$ElmFile_ProjectPath$determine = F2(
+	function (filePath, moduleName) {
+		return A3(
+			_elm_lang$core$List$foldr,
+			_user$project$ElmFile_ProjectPath$eliminateModuleName,
+			_user$project$ElmFile_ProjectPath$stripDotElm(filePath),
+			moduleName);
+	});
+
 var _user$project$ElmFile_References$argumentsFromPattern = F2(
 	function (pattern, $arguments) {
 		var _p0 = pattern;
@@ -17927,6 +17946,8 @@ var _user$project$ElmFile_TopLevelExpressions$fromFile = function (file) {
 		}(file));
 };
 
+var _user$project$Types_ProjectPath$default = '';
+
 var _user$project$Util_File$default = {
 	moduleDefinition: _stil4m$elm_syntax$Elm_Syntax_Module$NormalModule(
 		{
@@ -17961,6 +17982,7 @@ var _user$project$ElmFile$makeAst = F2(
 	});
 var _user$project$ElmFile$default = {
 	moduleName: {ctor: '[]'},
+	projectPath: _user$project$Types_ProjectPath$default,
 	imports: _user$project$Types_Imports$default,
 	topLevelExpressions: _user$project$Types_TopLevelExpressions$default,
 	exposings: _user$project$Types_Exposings$default,
@@ -17969,18 +17991,20 @@ var _user$project$ElmFile$default = {
 var _user$project$ElmFile$createBase = F2(
 	function (fileName, file) {
 		var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
+		var moduleName = _user$project$ElmFile_ModuleName$fromFile(file);
 		return _elm_lang$core$Native_Utils.update(
 			_user$project$ElmFile$default,
 			{
-				moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
+				moduleName: moduleName,
+				projectPath: A2(_user$project$ElmFile_ProjectPath$determine, fileName, moduleName),
 				imports: _user$project$ElmFile_Imports$fromFile(file),
 				topLevelExpressions: topLevelExpressions,
 				exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file)
 			});
 	});
-var _user$project$ElmFile$ElmFile = F5(
-	function (a, b, c, d, e) {
-		return {moduleName: a, imports: b, topLevelExpressions: c, exposings: d, references: e};
+var _user$project$ElmFile$ElmFile = F6(
+	function (a, b, c, d, e, f) {
+		return {moduleName: a, projectPath: b, imports: c, topLevelExpressions: d, exposings: e, references: f};
 	});
 
 var _user$project$And_ImportDependencies$process = F2(
