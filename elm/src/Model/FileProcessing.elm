@@ -1,4 +1,4 @@
-module Model.FileProcessing exposing (firstPass, processReferences, setAst, setFileName)
+module Model.FileProcessing exposing (addDependencies, firstPass, processDependencies, processReferences, setAst, setFileName)
 
 import Dict exposing (Dict)
 import Elm.Syntax.File exposing (File)
@@ -11,6 +11,7 @@ type alias Model model =
         , fileAst : File
         , asts : Dict String File
         , processedFile : ElmFile
+        , processedDependencies : Dict String ElmFile
     }
 
 
@@ -26,7 +27,26 @@ setAst file model =
 
 firstPass : Model model -> Model model
 firstPass model =
-    { model | processedFile = ElmFile.createBase model.fileName model.fileAst }
+    { model
+        | processedFile =
+            ElmFile.createBase model.fileName model.fileAst
+                |> ElmFile.parseCore model.fileName model.fileAst
+    }
+
+
+addDependencies : List ( String, String ) -> Model model -> Model model
+addDependencies fileData model =
+    { model | asts = List.foldl addDependency model.asts fileData }
+
+
+addDependency : ( String, String ) -> Dict String File -> Dict String File
+addDependency ( fileName, fileText ) dict =
+    Dict.insert fileName (ElmFile.makeAst fileName fileText) dict
+
+
+processDependencies : Model model -> Model model
+processDependencies model =
+    { model | processedDependencies = Dict.map ElmFile.createBase model.asts }
 
 
 processReferences : Model model -> Model model

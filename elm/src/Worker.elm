@@ -16,6 +16,7 @@ type alias Model =
     , fileAst : File
     , asts : Dict String File
     , processedFile : ElmFile
+    , processedDependencies : Dict String ElmFile
     }
 
 
@@ -40,6 +41,7 @@ init =
     , fileAst = Util.File.default
     , asts = Dict.empty
     , processedFile = ElmFile.default
+    , processedDependencies = Dict.empty
     }
         |> And.doNothing
 
@@ -56,6 +58,8 @@ update message model =
 
         ProcessImportDependencies fileData ->
             model
+                |> Model.FileProcessing.addDependencies fileData
+                |> Model.FileProcessing.processDependencies
                 |> And.executeNext ProcessReferencesAndReport
 
         ProcessReferencesAndReport ->

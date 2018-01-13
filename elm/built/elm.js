@@ -17971,6 +17971,16 @@ var _user$project$ElmFile$parseReferences = F3(
 				references: A3(_user$project$ElmFile_References$fromFile, fileName, elmFile.imports, file)
 			});
 	});
+var _user$project$ElmFile$parseCore = F3(
+	function (fileName, file, elmFile) {
+		return _elm_lang$core$Native_Utils.update(
+			elmFile,
+			{
+				projectPath: A2(_user$project$ElmFile_ProjectPath$determine, fileName, elmFile.moduleName),
+				imports: _user$project$ElmFile_Imports$fromFile(file),
+				exposings: A2(_user$project$ElmFile_Exposings$fromFile, elmFile.topLevelExpressions, file)
+			});
+	});
 var _user$project$ElmFile$makeAst = F2(
 	function (fileName, fileText) {
 		var _p0 = _stil4m$elm_syntax$Elm_Parser$parse(fileText);
@@ -17990,16 +18000,11 @@ var _user$project$ElmFile$default = {
 };
 var _user$project$ElmFile$createBase = F2(
 	function (fileName, file) {
-		var topLevelExpressions = _user$project$ElmFile_TopLevelExpressions$fromFile(file);
-		var moduleName = _user$project$ElmFile_ModuleName$fromFile(file);
 		return _elm_lang$core$Native_Utils.update(
 			_user$project$ElmFile$default,
 			{
-				moduleName: moduleName,
-				projectPath: A2(_user$project$ElmFile_ProjectPath$determine, fileName, moduleName),
-				imports: _user$project$ElmFile_Imports$fromFile(file),
-				topLevelExpressions: topLevelExpressions,
-				exposings: A2(_user$project$ElmFile_Exposings$fromFile, topLevelExpressions, file)
+				moduleName: _user$project$ElmFile_ModuleName$fromFile(file),
+				topLevelExpressions: _user$project$ElmFile_TopLevelExpressions$fromFile(file)
 			});
 	});
 var _user$project$ElmFile$ElmFile = F6(
@@ -18442,11 +18447,40 @@ var _user$project$Model_FileProcessing$processReferences = function (model) {
 			processedFile: A3(_user$project$ElmFile$parseReferences, model.fileName, model.fileAst, model.processedFile)
 		});
 };
+var _user$project$Model_FileProcessing$processDependencies = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			processedDependencies: A2(_elm_lang$core$Dict$map, _user$project$ElmFile$createBase, model.asts)
+		});
+};
+var _user$project$Model_FileProcessing$addDependency = F2(
+	function (_p0, dict) {
+		var _p1 = _p0;
+		var _p2 = _p1._0;
+		return A3(
+			_elm_lang$core$Dict$insert,
+			_p2,
+			A2(_user$project$ElmFile$makeAst, _p2, _p1._1),
+			dict);
+	});
+var _user$project$Model_FileProcessing$addDependencies = F2(
+	function (fileData, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				asts: A3(_elm_lang$core$List$foldl, _user$project$Model_FileProcessing$addDependency, model.asts, fileData)
+			});
+	});
 var _user$project$Model_FileProcessing$firstPass = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{
-			processedFile: A2(_user$project$ElmFile$createBase, model.fileName, model.fileAst)
+			processedFile: A3(
+				_user$project$ElmFile$parseCore,
+				model.fileName,
+				model.fileAst,
+				A2(_user$project$ElmFile$createBase, model.fileName, model.fileAst))
 		});
 };
 var _user$project$Model_FileProcessing$setAst = F2(
@@ -18469,7 +18503,7 @@ var _user$project$Model_Report$make = F2(
 	});
 
 var _user$project$Worker$init = _user$project$And$doNothing(
-	{fileName: '', fileAst: _user$project$Util_File$default, asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default});
+	{fileName: '', fileAst: _user$project$Util_File$default, asts: _elm_lang$core$Dict$empty, processedFile: _user$project$ElmFile$default, processedDependencies: _elm_lang$core$Dict$empty});
 var _user$project$Worker$report = _elm_lang$core$Native_Platform.outgoingPort(
 	'report',
 	function (v) {
@@ -18512,9 +18546,9 @@ var _user$project$Worker$processMultiple = _elm_lang$core$Native_Platform.incomi
 					A2(_elm_lang$core$Json_Decode$index, 1, _elm_lang$core$Json_Decode$string));
 			},
 			A2(_elm_lang$core$Json_Decode$index, 0, _elm_lang$core$Json_Decode$string))));
-var _user$project$Worker$Model = F4(
-	function (a, b, c, d) {
-		return {fileName: a, fileAst: b, asts: c, processedFile: d};
+var _user$project$Worker$Model = F5(
+	function (a, b, c, d, e) {
+		return {fileName: a, fileAst: b, asts: c, processedFile: d, processedDependencies: e};
 	});
 var _user$project$Worker$ProcessReferencesAndReport = {ctor: 'ProcessReferencesAndReport'};
 var _user$project$Worker$update = F2(
@@ -18532,7 +18566,11 @@ var _user$project$Worker$update = F2(
 							A2(_user$project$ElmFile$makeAst, _p1, _p0._0._1),
 							A2(_user$project$Model_FileProcessing$setFileName, _p1, model))));
 			case 'ProcessImportDependencies':
-				return A2(_user$project$And$executeNext, _user$project$Worker$ProcessReferencesAndReport, model);
+				return A2(
+					_user$project$And$executeNext,
+					_user$project$Worker$ProcessReferencesAndReport,
+					_user$project$Model_FileProcessing$processDependencies(
+						A2(_user$project$Model_FileProcessing$addDependencies, _p0._0, model)));
 			default:
 				return A2(
 					_user$project$Worker$andSendReport,
