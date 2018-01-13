@@ -18007,12 +18007,44 @@ var _user$project$ElmFile$ElmFile = F6(
 		return {moduleName: a, projectPath: b, imports: c, topLevelExpressions: d, exposings: e, references: f};
 	});
 
+var _user$project$And_ImportDependencies$pathFromModuleName = F2(
+	function (projectPath, moduleName) {
+		return A2(
+			_elm_lang$core$Basics_ops['++'],
+			projectPath,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				'/',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					A2(_elm_lang$core$String$join, '/', moduleName),
+					'.elm')));
+	});
+var _user$project$And_ImportDependencies$unqualifiedImportPaths = F2(
+	function (projectPath, moduleNames) {
+		return A2(
+			_elm_lang$core$List$map,
+			_user$project$And_ImportDependencies$pathFromModuleName(projectPath),
+			_elm_lang$core$Set$toList(moduleNames));
+	});
+var _user$project$And_ImportDependencies$requestForFiles = _elm_lang$core$Native_Platform.outgoingPort(
+	'requestForFiles',
+	function (v) {
+		return _elm_lang$core$Native_List.toArray(v).map(
+			function (v) {
+				return v;
+			});
+	});
 var _user$project$And_ImportDependencies$process = F2(
 	function (finalizeHandler, model) {
 		var unqualifiedImports = model.processedFile.imports.unqualified;
 		return (_elm_lang$core$Native_Utils.cmp(
 			_elm_lang$core$Set$size(unqualifiedImports),
-			0) > 0) ? A2(_user$project$And$executeNext, finalizeHandler, model) : A2(_user$project$And$executeNext, finalizeHandler, model);
+			0) > 0) ? A2(
+			_user$project$And$execute,
+			model,
+			_user$project$And_ImportDependencies$requestForFiles(
+				A2(_user$project$And_ImportDependencies$unqualifiedImportPaths, model.processedFile.projectPath, unqualifiedImports))) : A2(_user$project$And$executeNext, finalizeHandler, model);
 	});
 
 var _user$project$Model_ProjectFileData$markReprocessedFileComplete = F2(
