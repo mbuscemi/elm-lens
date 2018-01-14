@@ -2,5 +2,20 @@
     "context-menu": {
         "atom-text-editor": []
     },
-    "menu": []
+    "menu": [
+        {
+        "label": "Packages",
+            "submenu": [
+                {
+                    "label": "Elm Lens",
+                    "submenu": [
+                        {
+                            "label": "Toggle Markup Display",
+                            "command": "elm-lens:toggle-markup-display"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

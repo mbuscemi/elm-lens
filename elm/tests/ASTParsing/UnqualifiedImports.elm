@@ -1,4 +1,4 @@
-module ASTParsing.Infixes exposing (canParse)
+module ASTParsing.UnqualifiedImports exposing (canParse)
 
 import Dict
 import ElmFile
@@ -11,13 +11,13 @@ import Types.Reference exposing (Reference)
 
 canParse : Test
 canParse =
-    describe "Infix Elm File" <|
+    describe "Elm File with Unqualified Imports" <|
         let
             fileName =
-                "Infix.elm"
+                "UnqualifiedImports.elm"
 
             file =
-                ElmFile.makeAst fileName infixDotElm
+                ElmFile.makeAst fileName unqualifiedImports
 
             elmFile =
                 ElmFile.createBase fileName file
@@ -26,7 +26,7 @@ canParse =
         in
         [ test "has expected module name" <|
             \_ ->
-                Expect.equal elmFile.moduleName [ "Infix" ]
+                Expect.equal elmFile.moduleName [ "UnqualifiedImports" ]
         , test "has expected imports" <|
             \_ ->
                 Expect.equal elmFile.imports
@@ -34,16 +34,18 @@ canParse =
                         Dict.empty
                     , aliases =
                         Dict.empty
+                            |> Dict.insert [ "F" ] [ "Frangle" ]
                     , unqualified =
                         Set.empty
+                            |> Set.insert [ "Frangle" ]
+                            |> Set.insert [ "Blarg" ]
                     }
         , test "has expected top level expressions" <|
             \_ ->
                 Expect.equal elmFile.topLevelExpressions
                     { functions =
                         Dict.empty
-                            |> Dict.insert "$$" (Types.Expression.standardExpression 2)
-                            |> Dict.insert "blarg" (Types.Expression.standardExpression 6)
+                            |> Dict.insert "blarg" (Types.Expression.standardExpression 5)
                     , types =
                         Dict.empty
                     , typeAliases =
@@ -54,7 +56,7 @@ canParse =
                 Expect.equal elmFile.exposings
                     { functions =
                         Set.empty
-                            |> Set.insert "$$"
+                            |> Set.insert "blarg"
                     , types =
                         Set.empty
                     }
@@ -63,17 +65,8 @@ canParse =
                 Expect.equal elmFile.references
                     { internal =
                         Dict.empty
-                            |> Dict.insert "$$" [ Types.Reference.make "$$" 8 4 8 23 "Infix.elm" ]
-                            |> Dict.insert "++"
-                                [ Types.Reference.make "++" 4 9 4 20 "Infix.elm"
-                                , Types.Reference.make "++" 4 4 4 20 "Infix.elm"
-                                ]
-                            |> Dict.insert "String"
-                                [ Types.Reference.make "String" 6 18 6 24 "Infix.elm"
-                                , Types.Reference.make "String" 6 8 6 15 "Infix.elm"
-                                , Types.Reference.make "String" 2 27 2 33 "Infix.elm"
-                                , Types.Reference.make "String" 2 17 2 24 "Infix.elm"
-                                , Types.Reference.make "String" 2 7 2 14 "Infix.elm"
+                            |> Dict.insert "Int"
+                                [ Types.Reference.make "Int" 5 8 5 11 "UnqualifiedImports.elm"
                                 ]
                     , external =
                         Dict.empty
@@ -81,18 +74,15 @@ canParse =
         ]
 
 
-infixDotElm : String
-infixDotElm =
-    """module Infix exposing (($$))
+unqualifiedImports : String
+unqualifiedImports =
+    """module UnqualifiedImports exposing (blarg)
 
-($$) : String -> String -> String
-($$) a b =
-    a ++ " $$ " ++ b
+import Blarg exposing (..)
+import Frangle as F exposing (..)
 
-blarg : String -> String
-blarg string =
-    string $$ "frangle"
-
-infix 9 $$
+blarg : Int
+blarg =
+    10
 
 """

@@ -13,8 +13,16 @@ canParseProgram : Test
 canParseProgram =
     describe "File with Program Function" <|
         let
+            fileName =
+                "Main.elm"
+
+            file =
+                ElmFile.makeAst fileName moduleWithProgram
+
             elmFile =
-                ElmFile.fromString "Main.elm" moduleWithProgram
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
@@ -24,6 +32,7 @@ canParseProgram =
                 Expect.equal elmFile.imports
                     { direct = Dict.empty
                     , aliases = Dict.empty
+                    , unqualified = Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->
@@ -69,8 +78,16 @@ canParseTest : Test
 canParseTest =
     describe "File with Test Function" <|
         let
+            fileName =
+                "TruthTest.elm"
+
+            file =
+                ElmFile.makeAst fileName moduleWithTest
+
             elmFile =
-                ElmFile.fromString "TruthTest.elm" moduleWithTest
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
@@ -83,7 +100,10 @@ canParseTest =
                             |> Dict.insert "Test" [ "Test" ]
                             |> Dict.insert "test" [ "Test" ]
                             |> Dict.insert "describe" [ "Test" ]
-                    , aliases = Dict.empty
+                    , aliases =
+                        Dict.empty
+                    , unqualified =
+                        Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->

@@ -1,5 +1,6 @@
 module ASTParsing.ParseFailure exposing (parse)
 
+import Dict
 import ElmFile
 import Expect
 import Test exposing (Test, describe, test)
@@ -13,8 +14,16 @@ parse : Test
 parse =
     describe "Unparsable Elm File" <|
         let
+            fileName =
+                "BadFile.elm"
+
+            file =
+                ElmFile.makeAst fileName badFileDotElm
+
             elmFile =
-                ElmFile.fromString "BadFile.elm" badFileDotElm
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has default module name" <|
             \_ ->

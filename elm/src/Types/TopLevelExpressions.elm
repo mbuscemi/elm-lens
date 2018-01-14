@@ -1,4 +1,4 @@
-module Types.TopLevelExpressions exposing (TopLevelExpressions, decoder, default, encoder)
+module Types.TopLevelExpressions exposing (TopLevelExpressions, decoder, default, encoder, hasSymbol)
 
 import Dict exposing (Dict)
 import Json.Decode as JD exposing (Decoder)
@@ -36,6 +36,16 @@ decoder =
         (JD.field "functions" expressionDictDecoder)
         (JD.field "types" expressionDictDecoder)
         (JD.field "typeAliases" expressionDictDecoder)
+
+
+hasSymbol : String -> TopLevelExpressions -> Bool
+hasSymbol symbol exps =
+    case ( Dict.get symbol exps.functions, Dict.get symbol exps.types, Dict.get symbol exps.typeAliases ) of
+        ( Nothing, Nothing, Nothing ) ->
+            False
+
+        _ ->
+            True
 
 
 expressionValue : Dict String Expression -> Value

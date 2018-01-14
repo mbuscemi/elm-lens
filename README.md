@@ -70,18 +70,32 @@ unreferenced in other modules. Such functions are typically executed by a comman
 [Elm Test Runner](https://github.com/mbuscemi/elm-test-runner). Elm Lens will hide reference information and show a special
 tag for any function with a type signature of `Test`.
 
+### Configuration
+
+![Elm Test](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/elm-lens-settings.png?raw=true)
+
+#### Markup Toggles
+
+You can toggle each of the three pieces of data in Elm Lens's markup on and off. These are: access control, internal references, and external references.
+If you want to quickly toggle all markup on and off, use Ctrl-L, or select "Toggle Markup Display" from the "Packages → Elm Lens" menu.
+
+#### Markup Opacity
+
+If you prefer the markup text to be a lower opacity than the rest of your code, you can configure the opacity field with a different number.
+One hundred, the default, is full opacity, while zero is completely invisible. Any integer in between those two values is acceptable.
+
 ## Roadmap
 
-* 0.8.0 Editor Dependency Abstraction
-* 0.7.0 Exposed/Local Upgrades
+* 0.8 Editor Dependency Abstraction
+* 0.7 Exposed/Local Upgrades
   * Clicking on "exposed/local" toggles the function between being exposed and local.
   * Add a menu option "Auto-Adjust Exports..." which updates all exposings to correspond to whether or not the function is used externally.
-* 0.6.0 Differentiate Test References
-* 0.5.0 Support Type Constructors
-* 0.4.0 Handle Zero-Reference Exposed Functions in `exposed-modules`
+* 0.6 Differentiate Test References
+* 0.5 Support Type Constructors
+* 0.4 Handle Zero-Reference Exposed Functions in `exposed-modules`
   * Functions that are exposed and unreferenced in modules listed in `exposed-modules` should be handled differently.
-* 0.3.0 Configurability Upgrade
-  * Will be able to toggle off parts of the metadata or entire metadata via command keys and plugin options.
-  * Will be able to configure markup text opacity.
-* ~0.2.0 Visualization of References~
-* ~0.1.0 Initial Release~
+* ~0.3 Configurability Upgrade~
+  * ~Will be able to toggle off parts of the metadata or entire metadata via command keys and plugin options.~
+  * ~Will be able to configure markup text opacity.~
+* ~0.2 Visualization of References~
+* ~0.1 Initial Release~

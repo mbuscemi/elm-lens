@@ -1,3 +1,5 @@
 {
-    "atom-workspace": {}
+    "atom-workspace": {
+        "ctrl-l": "elm-lens:toggle-markup-display"
+    }
 }

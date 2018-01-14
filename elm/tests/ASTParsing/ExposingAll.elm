@@ -13,8 +13,16 @@ canParseSimpleExposingAll : Test
 canParseSimpleExposingAll =
     describe "Simple Elm File (Exposing All)" <|
         let
+            fileName =
+                "Simple.elm"
+
+            file =
+                ElmFile.makeAst fileName simpleExposingAll
+
             elmFile =
-                ElmFile.fromString "Simple.elm" simpleExposingAll
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
@@ -24,6 +32,7 @@ canParseSimpleExposingAll =
                 Expect.equal elmFile.imports
                     { direct = Dict.empty
                     , aliases = Dict.empty
+                    , unqualified = Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->

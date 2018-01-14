@@ -13,8 +13,16 @@ canParseFromCase : Test
 canParseFromCase =
     describe "Reference in Case Expression" <|
         let
+            fileName =
+                "CaseExpression.elm"
+
+            file =
+                ElmFile.makeAst fileName elmFileText
+
             elmFile =
-                ElmFile.fromString "CaseExpression.elm" elmFileText
+                ElmFile.createBase fileName file
+                    |> ElmFile.parseCore fileName file
+                    |> ElmFile.parseReferences fileName file Dict.empty
         in
         [ test "has expected module name" <|
             \_ ->
@@ -24,6 +32,7 @@ canParseFromCase =
                 Expect.equal elmFile.imports
                     { direct = Dict.empty
                     , aliases = Dict.empty
+                    , unqualified = Set.empty
                     }
         , test "has expected top level expressions" <|
             \_ ->

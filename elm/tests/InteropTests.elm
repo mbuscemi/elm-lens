@@ -53,6 +53,10 @@ imports =
                                 |> Dict.insert [ "g" ] [ "h", "i", "k" ]
                                 |> Dict.insert [ "l", "m" ] [ "n", "o" ]
                             )
+                            (Set.empty
+                                |> Set.insert [ "p" ]
+                                |> Set.insert [ "q", "r" ]
+                            )
 
                     encoded =
                         Types.Imports.encoder orig
@@ -74,7 +78,9 @@ reference =
                     orig =
                         Reference
                             "blarg"
-                            { start = { row = 1, column = 2 }, end = { row = 3, column = 4 } }
+                            { start = { row = 1, column = 2 }
+                            , end = { row = 3, column = 4 }
+                            }
                             "file.elm"
 
                     encoded =

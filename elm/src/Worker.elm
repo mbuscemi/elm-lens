@@ -1,20 +1,21 @@
 port module Worker exposing (main)
 
 import And
+import And.ImportDependencies
 import ElmFile exposing (ElmFile)
 import Json.Decode exposing (Value)
+import Model.FileProcessing
 import Model.Report
-
-
-type alias Model =
-    ElmFile
+import WorkerModel exposing (WorkerModel)
 
 
 type Message
-    = ProcessFile ( String, String )
+    = ProcessFileFirstPass ( String, String )
+    | ProcessImportDependencies (List ( String, String ))
+    | ProcessReferencesAndReport
 
 
-main : Program Never Model Message
+main : Program Never WorkerModel Message
 main =
     Platform.program
         { init = init
@@ -23,29 +24,52 @@ main =
         }
 
 
-init : ( Model, Cmd Message )
+init : ( WorkerModel, Cmd Message )
 init =
-    ElmFile.default |> And.doNothing
+    WorkerModel.default |> And.doNothing
 
 
-update : Message -> Model -> ( Model, Cmd Message )
+update : Message -> WorkerModel -> ( WorkerModel, Cmd Message )
 update message model =
     case message of
-        ProcessFile ( fileName, text ) ->
-            ElmFile.fromString fileName text |> andSendReport fileName
+        ProcessFileFirstPass ( fileName, text ) ->
+            WorkerModel.default
+                |> Model.FileProcessing.setFileName fileName
+                |> Model.FileProcessing.setAst (ElmFile.makeAst fileName text)
+                |> Model.FileProcessing.firstPass
+                |> And.ImportDependencies.process ProcessReferencesAndReport
+
+        ProcessImportDependencies fileData ->
+            model
+                |> Model.FileProcessing.addDependencies fileData
+                |> Model.FileProcessing.processDependencies
+                |> And.executeNext ProcessReferencesAndReport
+
+        ProcessReferencesAndReport ->
+            model
+                |> Model.FileProcessing.processReferences
+                |> andSendReport model.fileName
 
 
-subscriptions : Model -> Sub Message
+subscriptions : WorkerModel -> Sub Message
 subscriptions model =
-    Sub.batch [ process ProcessFile ]
+    Sub.batch
+        [ process ProcessFileFirstPass
+        , processMultiple ProcessImportDependencies
+        ]
 
 
-andSendReport : String -> Model -> ( Model, Cmd Message )
+andSendReport : String -> WorkerModel -> ( WorkerModel, Cmd Message )
 andSendReport fileName model =
-    And.execute model (report <| Model.Report.make fileName model)
+    Model.Report.make fileName model.processedFile
+        |> report
+        |> And.execute model
 
 
 port report : Value -> Cmd message
 
 
 port process : (( String, String ) -> message) -> Sub message
+
+
+port processMultiple : (List ( String, String ) -> message) -> Sub message

@@ -1,23 +1,27 @@
-module ElmFile exposing (ElmFile, default, fromString)
+module ElmFile exposing (ElmFile, createBase, default, makeAst, parseCore, parseReferences)
 
+import Dict exposing (Dict)
 import Elm.Parser
 import Elm.Processing exposing (init, process)
-import Elm.RawFile exposing (RawFile)
 import Elm.Syntax.Base exposing (ModuleName)
 import Elm.Syntax.File exposing (File)
 import ElmFile.Exposings
 import ElmFile.Imports
 import ElmFile.ModuleName
+import ElmFile.ProjectPath
 import ElmFile.References
 import ElmFile.TopLevelExpressions
 import Types.Exposings exposing (Exposings)
 import Types.Imports exposing (Imports)
+import Types.ProjectPath exposing (ProjectPath)
 import Types.References exposing (References)
 import Types.TopLevelExpressions exposing (TopLevelExpressions)
+import Util.File
 
 
 type alias ElmFile =
     { moduleName : ModuleName
+    , projectPath : ProjectPath
     , imports : Imports
     , topLevelExpressions : TopLevelExpressions
     , exposings : Exposings
@@ -28,6 +32,7 @@ type alias ElmFile =
 default : ElmFile
 default =
     { moduleName = []
+    , projectPath = Types.ProjectPath.default
     , imports = Types.Imports.default
     , topLevelExpressions = Types.TopLevelExpressions.default
     , exposings = Types.Exposings.default
@@ -35,35 +40,33 @@ default =
     }
 
 
-fromString : String -> String -> ElmFile
-fromString fileName fileText =
-    Elm.Parser.parse fileText
-        |> make fileName
-
-
-make : String -> Result (List String) RawFile -> ElmFile
-make fileName result =
-    case result of
+makeAst : String -> String -> File
+makeAst fileName fileText =
+    case Elm.Parser.parse fileText of
         Ok rawFile ->
             process init rawFile
-                |> fromFile fileName
 
         Err stringList ->
-            default
+            Util.File.default
 
 
-fromFile : String -> File -> ElmFile
-fromFile fileName file =
-    let
-        imports =
-            ElmFile.Imports.fromFile file
-
-        topLevelExpressions =
-            ElmFile.TopLevelExpressions.fromFile file
-    in
-    { moduleName = ElmFile.ModuleName.fromFile file
-    , imports = imports
-    , topLevelExpressions = topLevelExpressions
-    , exposings = ElmFile.Exposings.fromFile topLevelExpressions file
-    , references = ElmFile.References.fromFile fileName imports file
+createBase : String -> File -> ElmFile
+createBase fileName file =
+    { default
+        | moduleName = ElmFile.ModuleName.fromFile file
+        , topLevelExpressions = ElmFile.TopLevelExpressions.fromFile file
     }
+
+
+parseCore : String -> File -> ElmFile -> ElmFile
+parseCore fileName file elmFile =
+    { elmFile
+        | projectPath = ElmFile.ProjectPath.determine fileName elmFile.moduleName
+        , imports = ElmFile.Imports.fromFile file
+        , exposings = ElmFile.Exposings.fromFile elmFile.topLevelExpressions file
+    }
+
+
+parseReferences : String -> File -> Dict ModuleName TopLevelExpressions -> ElmFile -> ElmFile
+parseReferences fileName file dependencies elmFile =
+    { elmFile | references = ElmFile.References.fromFile fileName elmFile.imports dependencies file }

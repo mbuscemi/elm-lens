@@ -50,7 +50,7 @@ collectFromExposing : ModuleName -> Exposing (Ranged TopLevelExpose) -> Imports 
 collectFromExposing moduleName exposing_ imports =
     case exposing_ of
         Elm.Syntax.Exposing.All _ ->
-            imports
+            Types.Imports.addUnqualified moduleName imports
 
         Elm.Syntax.Exposing.Explicit rangedExposeList ->
             List.foldl (fromExposing moduleName) imports rangedExposeList
