@@ -70,6 +70,20 @@ unreferenced in other modules. Such functions are typically executed by a comman
 [Elm Test Runner](https://github.com/mbuscemi/elm-test-runner). Elm Lens will hide reference information and show a special
 tag for any function with a type signature of `Test`.
 
+### Configuration
+
+![Elm Test](https://raw.githubusercontent.com/mbuscemi/elm-lens/master/images/elm-lens-settings.png?raw=true)
+
+#### Markup Toggles
+
+You can toggle each of the three pieces of data in Elm Lens's markup on and off. These are: access control, internal references, and external references.
+If you want to quickly toggle all markup on and off, use Ctrl-L, or select "Toggle Markup Display" from the "Packages → Elm Lens" menu.
+
+#### Markup Opacity
+
+If you prefer the markup text to be a lower opacity than the rest of your code, you can configure the opacity field with a different number.
+One hundred, the default, is full opacity, while zero is completely invisible. Any integer in between those two values is acceptable.
+
 ## Roadmap
 
 * 0.8 Editor Dependency Abstraction
